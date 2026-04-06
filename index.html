@@ -1,10 +1,11 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>CantinaPro — Bar Management App</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -14,38 +15,46 @@
   --text:#e8e8f0;--muted:#6b6b80;--lc:#c8102e;--lcg:#d4a017;
 }
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
-.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;position:relative;}
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;}
 
-/* SPLASH */
-.splash{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;transition:opacity .5s;}
-.splash.hidden{opacity:0;pointer-events:none;}
-.sp-name{font-family:'Bebas Neue',cursive;font-size:56px;letter-spacing:8px;color:var(--lc);line-height:1;}
-.sp-tagline{font-family:'Rajdhani',sans-serif;font-size:16px;color:var(--lcg);letter-spacing:3px;text-transform:uppercase;margin-top:6px;}
-.sp-div{width:60px;height:2px;background:linear-gradient(90deg,var(--lc),var(--lcg));margin:24px auto;}
-.sp-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px;max-width:320px;}
-.sp-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);border-radius:20px;padding:6px 16px;font-size:11px;color:var(--lcg);font-family:'Share Tech Mono',monospace;margin-bottom:24px;letter-spacing:1px;}
-.sp-btn{background:linear-gradient(135deg,var(--lc),#a00020);border:none;color:#fff;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;padding:16px 40px;border-radius:10px;cursor:pointer;width:100%;max-width:320px;transition:all .2s;}
-.sp-btn:hover{filter:brightness(1.1);transform:translateY(-2px);}
-.sp-note{font-size:11px;color:var(--muted);margin-top:14px;font-family:'Share Tech Mono',monospace;}
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;}
+.auth-logo{font-family:'Bebas Neue',cursive;font-size:52px;letter-spacing:8px;color:var(--lc);line-height:1;}
+.auth-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--lcg);margin-top:4px;}
+.auth-div{width:60px;height:2px;background:linear-gradient(90deg,var(--lc),var(--lcg));margin:24px auto;}
+.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:360px;}
+.auth-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;color:var(--text);margin-bottom:20px;}
+.auth-tabs{display:flex;background:var(--s2);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+.auth-tab{flex:1;padding:10px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+.auth-tab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.field label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.field input{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;}
+.field input:focus{border-color:var(--lc);}
+.auth-btn{width:100%;padding:14px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-top:4px;}
+.auth-btn:hover{filter:brightness(1.1);}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed;}
+.auth-err{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.3);border-radius:6px;padding:10px;font-size:13px;color:var(--red);margin-bottom:12px;}
+.auth-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;}
 
 /* HEADER */
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
-.hdr-logo{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:4px;color:var(--lc);}
-.hdr-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+.hdr-logo{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:var(--lc);}
+.hdr-bar{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--lcg);letter-spacing:1px;margin-top:1px;}
 .hdr-r{display:flex;align-items:center;gap:10px;}
 .lang-wrap{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-.lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;padding:5px 10px;cursor:pointer;transition:all .2s;}
+.lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:4px 8px;cursor:pointer;}
 .lb.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;padding:4px 8px;border-radius:4px;cursor:pointer;}
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* BOTTOM NAV */
 .bot-nav{background:var(--s1);border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:100;}
-.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-top:2px solid transparent;transition:all .2s;position:relative;}
+.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-top:2px solid transparent;transition:all .2s;}
 .nb.on{color:var(--lc);border-top-color:var(--lc);}
-.ni{font-size:20px;line-height:1;}
+.ni{font-size:18px;line-height:1;}
 .nl{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
-.nbadge{position:absolute;top:5px;right:16%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 4px;font-weight:700;}
 
 /* MAIN */
 .main{flex:1;padding:14px;padding-bottom:74px;}
@@ -70,161 +79,39 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .kpi.g .kv{color:var(--green);}
 .kpi.r .kv{color:var(--red);}
 .kpi.b .kv{color:var(--blue);}
-.kd{font-size:11px;font-weight:600;color:var(--green);}
-.kd.dn{color:var(--red);}
+.kd{font-size:11px;color:var(--muted);}
 
-/* BAR CHART */
-.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;margin-bottom:4px;}
-.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;}
-.bci{flex:1;display:flex;align-items:flex-end;width:100%;}
-.bar{width:100%;border-radius:3px 3px 0 0;min-height:4px;transition:all .3s;}
-.bar:hover{filter:brightness(1.3);}
-.bl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.action-btn{width:100%;padding:13px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:8px;}
+.action-btn.red{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
+.action-btn.blue{background:linear-gradient(135deg,var(--blue),#2266cc);color:#fff;}
+.action-btn.gold{background:linear-gradient(135deg,var(--gold),var(--amber));color:#000;}
+.action-btn:disabled{opacity:.5;cursor:not-allowed;}
 
 /* ROWS */
 .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
 .row:last-child{border-bottom:none;}
-.rank{font-family:'Bebas Neue',cursive;font-size:18px;color:var(--border);width:20px;text-align:center;}
-.rank.top{color:var(--lcg);}
-.bar-wrap{flex:1;background:var(--s2);border-radius:2px;height:3px;overflow:hidden;}
-.bar-fill{height:100%;background:linear-gradient(90deg,var(--lc),var(--lcg));border-radius:2px;}
 .mono{font-family:'Share Tech Mono',monospace;}
 
-/* ALERTS */
-.adot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.adot.danger{background:var(--red);box-shadow:0 0 5px var(--red);}
-.adot.warn{background:var(--gold);box-shadow:0 0 5px var(--gold);}
-.adot.ok{background:var(--green);}
+/* STAFF */
+.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.staff-pick{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .2s;position:relative;}
+.staff-pick:hover{border-color:var(--lc);}
+.staff-pick.on{background:rgba(200,16,46,.1);border-color:var(--lc);}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;}
+.del-btn{position:absolute;top:6px;right:6px;background:rgba(255,68,85,.15);border:none;color:var(--red);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
 
-/* PILLS */
-.pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;}
-.pill.in{background:rgba(0,232,122,.15);color:var(--green);}
-.pill.out{background:rgba(107,107,128,.15);color:var(--muted);}
-.rpill{border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;}
-.rpill.yes{background:rgba(0,232,122,.12);color:var(--green);}
-.rpill.no{background:rgba(255,68,85,.12);color:var(--red);}
-.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;}
-
-/* SHIFT */
-.shift-toggle{display:flex;background:var(--s1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.stab{flex:1;padding:10px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
-.stab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.brhdr{padding:16px;border-radius:8px 8px 0 0;background:linear-gradient(135deg,#1a0008,#0a0a1a);}
-.brhdr-t{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;color:#fff;}
-.brhdr-s{font-size:11px;color:rgba(255,255,255,.55);font-family:'Share Tech Mono',monospace;margin-top:4px;}
-.brbody{padding:14px;background:var(--s1);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none;margin-bottom:12px;}
-.brsec-t{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px;margin-top:12px;}
-.brtext{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:6px;padding:10px;font-size:13px;line-height:1.7;}
-.rescard{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;}
-.restop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-.restime{background:rgba(212,160,23,.15);color:var(--lcg);border:1px solid rgba(212,160,23,.25);border-radius:4px;padding:2px 7px;font-size:11px;font-family:'Share Tech Mono',monospace;}
-.resnote{margin-top:6px;font-size:12px;color:var(--lcg);background:rgba(212,160,23,.06);border-radius:4px;padding:5px 8px;}
-.specrow{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border-radius:6px;margin-bottom:6px;font-size:13px;}
-.spectag{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;}
-.spectag.push{background:rgba(0,232,122,.15);color:var(--green);}
-.spectag.eightysix{background:rgba(255,68,85,.15);color:var(--red);}
-.spectag.special{background:rgba(212,160,23,.15);color:var(--lcg);}
-.liveclock{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;}
-.lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
-.lcd{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;}
-.spicker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.spick{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .2s;}
-.spick:hover{border-color:var(--lc);}
-.spick.sel{background:rgba(200,16,46,.1);border-color:var(--lc);}
-.spick.clk{background:rgba(0,232,122,.06);border-color:var(--green);}
-.spick-name{font-weight:700;font-size:13px;margin-top:6px;}
-.spick-role{font-size:10px;color:var(--muted);text-transform:uppercase;}
-.spick-status{font-size:9px;font-weight:700;letter-spacing:1px;margin-top:3px;}
-.spick-status.in{color:var(--green);}
-.spick-status.out{color:var(--muted);}
-.cbtn{width:100%;padding:16px;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-bottom:8px;}
-.cbtn.in{background:linear-gradient(135deg,var(--green),#00c060);color:#000;}
-.cbtn.out{background:linear-gradient(135deg,var(--red),#cc2233);color:#fff;}
-.cbtn.dis{background:var(--s2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed;}
-.mustread{background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.25);border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px;}
-.conbtn{width:100%;padding:14px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;margin-bottom:12px;transition:all .2s;}
-.conbtn.unread{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.conbtn.read{background:rgba(0,232,122,.1);color:var(--green);border:1px solid rgba(0,232,122,.25);}
-.htable{width:100%;border-collapse:collapse;}
-.htable th{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);padding:8px;text-align:left;border-bottom:1px solid var(--border);}
-.htable td{padding:9px 8px;border-bottom:1px solid rgba(42,42,58,.4);font-size:12px;}
-.htable tr:last-child td{border-bottom:none;}
-
-/* GALLERY */
-.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.pcard{border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;}
-.pcard:hover{border-color:var(--lc);transform:scale(1.02);}
-.pemoji{font-size:36px;}
-.plabel{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;text-align:center;padding:0 6px;margin-top:6px;}
-.pstaff{position:absolute;bottom:6px;left:6px;font-size:9px;color:rgba(255,255,255,.45);}
-.ptime{position:absolute;bottom:6px;right:6px;font-size:9px;color:rgba(255,255,255,.45);font-family:'Share Tech Mono',monospace;}
-.pwm{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border-radius:4px;padding:3px 6px;}
-.backbtn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:12px;padding:0;}
-.backbtn:hover{color:var(--text);}
-.wmprev{background:var(--s2);border:1px solid var(--lc);border-radius:10px;overflow:hidden;margin-bottom:12px;}
-.wminner{padding:40px 32px;text-align:center;background:linear-gradient(135deg,#1a0008,#0a0a1a);position:relative;}
-.wm-stamp{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.7);border-radius:6px;padding:5px 8px;}
-.action-btn{width:100%;padding:13px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;transition:all .2s;}
-.action-btn.red{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.action-btn.purple{background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff;}
-.action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
-.action-btn:hover{filter:brightness(1.1);}
-.capbox{background:var(--s2);border:1px solid var(--purple);border-radius:8px;padding:12px;font-size:13px;line-height:1.7;margin-bottom:10px;}
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:12px auto;}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* RECEIPTS */
-.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;}
-.upzone:hover{border-color:var(--lc);background:rgba(200,16,46,.04);}
-.rbox{background:var(--s2);border:1px solid var(--lc);border-radius:8px;padding:14px;margin-bottom:10px;}
-.rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.rrow:last-child{border-bottom:none;}
-.rkey{color:var(--muted);font-weight:600;}
-.rval{font-family:'Share Tech Mono',monospace;}
-.rval.money{color:var(--lcg);font-size:22px;font-family:'Bebas Neue',cursive;}
-.rlog-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.rlog-item:last-child{border-bottom:none;}
-
-/* RECIPES */
-.sbox{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;}
-.sbox:focus-within{border-color:var(--lc);}
-.sinput{background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;flex:1;outline:none;width:100%;}
-.frow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-.fchip{background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;}
-.fchip.on{background:rgba(200,16,46,.12);border-color:var(--lc);color:var(--lc);}
-.ritem{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
-.ritem:hover{border-color:var(--lc);background:rgba(200,16,46,.05);}
-.ritem-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.ritem-name{font-weight:700;font-size:14px;}
-.rmargin{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green);}
-.ritem-meta{font-size:11px;color:var(--muted);}
-.rdetail{background:var(--s1);border:1px solid var(--lc);border-radius:10px;padding:16px;}
-.rdetail-name{font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:3px;margin-bottom:4px;}
-.rstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-.rstat{background:var(--s2);border-radius:6px;padding:10px;text-align:center;}
-.rstat-val{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:1px;margin-bottom:2px;}
-.rstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
-.ingrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
-.ingrow:last-child{border-bottom:none;}
-.ingamt{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0;}
-.ingname{font-size:13px;font-weight:600;flex:1;}
-.ingnote{font-size:11px;color:var(--muted);font-style:italic;}
-.steprow{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
-.steprow:last-child{border-bottom:none;}
-.stepnum{width:26px;height:26px;border-radius:50%;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0;}
-.steptext{font-size:13px;line-height:1.6;}
-
-/* JOIN */
-.fcta{background:linear-gradient(135deg,rgba(200,16,46,.1),rgba(212,160,23,.05));border:1px solid rgba(200,16,46,.25);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;}
-.fcta-price{font-family:'Bebas Neue',cursive;font-size:56px;color:var(--green);line-height:1;}
-.spots{display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);border-radius:8px;padding:12px;margin:12px 0;}
-.spots-n{font-family:'Bebas Neue',cursive;font-size:32px;color:var(--red);letter-spacing:2px;}
-.sfire{font-size:24px;animation:fire .6s ease infinite;}
-@keyframes fire{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
-.joinbtn{width:100%;padding:16px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-bottom:10px;text-decoration:none;display:block;text-align:center;}
-.joinbtn:hover{filter:brightness(1.1);transform:translateY(-2px);}
-.feat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
-.feat-row:last-child{border-bottom:none;}
+/* INVENTORY */
+.inv-table{width:100%;border-collapse:collapse;}
+.inv-table th{font-size:10px;letter-spacing:1px;color:var(--muted);padding:8px;text-align:left;border-bottom:1px solid var(--border);text-transform:uppercase;}
+.inv-table td{padding:10px 8px;border-bottom:1px solid var(--border);font-size:13px;}
+.inv-table tr:last-child td{border-bottom:none;}
+.stock-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.stock-ok{background:#0d3320;color:var(--green);}
+.stock-low{background:#3d1800;color:#ff9040;}
+.stock-out{background:#2d0008;color:var(--red);}
 
 /* CHECKLIST */
 .cprog{background:var(--s2);border-radius:4px;overflow:hidden;height:6px;margin-bottom:10px;}
@@ -239,807 +126,657 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .subbtn{width:100%;padding:14px;border-radius:6px;border:none;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:14px;}
 .subbtn.ready{background:var(--gold);color:#000;}
 .subbtn.locked{background:var(--s2);color:var(--muted);cursor:not-allowed;border:1px solid var(--border);}
-.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
-.fld label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
-.fld input,.fld select,.fld textarea{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;}
-.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--lc);}
-.fld textarea{resize:vertical;min-height:60px;}
-.clo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.success-box{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;color:var(--green);}
+
+/* GALLERY */
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pcard{border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;background:var(--s2);}
+.pcard:hover{border-color:var(--lc);}
+.pcard img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.photo-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:8px;}
+.photo-label{font-size:10px;color:#fff;font-weight:700;}
+.photo-time{font-size:9px;color:rgba(255,255,255,.6);font-family:'Share Tech Mono',monospace;}
+.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.upzone:hover{border-color:var(--lc);}
+
+/* SPINNER */
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:12px auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{text-align:center;color:var(--muted);font-size:13px;padding:20px;}
+
+/* PILLS */
+.pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;}
+.pill.in{background:rgba(0,232,122,.15);color:var(--green);}
+.pill.out{background:rgba(107,107,128,.15);color:var(--muted);}
+.success-box{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:12px;}
+.empty-state{text-align:center;padding:32px 16px;color:var(--muted);font-size:14px;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:20px;width:100%;max-width:360px;}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;margin-bottom:16px;}
+.modal-actions{display:flex;gap:8px;margin-top:14px;}
+.modal-actions button{flex:1;padding:10px;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;border:none;cursor:pointer;}
+.btn-cancel{background:var(--s3);color:var(--muted);}
+.btn-save{background:var(--lc);color:#fff;}
+
+/* SHIFT */
+.briefing-hdr{padding:16px;border-radius:8px 8px 0 0;background:linear-gradient(135deg,#1a0008,#0a0a1a);margin-bottom:0;}
+.briefing-body{padding:14px;background:var(--s1);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none;margin-bottom:12px;}
+.brtext{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:6px;padding:10px;font-size:13px;line-height:1.7;}
+.liveclock{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;}
+.lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
+.lcd{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;}
 </style>
 </head>
 <body>
-<div class="app">
-
-<!-- SPLASH -->
-<div class="splash" id="splash">
-  <div class="sp-name">CantinaPro</div>
-  <div class="sp-tagline">Bar Management System</div>
-  <div class="sp-div"></div>
-  <div class="sp-desc" id="sp-desc">Your bar. Your data. Your way.<br/>Shift briefings, staff clock-in, AI receipts, recipe book, night gallery — all in one app.</div>
-  <div class="sp-badge" id="sp-badge">⭐ FOUNDING MEMBER OFFER — $50/MO</div>
-  <button class="sp-btn" onclick="document.getElementById('splash').classList.add('hidden')" id="sp-btn">SEE THE APP →</button>
-  <div class="sp-note" id="sp-note">Bilingual EN/ES · Cancel anytime · cantinapro.app</div>
-</div>
-
-<!-- HEADER -->
-<header class="hdr">
-  <div>
-    <div class="hdr-logo">CantinaPro</div>
-    <div class="hdr-sub" id="hdr-sub">BAR MANAGEMENT SYSTEM</div>
-  </div>
-  <div class="hdr-r">
-    <div class="lang-wrap">
-      <button class="lb on" onclick="setLang('en')" id="lb-en">EN</button>
-      <button class="lb" onclick="setLang('es')" id="lb-es">ES</button>
-    </div>
-    <div class="sdot"></div>
-  </div>
-</header>
-
-<!-- MAIN -->
-<main class="main">
-
-  <!-- DASHBOARD -->
-  <div class="tab-content on" id="tab-dashboard">
-    <div class="sec-title" id="dash-title">TONIGHT'S OVERVIEW</div>
-    <div class="kpi-grid">
-      <div class="kpi lc"><div class="kl" id="k1">Today's Sales</div><div class="kv">$6,890</div><div class="kd">▲ 31% vs last Sat</div></div>
-      <div class="kpi g"><div class="kl" id="k2">Weekly Revenue</div><div class="kv">$26,130</div><div class="kd">▲ 18% this week</div></div>
-      <div class="kpi r"><div class="kl" id="k3">Expenses</div><div class="kv">$4,120</div><div class="kd dn">▼ 5% from last week</div></div>
-      <div class="kpi b"><div class="kl" id="k4">Staff On Clock</div><div class="kv" id="clocked-count">2</div><div class="kd" id="k4-sub">of 5 scheduled</div></div>
-    </div>
-    <div class="card">
-      <div class="ct" id="weekly-title">WEEKLY SALES</div>
-      <div class="bar-chart">
-        <div class="bc"><div class="bci"><div class="bar" style="height:31%;background:var(--s3)"></div></div><div class="bl">MON</div></div>
-        <div class="bc"><div class="bci"><div class="bar" style="height:29%;background:var(--s3)"></div></div><div class="bl">TUE</div></div>
-        <div class="bc"><div class="bci"><div class="bar" style="height:37%;background:var(--s3)"></div></div><div class="bl">WED</div></div>
-        <div class="bc"><div class="bci"><div class="bar" style="height:45%;background:var(--s3)"></div></div><div class="bl">THU</div></div>
-        <div class="bc"><div class="bci"><div class="bar" style="height:76%;background:var(--s3)"></div></div><div class="bl">FRI</div></div>
-        <div class="bc"><div class="bci"><div class="bar" style="height:100%;background:linear-gradient(180deg,var(--lcg),var(--amber))"></div></div><div class="bl">SAT</div></div>
-        <div class="bc"><div class="bci"><div class="bar" style="height:61%;background:var(--s3)"></div></div><div class="bl">SUN</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct" id="sellers-title">TOP SELLERS</div>
-      <div class="row"><div class="rank top">1</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Modelo Especial</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Beer</div></div><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$1,840</div></div>
-      <div class="row"><div class="rank">2</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Don Julio Margarita</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cocktail</div></div><div class="bar-wrap"><div class="bar-fill" style="width:77%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$1,420</div></div>
-      <div class="row"><div class="rank">3</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Michelada</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Beer</div></div><div class="bar-wrap"><div class="bar-fill" style="width:53%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$980</div></div>
-      <div class="row"><div class="rank">4</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Paloma</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cocktail</div></div><div class="bar-wrap"><div class="bar-fill" style="width:41%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$760</div></div>
-      <div class="row"><div class="rank">5</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Corona</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Beer</div></div><div class="bar-wrap"><div class="bar-fill" style="width:29%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$540</div></div>
-    </div>
-    <div class="card">
-      <div class="ct" id="alerts-title">ALERTS & REMINDERS</div>
-      <div class="row"><div class="adot danger"></div><div style="flex:1;font-size:13px" id="a1">Tequila Blanco — LOW STOCK (2 bottles left)</div><div class="mono" style="font-size:10px;color:var(--muted)">Now</div></div>
-      <div class="row"><div class="adot warn"></div><div style="flex:1;font-size:13px" id="a2">Liquor license renewal — 18 days</div><div class="mono" style="font-size:10px;color:var(--muted)">Reminder</div></div>
-      <div class="row"><div class="adot warn"></div><div style="flex:1;font-size:13px" id="a3">Modelo keg — reorder today</div><div class="mono" style="font-size:10px;color:var(--muted)">Today</div></div>
-      <div class="row"><div class="adot ok"></div><div style="flex:1;font-size:13px" id="a4">Health inspection passed ✓</div><div class="mono" style="font-size:10px;color:var(--muted)">Mon</div></div>
-    </div>
-    <div class="card">
-      <div class="ct" id="staff-status-title">STAFF STATUS</div>
-      <div class="row" id="s1-row"><div class="av" style="background:#c8102e22;color:#c8102e">MG</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Maria G.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Bartender</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill in" id="s1-status">On clock</span><span class="rpill yes" id="s1-read">Read</span></div></div>
-      <div class="row"><div class="av" style="background:#d4a01722;color:#d4a017">CR</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Carlos R.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Bartender</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill in" id="s2-status">On clock</span><span class="rpill yes" id="s2-read">Read</span></div></div>
-      <div class="row"><div class="av" style="background:#00e87a22;color:#00e87a">JT</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Jess T.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Server</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill out" id="s3-status">Off</span><span class="rpill no" id="s3-read">Unread</span></div></div>
-      <div class="row"><div class="av" style="background:#4488ff22;color:#4488ff">MS</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Mike S.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Barback</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill out" id="s4-status">Off</span><span class="rpill no" id="s4-read">Unread</span></div></div>
-      <div class="row"><div class="av" style="background:#a855f722;color:#a855f7">AP</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Ana P.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Server</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill out" id="s5-status">Off</span><span class="rpill no" id="s5-read">Unread</span></div></div>
-    </div>
-    <div class="card">
-      <div class="ct" id="res-title">TONIGHT'S RESERVATIONS</div>
-      <div class="row"><div style="width:7px;height:7px;border-radius:50%;background:var(--lc);flex-shrink:0"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Hernandez Birthday Party</div><div style="font-size:11px;color:var(--muted)">7:00 PM · 22 guests · 🎂 Birthday</div></div></div>
-      <div class="row"><div style="width:7px;height:7px;border-radius:50%;background:var(--lc);flex-shrink:0"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Oak Lawn Business Assoc.</div><div style="font-size:11px;color:var(--muted)">6:30 PM · 15 guests · 💼 Corporate</div></div></div>
-      <div class="row"><div style="width:7px;height:7px;border-radius:50%;background:var(--lc);flex-shrink:0"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Morales Anniversary</div><div style="font-size:11px;color:var(--muted)">8:00 PM · 2 guests · ❤️ Anniversary</div></div></div>
-    </div>
-  </div>
-
-  <!-- SHIFT -->
-  <div class="tab-content" id="tab-shift">
-    <div class="shift-toggle">
-      <button class="stab on" onclick="setShiftView('staff')" id="stab-staff">👤 <span id="stab-s-lbl">STAFF</span></button>
-      <button class="stab" onclick="setShiftView('owner')" id="stab-owner">👑 <span id="stab-o-lbl">OWNER</span></button>
-    </div>
-    <div id="shift-staff">
-      <div class="brhdr">
-        <div class="brhdr-t">📋 <span id="br-title">TONIGHT'S SHIFT BRIEFING</span></div>
-        <div class="brhdr-s" id="br-sub">Monday, April 6 · 5:00 PM – 2:00 AM</div>
-      </div>
-      <div class="brbody">
-        <div class="brsec-t">📣 <span id="br-from">FROM THE OWNER</span></div>
-        <div class="brtext" id="br-text">Big Friday night — expect a packed house by 8PM.&#10;&#10;Last Friday we hit $5,240. Tonight we push for $6k. Hernandez party of 22 at 7PM — treat them right, they come every month.&#10;&#10;Reminder: card minimum is $10. No exceptions.</div>
-        <div class="brsec-t">🎟️ <span id="br-res">RESERVATIONS</span></div>
-        <div class="rescard"><div class="restop"><div style="font-weight:700;font-size:13px">Hernandez Birthday Party</div><div class="restime">7:00 PM</div></div><div style="font-size:12px;color:var(--muted)">👥 22 guests · 🎂 Birthday</div><div class="resnote">📌 Call ahead confirmed. Set up section B.</div></div>
-        <div class="rescard"><div class="restop"><div style="font-weight:700;font-size:13px">Oak Lawn Business Assoc.</div><div class="restime">6:30 PM</div></div><div style="font-size:12px;color:var(--muted)">👥 15 guests · 💼 Corporate</div><div class="resnote">📌 Running tab authorized.</div></div>
-        <div class="rescard"><div class="restop"><div style="font-weight:700;font-size:13px">Morales Anniversary</div><div class="restime">8:00 PM</div></div><div style="font-size:12px;color:var(--muted)">👥 2 guests · ❤️ Anniversary</div><div class="resnote">📌 Champagne on arrival — confirmed.</div></div>
-        <div class="brsec-t">🎯 <span id="br-spec">SPECIALS & 86'S</span></div>
-        <div class="specrow"><div>🍺</div><div style="flex:1">Modelo Buckets — 5 for $28 until 9PM</div><span class="spectag special">SPECIAL</span></div>
-        <div class="specrow"><div>🍖</div><div style="flex:1">Free appetizer with bottle service tonight</div><span class="spectag special">SPECIAL</span></div>
-        <div class="specrow"><div>💰</div><div style="flex:1">Push Don Julio Reposado — great margin</div><span class="spectag push">PUSH</span></div>
-        <div class="specrow"><div>🚫</div><div style="flex:1">Tequila Blanco — 86'd. Offer Espolon instead.</div><span class="spectag eightysix">86'D</span></div>
-        <button class="conbtn unread" id="confirm-btn" onclick="confirmBriefing()" style="margin-top:14px" id="br-confirm-btn">✓ CONFIRM YOU'VE READ THIS</button>
-      </div>
-      <div class="liveclock"><div class="lct" id="clock-display">12:00:00 PM</div><div class="lcd" id="clock-date">Monday, April 6 · CantinaPro</div></div>
-      <div class="card">
-        <div class="ct" id="clockin-title" style="margin-bottom:10px">⏱️ CLOCK IN / OUT</div>
-        <div class="spicker">
-          <div class="spick" id="spick-1" onclick="selectStaff(1)"><div class="av" style="background:#c8102e22;color:#c8102e;width:34px;height:34px;font-size:11px">MG</div><div class="spick-name">Maria G.</div><div class="spick-role">Bartender</div><div class="spick-status in" id="spick-1-status">● ON CLOCK</div></div>
-          <div class="spick" id="spick-2" onclick="selectStaff(2)"><div class="av" style="background:#d4a01722;color:#d4a017;width:34px;height:34px;font-size:11px">CR</div><div class="spick-name">Carlos R.</div><div class="spick-role">Bartender</div><div class="spick-status in" id="spick-2-status">● ON CLOCK</div></div>
-          <div class="spick" id="spick-3" onclick="selectStaff(3)"><div class="av" style="background:#00e87a22;color:#00e87a;width:34px;height:34px;font-size:11px">JT</div><div class="spick-name">Jess T.</div><div class="spick-role">Server</div><div class="spick-status out" id="spick-3-status">○ OFF</div></div>
-          <div class="spick" id="spick-4" onclick="selectStaff(4)"><div class="av" style="background:#4488ff22;color:#4488ff;width:34px;height:34px;font-size:11px">MS</div><div class="spick-name">Mike S.</div><div class="spick-role">Barback</div><div class="spick-status out" id="spick-4-status">○ OFF</div></div>
-          <div class="spick" id="spick-5" onclick="selectStaff(5)"><div class="av" style="background:#a855f722;color:#a855f7;width:34px;height:34px;font-size:11px">AP</div><div class="spick-name">Ana P.</div><div class="spick-role">Server</div><div class="spick-status out" id="spick-5-status">○ OFF</div></div>
-        </div>
-        <div id="clock-action"><button class="cbtn dis" id="select-lbl">SELECT YOUR NAME</button></div>
-      </div>
-    </div>
-    <div id="shift-owner" style="display:none">
-      <div class="card">
-        <div class="ct" style="color:var(--lc)">SHIFT LOG — OWNER VIEW</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-          <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--green)" id="owner-clocked">2</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">On Clock</div></div>
-          <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--blue)">2</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Read</div></div>
-          <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--red)">3</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Unread</div></div>
-        </div>
-        <table class="htable">
-          <thead><tr><th>NAME</th><th>IN</th><th>OUT</th><th>HRS</th><th>READ</th></tr></thead>
-          <tbody>
-            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#c8102e22;color:#c8102e;width:22px;height:22px;font-size:9px">MG</div>Maria G.</div></td><td class="mono" style="color:var(--green);font-size:11px">4:52 PM</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">Active</td><td><span class="rpill yes">Yes</span></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#d4a01722;color:#d4a017;width:22px;height:22px;font-size:9px">CR</div>Carlos R.</div></td><td class="mono" style="color:var(--green);font-size:11px">4:58 PM</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">Active</td><td><span class="rpill yes">Yes</span></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#00e87a22;color:#00e87a;width:22px;height:22px;font-size:9px">JT</div>Jess T.</div></td><td class="mono" style="color:var(--green);font-size:11px">—</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">—</td><td><span class="rpill no">No</span></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#4488ff22;color:#4488ff;width:22px;height:22px;font-size:9px">MS</div>Mike S.</div></td><td class="mono" style="color:var(--green);font-size:11px">—</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">—</td><td><span class="rpill no">No</span></td></tr>
-            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#a855f722;color:#a855f7;width:22px;height:22px;font-size:9px">AP</div>Ana P.</div></td><td class="mono" style="color:var(--green);font-size:11px">—</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">—</td><td><span class="rpill no">No</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- GALLERY -->
-  <div class="tab-content" id="tab-gallery">
-    <div class="sec-title" id="gallery-title">NIGHT GALLERY</div>
-    <div id="gallery-grid">
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px" id="gallery-hint">TAP A PHOTO TO EDIT & DOWNLOAD</div>
-      <div class="photo-grid">
-        <div class="pcard" style="background:#1a0a12" onclick="openPhoto(0)"><div class="pemoji">🥂</div><div class="plabel">Friday Night Crowd</div><div class="pstaff">Maria G.</div><div class="ptime">9:42 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
-        <div class="pcard" style="background:#0a1a0a" onclick="openPhoto(1)"><div class="pemoji">🎉</div><div class="plabel">Hernandez Birthday</div><div class="pstaff">Carlos R.</div><div class="ptime">10:15 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
-        <div class="pcard" style="background:#0a0a1a" onclick="openPhoto(2)"><div class="pemoji">🌃</div><div class="plabel">VIP Section</div><div class="pstaff">Ana P.</div><div class="ptime">11:00 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
-        <div class="pcard" style="background:#1a1a0a" onclick="openPhoto(3)"><div class="pemoji">🍺</div><div class="plabel">Happy Hour</div><div class="pstaff">Mike S.</div><div class="ptime">6:30 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
-        <div class="pcard" style="background:#1a0a1a" onclick="openPhoto(4)"><div class="pemoji">🎵</div><div class="plabel">Live Music Night</div><div class="pstaff">Jess T.</div><div class="ptime">8:45 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
-        <div class="pcard" style="background:#0a1a1a" onclick="openPhoto(5)"><div class="pemoji">🌮</div><div class="plabel">Taco Tuesday</div><div class="pstaff">Carlos R.</div><div class="ptime">7:00 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
-      </div>
-      <div style="margin-top:12px;border:1px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer" onclick="document.getElementById('photo-upload').click()">
-        <input type="file" id="photo-upload" accept="image/*" multiple style="display:none"/>
-        <div style="font-size:28px;margin-bottom:6px">📷</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--muted)" id="add-photo-lbl">ADD PHOTO</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="add-photo-sub">Staff takes photos during shift</div>
-      </div>
-    </div>
-    <div id="gallery-detail" style="display:none">
-      <button class="backbtn" onclick="closePhoto()">← <span id="back-lbl">BACK</span></button>
-      <div class="wmprev">
-        <div class="wminner">
-          <div style="font-size:64px" id="detail-emoji">🥂</div>
-          <div style="font-size:15px;color:rgba(255,255,255,.5);font-weight:700;margin-top:8px" id="detail-label">Friday Night Crowd</div>
-          <div class="wm-stamp">
-            <div style="font-family:'Bebas Neue',cursive;font-size:12px;color:var(--lc)">CantinaPro</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg);letter-spacing:2px">cantinapro.app</div>
-          </div>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px" id="wm-note">Preview with CantinaPro watermark</div>
-      <button class="action-btn red" id="dl-btn">⬇️ DOWNLOAD WITH LOGO</button>
-      <button class="action-btn purple" id="cap-btn" onclick="generateCaption()">✨ GENERATE AI CAPTION</button>
-      <div class="spinner" id="cap-spinner" style="display:none"></div>
-      <div class="capbox" id="cap-box" style="display:none">
-        <div style="font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:6px">AI CAPTION</div>
-        <div id="cap-text"></div>
-        <button onclick="copyCaption()" style="margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:4px;padding:5px 12px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px" id="copy-btn">COPY</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- RECEIPTS -->
-  <div class="tab-content" id="tab-receipts">
-    <div class="sec-title" id="receipts-title">RECEIPT SCANNER</div>
-    <div class="card">
-      <div class="ct" style="color:var(--lc)" id="scan-title">📸 SCAN RECEIPT WITH AI</div>
-      <div class="upzone" onclick="document.getElementById('receipt-file').click()" id="upload-zone">
-        <input type="file" id="receipt-file" accept="image/*" capture="environment" style="display:none" onchange="handleReceiptFile(event)"/>
-        <div style="font-size:40px;margin-bottom:8px">🧾</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;margin-bottom:4px" id="scan-upload-lbl">TAKE OR UPLOAD PHOTO</div>
-        <div style="font-size:12px;color:var(--muted)" id="scan-upload-sub">Photo of any vendor receipt</div>
-      </div>
-      <div id="scan-preview-wrap" style="display:none;margin-bottom:12px;text-align:center">
-        <img id="scan-preview-img" style="max-width:100%;max-height:200px;object-fit:contain;border-radius:6px"/>
-        <button onclick="clearReceipt()" style="margin-top:8px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">✕ Remove</button>
-      </div>
-      <button class="action-btn red" id="scan-btn" onclick="scanReceipt()" style="display:none" id="scan-action-btn">✨ ANALYZE RECEIPT WITH AI</button>
-      <div class="spinner" id="scan-spinner" style="display:none"></div>
-      <div id="scan-error" style="display:none;background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);border-radius:8px;padding:12px;font-size:13px;color:var(--red)"></div>
-      <div class="rbox" id="scan-result" style="display:none">
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">✓ RECEIPT DETECTED</div>
-        <div class="rrow"><div class="rkey" id="r-vendor-lbl">Vendor</div><div class="rval" id="r-vendor"></div></div>
-        <div class="rrow"><div class="rkey" id="r-date-lbl">Date</div><div class="rval" id="r-date"></div></div>
-        <div class="rrow"><div class="rkey" id="r-cat-lbl">Category</div><div class="rval" id="r-cat"></div></div>
-        <div id="r-items"></div>
-        <div class="rrow" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><div class="rkey" style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;color:var(--text)" id="r-total-lbl">TOTAL</div><div class="rval money" id="r-total">$0.00</div></div>
-        <button class="action-btn green" onclick="logReceipt()" style="margin-top:10px" id="log-btn">✓ LOG THIS RECEIPT</button>
-        <button onclick="clearReceipt()" style="width:100%;padding:8px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-size:12px;margin-top:6px" id="scan-again-btn">Scan again</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="ct" id="rlog-title">RECEIPT LOG</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--lc)" id="rlog-total">$1,260</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase" id="rlog-total-lbl">Total Spent</div></div>
-        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--blue)" id="rlog-count">2</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase" id="rlog-count-lbl">Receipts</div></div>
-      </div>
-      <div id="rlog-list">
-        <div class="rlog-item"><div style="font-size:16px">🧾</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Republic National</div><div style="font-size:11px;color:var(--muted)">Spirits · Apr 2</div></div><div class="mono" style="color:var(--lcg);font-weight:700">$840</div></div>
-        <div class="rlog-item"><div style="font-size:16px">🧾</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Marca's Distributing</div><div style="font-size:11px;color:var(--muted)">Beer · Apr 1</div></div><div class="mono" style="color:var(--lcg);font-weight:700">$420</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RECIPES -->
-  <div class="tab-content" id="tab-recipes">
-    <div class="sec-title" id="recipes-title">RECIPE BOOK</div>
-    <div id="recipe-list-view">
-      <div class="sbox"><span style="color:var(--muted)">🔍</span><input class="sinput" id="recipe-search" placeholder="Search drinks or ingredients..." oninput="filterRecipes()"/></div>
-      <div class="frow">
-        <button class="fchip on" onclick="setRecipeFilter('All')" id="rf-all">All</button>
-        <button class="fchip" onclick="setRecipeFilter('Signature')" id="rf-sig">Signature</button>
-        <button class="fchip" onclick="setRecipeFilter('Classic')" id="rf-cls">Classic</button>
-        <button class="fchip" onclick="setRecipeFilter('Premium')" id="rf-pre">Premium</button>
-      </div>
-      <div id="recipe-items"></div>
-    </div>
-    <div id="recipe-detail-view" style="display:none">
-      <button class="backbtn" onclick="closeRecipe()">← <span id="recipe-back-lbl">BACK</span></button>
-      <div class="rdetail">
-        <div style="font-size:56px;text-align:center;margin-bottom:10px" id="rd-emoji"></div>
-        <div class="rdetail-name" id="rd-name"></div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;font-family:'Share Tech Mono',monospace" id="rd-meta"></div>
-        <div class="rstats">
-          <div class="rstat"><div class="rstat-val" style="color:var(--red)" id="rd-cost"></div><div class="rstat-lbl" id="rd-cost-lbl">Cost</div></div>
-          <div class="rstat"><div class="rstat-val" style="color:var(--lcg)" id="rd-price"></div><div class="rstat-lbl" id="rd-price-lbl">Price</div></div>
-          <div class="rstat"><div class="rstat-val" style="color:var(--green)" id="rd-margin"></div><div class="rstat-lbl" id="rd-margin-lbl">Margin</div></div>
-          <div class="rstat"><div class="rstat-val" style="color:var(--blue)" id="rd-time"></div><div class="rstat-lbl" id="rd-time-lbl">Time</div></div>
-        </div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px" id="rd-ing-title">INGREDIENTS</div>
-        <div id="rd-ingredients"></div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 8px" id="rd-steps-title">STEPS</div>
-        <div id="rd-steps"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- JOIN -->
-  <div class="tab-content" id="tab-join">
-    <div class="sec-title" id="join-title">JOIN CANTINAPRO</div>
-    <div class="fcta">
-      <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:3px;color:var(--lcg);margin-bottom:4px" id="join-founding">FOUNDING MEMBER PRICE</div>
-      <div class="fcta-price">$50</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="join-mo">/month · locked forever</div>
-      <div style="font-size:12px;color:var(--lcg);margin-bottom:16px" id="join-after">After launch $99/mo — you never change</div>
-      <div class="spots">
-        <div class="sfire">🔥</div>
-        <div><div class="spots-n">47</div><div style="font-size:12px;color:var(--muted);line-height:1.4" id="join-spots">founding spots remaining</div></div>
-        <div class="sfire">🔥</div>
-      </div>
-      <div style="background:rgba(255,255,255,.06);border-radius:999px;height:10px;overflow:hidden;margin:12px 0">
-        <div style="height:100%;border-radius:999px;background:linear-gradient(90deg,var(--lc),var(--lcg));width:53%"></div>
-      </div>
-      <button class="joinbtn" onclick="window.top.location.href='https://buy.stripe.com/3cI5kDeBLgjJ90b8ujbV601'">🔒 LOCK IN MY SPOT — $50/MO</button>
-      <div style="font-size:11px;color:var(--muted)" id="join-note">🔒 No contracts · Cancel anytime · Secure via Stripe</div>
-    </div>
-    <div class="card">
-      <div class="ct" id="join-included">WHAT'S INCLUDED</div>
-      <div class="feat-row"><div style="font-size:18px">📋</div><div style="font-size:13px;font-weight:600;flex:1" id="f1">Shift briefings & reservations</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">⏰</div><div style="font-size:13px;font-weight:600;flex:1" id="f2">Staff clock in / out</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">🧾</div><div style="font-size:13px;font-weight:600;flex:1" id="f3">AI receipt scanner</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">🍹</div><div style="font-size:13px;font-weight:600;flex:1" id="f4">Recipe book with profit margins</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">📸</div><div style="font-size:13px;font-weight:600;flex:1" id="f5">Watermarked gallery + AI captions</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">✅</div><div style="font-size:13px;font-weight:600;flex:1" id="f6">End of night checklist & closeout</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">🌎</div><div style="font-size:13px;font-weight:600;flex:1" id="f7">Fully bilingual EN/ES</div><div style="color:var(--green)">✓</div></div>
-      <div class="feat-row"><div style="font-size:18px">💰</div><div style="font-size:13px;font-weight:600;flex:1" id="f8">Referral program — earn $20/mo per bar</div><div style="color:var(--green)">✓</div></div>
-    </div>
-    <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:20px">Questions? <span style="color:var(--lc)">hello@cantinapro.app</span></div>
-  </div>
-
-  <!-- CLOSEOUT -->
-  <div class="tab-content" id="tab-closeout">
-    <div class="sec-title" id="closeout-title">END OF NIGHT</div>
-    <div class="card">
-      <div class="ct" id="checklist-title">CLOSING CHECKLIST</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="checklist-sub">Staff must complete before submitting closeout</div>
-      <div class="cprog"><div class="cbar" id="check-bar" style="width:0%"></div></div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px" id="check-count">0/16 complete — 0%</div>
-      <div id="checklist-items"></div>
-    </div>
-    <div class="card" id="closeout-form-card">
-      <div class="ct" id="closeout-form-title">END OF NIGHT CLOSEOUT</div>
-      <div id="closeout-submitted" style="display:none" class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>
-      <div id="closeout-form-inner">
-        <div class="clo-grid">
-          <div class="fld"><label id="lbl-bar">Bar Sales ($)</label><input type="number" placeholder="0.00" id="f-bar"/></div>
-          <div class="fld"><label id="lbl-food">Food Sales ($)</label><input type="number" placeholder="0.00" id="f-food"/></div>
-          <div class="fld"><label id="lbl-cash">Cash Collected ($)</label><input type="number" placeholder="0.00" id="f-cash"/></div>
-          <div class="fld"><label id="lbl-cards">Card Sales ($)</label><input type="number" placeholder="0.00" id="f-cards"/></div>
-          <div class="fld"><label id="lbl-tips">Tips Total ($)</label><input type="number" placeholder="0.00" id="f-tips"/></div>
-          <div class="fld"><label id="lbl-comps">Comps & Voids ($)</label><input type="number" placeholder="0.00" id="f-comps"/></div>
-        </div>
-        <div class="fld"><label id="lbl-staff">Closing Staff</label><select id="f-staff"><option value="">Select staff member</option><option>Maria G.</option><option>Carlos R.</option><option>Jess T.</option><option>Mike S.</option><option>Ana P.</option></select></div>
-        <div class="fld"><label id="lbl-notes">Notes / Incidents</label><textarea placeholder="Any issues, incidents, or notes for the owner..." id="f-notes"></textarea></div>
-        <button class="subbtn locked" id="submit-btn" onclick="submitCloseout()">COMPLETE CHECKLIST FIRST</button>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<!-- BOTTOM NAV -->
-<nav class="bot-nav">
-  <button class="nb on" onclick="setTab('dashboard')" id="nav-dashboard"><span class="ni">📊</span><span class="nl" id="nl-dashboard">Dashboard</span></button>
-  <button class="nb" onclick="setTab('shift')" id="nav-shift"><span class="ni">⏰</span><span class="nl" id="nl-shift">Shift</span></button>
-  <button class="nb" onclick="setTab('gallery')" id="nav-gallery"><span class="ni">📸</span><span class="nl" id="nl-gallery">Gallery</span></button>
-  <button class="nb" onclick="setTab('receipts')" id="nav-receipts"><span class="ni">🧾</span><span class="nl" id="nl-receipts">Receipts</span></button>
-  <button class="nb" onclick="setTab('recipes')" id="nav-recipes"><span class="ni">🍹</span><span class="nl" id="nl-recipes">Recipes</span></button>
-  <button class="nb" onclick="setTab('closeout')" id="nav-closeout"><span class="ni">✅</span><span class="nl" id="nl-closeout">Closeout</span></button>
-  <button class="nb" onclick="setTab('join')" id="nav-join"><span class="ni">🔥</span><span class="nl" id="nl-join">Join</span><span class="nbadge">47</span></button>
-</nav>
-
-</div>
+<div id="root"></div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────
+const SUPABASE_URL = 'https://hfndlrfqijwuxhwydhns.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_IB2dOie5ji9zbXl-JZPu6w_CCrDW2kT';
+const STRIPE_LINK = 'https://buy.stripe.com/3cI5kDeBLgjJ90b8ujbV601';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let state = {
+  user: null, bar: null, staff: [], sales: [], inventory: [], photos: [],
+  checklist: {}, closeoutSubmitted: false,
+  tab: 'dashboard', lang: 'en', authMode: 'login',
+  authLoading: false, authError: '', appLoading: true,
+  showStaffModal: false, showInvModal: false, showSaleModal: false,
+  newStaff: {name:'',role:'',pin:''},
+  newInv: {name:'',category:'',unit:'',stock:'',par_level:''},
+  newSale: {bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
+  loginEmail:'', loginPassword:'', loginBarName:'', loginLocation:'',
+  clockedIn: [], selectedStaff: null, briefingRead: [],
+  liveTime: '', photoCaption: null, generatingCaption: false,
+  selectedPhoto: null, photoTag: 'Social Media', photoNote: '',
+  recipeSearch: '', recipeFilter: 'All',
+};
+
+const CHECKLIST_DATA = {
+  '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms'],
+  '🍺 Bar':['Count remaining liquor bottles','Log any breakage or spillage','Restock for next shift','Lock liquor storage'],
+  '💰 Cash':['Count cash drawer','Separate tips','Prepare bank deposit','Reconcile card totals'],
+  '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm'],
+};
+const ALL_ITEMS = Object.values(CHECKLIST_DATA).flat();
+
+const COLORS = ['#c8102e','#d4a017','#00e87a','#4488ff','#a855f7','#00d4aa','#ff8c42','#ff6eb4'];
+
 const RECIPES = [
-  {id:1,emoji:"🍹",name:"Local Cantina Margarita",tag:"Signature",glass:"Rocks",garnish:"Lime + Tajín",prepTime:"2 min",cost:2.80,price:14,
-    ingredients:[{amount:"2 oz",name:"Don Julio Blanco",note:"our well tequila"},{amount:"1 oz",name:"Cointreau",note:""},{amount:"3/4 oz",name:"Fresh lime juice",note:"squeeze to order"},{amount:"1/2 oz",name:"Agave syrup",note:""},{amount:"",name:"Tajín",note:"rim only"},{amount:"",name:"Ice",note:"shaken + fresh rocks"}],
-    steps:["Tajín rim the glass. Fill with fresh ice and set aside.","In a shaker, combine tequila, Cointreau, lime juice, and agave. Add ice and shake hard for 10 seconds.","Double strain over fresh rocks. Garnish with lime wheel."]},
-  {id:2,emoji:"🍺",name:"Local Cantina Michelada",tag:"Signature",glass:"Pint glass",garnish:"Lime + Tajín",prepTime:"1.5 min",cost:1.60,price:10,
-    ingredients:[{amount:"1",name:"Modelo Especial (12 oz)",note:"ice cold"},{amount:"2 oz",name:"Clamato juice",note:""},{amount:"1/2 oz",name:"Fresh lime juice",note:""},{amount:"4 dashes",name:"Valentina hot sauce",note:"adjust to taste"},{amount:"2 dashes",name:"Worcestershire sauce",note:""},{amount:"1 dash",name:"Soy sauce",note:"secret — don't skip"},{amount:"",name:"Tajín",note:"rim + dusting on top"}],
-    steps:["Lime juice + Tajín rim. Fill pint glass with ice.","Mix Clamato, lime, Valentina, Worcestershire, and soy sauce in the glass.","Pour Modelo slowly. Dust Tajín on top. Serve immediately."]},
-  {id:3,emoji:"🍊",name:"Paloma",tag:"Classic",glass:"Highball",garnish:"Lime + salt rim",prepTime:"1.5 min",cost:1.90,price:12,
-    ingredients:[{amount:"2 oz",name:"Blanco Tequila",note:""},{amount:"1/2 oz",name:"Fresh lime juice",note:""},{amount:"Pinch",name:"Salt",note:"in the drink"},{amount:"4 oz",name:"Jarritos Grapefruit",note:"preferred over Squirt"},{amount:"",name:"Ice",note:""}],
-    steps:["Salt rim. Fill highball with ice.","Add tequila and lime juice.","Pinch of salt directly in glass. Top with Jarritos. Stir gently."]},
-  {id:4,emoji:"🥃",name:"Cantina Old Fashioned",tag:"Premium",glass:"Rocks",garnish:"Orange peel",prepTime:"3 min",cost:3.20,price:16,
-    ingredients:[{amount:"2 oz",name:"Bulleit Bourbon",note:""},{amount:"1/4 oz",name:"Demerara syrup",note:"2:1"},{amount:"2 dashes",name:"Angostura bitters",note:""},{amount:"1 dash",name:"Orange bitters",note:""},{amount:"",name:"Large ice cube",note:"use the big cube ONLY"}],
-    steps:["Large ice cube in rocks glass.","Stir all ingredients in mixing glass with ice for 30 seconds.","Strain over the big cube. Express orange peel, rim glass, drop in."]}
+  {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',cost:2.80,price:14,
+    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
+    steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice for 10 seconds.','Double strain over fresh rocks. Lime wheel garnish.']},
+  {id:2,emoji:'🍺',name:'Michelada',tag:'Signature',glass:'Pint glass',prepTime:'1.5 min',cost:1.60,price:10,
+    ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:"secret — don't skip"}],
+    steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
+  {id:3,emoji:'🍊',name:'Paloma',tag:'Classic',glass:'Highball',prepTime:'1.5 min',cost:1.90,price:12,
+    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred over Squirt'}],
+    steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
+  {id:4,emoji:'🥃',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prepTime:'3 min',cost:3.20,price:16,
+    ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
+    steps:['Large ice cube in rocks glass.','Stir all ingredients with ice for 30 seconds.','Strain over the big cube. Orange peel garnish.']},
 ];
 
-const PHOTOS = [
-  {emoji:"🥂",label:"Friday Night Crowd",staff:"Maria G.",time:"9:42 PM"},
-  {emoji:"🎉",label:"Hernandez Birthday",staff:"Carlos R.",time:"10:15 PM"},
-  {emoji:"🌃",label:"VIP Section",staff:"Ana P.",time:"11:00 PM"},
-  {emoji:"🍺",label:"Happy Hour",staff:"Mike S.",time:"6:30 PM"},
-  {emoji:"🎵",label:"Live Music Night",staff:"Jess T.",time:"8:45 PM"},
-  {emoji:"🌮",label:"Taco Tuesday",staff:"Carlos R.",time:"7:00 PM"}
-];
+function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
 
-const CHECKLIST = {
-  "🧹 Cleaning":["Wipe down all bar surfaces","Clean beer taps & lines","Mop floors","Empty trash & replace bags","Clean bathrooms"],
-  "🍺 Bar":["Count remaining liquor bottles","Log any breakage or spillage","Restock for next shift","Lock liquor storage"],
-  "💰 Cash":["Count cash drawer","Separate tips","Prepare bank deposit","Reconcile card totals"],
-  "🔒 Security":["Check all doors & windows locked","Turn off all equipment","Set alarm"]
-};
+// ── INIT ───────────────────────────────────────────────────────────────────
+async function init(){
+  setInterval(()=>{
+    const now = new Date();
+    state.liveTime = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const el = document.getElementById('clock-display');
+    if(el) el.textContent = state.liveTime;
+  },1000);
 
-// ── STATE ─────────────────────────────────────────────
-let lang = 'en';
-let currentTab = 'dashboard';
-let shiftView = 'staff';
-let selectedStaff = null;
-let briefingRead = [1,2];
-let clockedIn = [1,2];
-let checked = {};
-let receiptLog = [{vendor:"Republic National",category:"Spirits",total:840,date:"Apr 2"},{vendor:"Marca's Distributing",category:"Beer",total:420,date:"Apr 1"}];
-let currentRecipe = null;
-let currentPhoto = null;
-let currentCaption = null;
-let receiptBase64 = null;
-let recipeFilter = 'All';
-
-// ── CLOCK ─────────────────────────────────────────────
-function updateClock(){
-  const now = new Date();
-  document.getElementById('clock-display').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-setInterval(updateClock,1000);
-updateClock();
-
-// ── TABS ──────────────────────────────────────────────
-function setTab(t){
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('on'));
-  document.querySelectorAll('.nb').forEach(el=>el.classList.remove('on'));
-  document.getElementById('tab-'+t).classList.add('on');
-  document.getElementById('nav-'+t).classList.add('on');
-  currentTab = t;
-}
-
-// ── LANGUAGE ──────────────────────────────────────────
-const TR = {
-  en:{
-    dashboard:'Dashboard',shift:'Shift',gallery:'Gallery',receipts:'Receipts',recipes:'Recipes',closeout:'Closeout',join:'Join',
-    'dash-title':'TONIGHT\'S OVERVIEW','k1':'Today\'s Sales','k2':'Weekly Revenue','k3':'Expenses','k4':'Staff On Clock','k4-sub':'of 5 scheduled',
-    'weekly-title':'WEEKLY SALES','sellers-title':'TOP SELLERS','alerts-title':'ALERTS & REMINDERS','staff-status-title':'STAFF STATUS','res-title':'TONIGHT\'S RESERVATIONS',
-    'stab-s-lbl':'STAFF','stab-o-lbl':'OWNER','br-title':'TONIGHT\'S SHIFT BRIEFING','br-from':'FROM THE OWNER','br-res':'RESERVATIONS','br-spec':'SPECIALS & 86\'S',
-    'br-confirm-btn-unread':'✓ CONFIRM YOU\'VE READ THIS','br-confirm-btn-read':'✓ BRIEFING CONFIRMED',
-    'clockin-title':'⏱️ CLOCK IN / OUT','select-lbl':'SELECT YOUR NAME',
-    'gallery-title':'NIGHT GALLERY','gallery-hint':'TAP A PHOTO TO EDIT & DOWNLOAD','add-photo-lbl':'ADD PHOTO','add-photo-sub':'Staff takes photos during shift',
-    'back-lbl':'BACK','wm-note':'Preview with CantinaPro watermark','dl-btn':'⬇️ DOWNLOAD WITH LOGO','cap-btn':'✨ GENERATE AI CAPTION','copy-btn':'COPY',
-    'receipts-title':'RECEIPT SCANNER','scan-title':'📸 SCAN RECEIPT WITH AI','scan-upload-lbl':'TAKE OR UPLOAD PHOTO','scan-upload-sub':'Photo of any vendor receipt',
-    'scan-action-btn':'✨ ANALYZE RECEIPT WITH AI','r-vendor-lbl':'Vendor','r-date-lbl':'Date','r-cat-lbl':'Category','r-total-lbl':'TOTAL',
-    'log-btn':'✓ LOG THIS RECEIPT','scan-again-btn':'Scan again','rlog-title':'RECEIPT LOG','rlog-total-lbl':'Total Spent','rlog-count-lbl':'Receipts',
-    'recipes-title':'RECIPE BOOK','recipe-back-lbl':'BACK','rd-cost-lbl':'Cost','rd-price-lbl':'Price','rd-margin-lbl':'Margin','rd-time-lbl':'Time',
-    'rd-ing-title':'INGREDIENTS','rd-steps-title':'STEPS',
-    'closeout-title':'END OF NIGHT','checklist-title':'CLOSING CHECKLIST','checklist-sub':'Staff must complete before submitting closeout',
-    'closeout-form-title':'END OF NIGHT CLOSEOUT','lbl-bar':'Bar Sales ($)','lbl-food':'Food Sales ($)','lbl-cash':'Cash Collected ($)',
-    'lbl-cards':'Card Sales ($)','lbl-tips':'Tips Total ($)','lbl-comps':'Comps & Voids ($)','lbl-staff':'Closing Staff','lbl-notes':'Notes / Incidents',
-    'join-title':'JOIN CANTINAPRO','join-founding':'FOUNDING MEMBER PRICE','join-mo':'/month · locked forever','join-after':'After launch $99/mo — you never change',
-    'join-spots':'founding spots remaining','join-btn':'🔒 LOCK IN MY SPOT — $50/MO','join-note':'🔒 No contracts · Cancel anytime · Secure via Stripe',
-    'join-included':'WHAT\'S INCLUDED',
-    'f1':'Shift briefings & reservations','f2':'Staff clock in / out','f3':'AI receipt scanner','f4':'Recipe book with profit margins',
-    'f5':'Watermarked gallery + AI captions','f6':'End of night checklist & closeout','f7':'Fully bilingual EN/ES','f8':'Referral program — earn $20/mo per bar',
-    's1-status':'On clock','s2-status':'On clock','s3-status':'Off','s4-status':'Off','s5-status':'Off',
-    's1-read':'Read','s2-read':'Read','s3-read':'Unread','s4-read':'Unread','s5-read':'Unread',
-    'hdr-sub':'BAR MANAGEMENT SYSTEM','sp-desc':'Your bar. Your data. Your way.<br/>Shift briefings, staff clock-in, AI receipts, recipe book, night gallery — all in one app.',
-    'sp-badge':'⭐ FOUNDING MEMBER HOLLA — $50/MO','sp-btn':'SEE THE APP →','sp-note':'Bilingual EN/ES · Cancel anytime · cantinapro.app',
-    'rf-all':'All','rf-sig':'Signature','rf-cls':'Classic','rf-pre':'Premium'
-  },
-  es:{
-    dashboard:'Inicio',shift:'Turno',gallery:'Galería',receipts:'Recibos',recipes:'Recetas',closeout:'Cierre',join:'Únete',
-    'dash-title':'RESUMEN DE HOY','k1':'Ventas Hoy','k2':'Ingresos Semana','k3':'Gastos','k4':'Personal En Turno','k4-sub':'de 5 programados',
-    'weekly-title':'VENTAS SEMANALES','sellers-title':'LO MÁS VENDIDO','alerts-title':'ALERTAS','staff-status-title':'ESTADO DEL PERSONAL','res-title':'RESERVACIONES DE HOY',
-    'stab-s-lbl':'PERSONAL','stab-o-lbl':'DUEÑO','br-title':'BRIEFING DE HOY EN LA NOCHE','br-from':'DEL DUEÑO','br-res':'RESERVACIONES','br-spec':'ESPECIALES Y 86\'S',
-    'br-confirm-btn-unread':'✓ CONFIRMAR QUE LEÍSTE','br-confirm-btn-read':'✓ BRIEFING CONFIRMADO',
-    'clockin-title':'⏱️ MARCAR ENTRADA/SALIDA','select-lbl':'SELECCIONA TU NOMBRE',
-    'gallery-title':'GALERÍA NOCTURNA','gallery-hint':'TOCA UNA FOTO PARA EDITAR','add-photo-lbl':'AÑADIR FOTO','add-photo-sub':'El personal toma fotos durante el turno',
-    'back-lbl':'VOLVER','wm-note':'Vista previa con marca de agua','dl-btn':'⬇️ DESCARGAR CON LOGO','cap-btn':'✨ GENERAR SUBTÍTULO IA','copy-btn':'COPIAR',
-    'receipts-title':'ESCÁNER DE RECIBOS','scan-title':'📸 ESCANEAR RECIBO CON IA','scan-upload-lbl':'TOMAR O SUBIR FOTO','scan-upload-sub':'Foto de cualquier recibo de proveedor',
-    'scan-action-btn':'✨ ANALIZAR RECIBO CON IA','r-vendor-lbl':'Proveedor','r-date-lbl':'Fecha','r-cat-lbl':'Categoría','r-total-lbl':'TOTAL',
-    'log-btn':'✓ REGISTRAR EN EL LOG','scan-again-btn':'Volver a escanear','rlog-title':'REGISTRO DE RECIBOS','rlog-total-lbl':'Total Gastado','rlog-count-lbl':'Recibos',
-    'recipes-title':'LIBRO DE RECETAS','recipe-back-lbl':'VOLVER','rd-cost-lbl':'Costo','rd-price-lbl':'Precio','rd-margin-lbl':'Margen','rd-time-lbl':'Tiempo',
-    'rd-ing-title':'INGREDIENTES','rd-steps-title':'PASOS',
-    'closeout-title':'CIERRE DE NOCHE','checklist-title':'LISTA DE CIERRE','checklist-sub':'El personal debe completarla antes del cierre',
-    'closeout-form-title':'CIERRE DE NOCHE','lbl-bar':'Ventas del Bar ($)','lbl-food':'Ventas de Comida ($)','lbl-cash':'Efectivo Recibido ($)',
-    'lbl-cards':'Ventas con Tarjeta ($)','lbl-tips':'Total de Propinas ($)','lbl-comps':'Cortesías ($)','lbl-staff':'Personal de Cierre','lbl-notes':'Notas / Incidentes',
-    'join-title':'ÚNETE A CANTINAPRO','join-founding':'PRECIO DE MIEMBRO FUNDADOR','join-mo':'/mes · bloqueado para siempre','join-after':'Después $99/mes — nunca cambias',
-    'join-spots':'lugares fundadores restantes','join-btn':'🔒 ASEGURAR MI LUGAR — $50/MES','join-note':'🔒 Sin contratos · Cancela cuando quieras',
-    'join-included':'QUÉ INCLUYE',
-    'f1':'Briefings de turno y reservaciones','f2':'Registro de entrada/salida del personal','f3':'Escáner de recibos con IA','f4':'Libro de recetas con márgenes',
-    'f5':'Galería con marca de agua + subtítulos IA','f6':'Lista de cierre de noche','f7':'Completamente bilingüe EN/ES','f8':'Programa de referidos — $20/mes por referido',
-    's1-status':'En turno','s2-status':'En turno','s3-status':'Fuera','s4-status':'Fuera','s5-status':'Fuera',
-    's1-read':'Leyó','s2-read':'Leyó','s3-read':'Sin leer','s4-read':'Sin leer','s5-read':'Sin leer',
-    'hdr-sub':'SISTEMA DE GESTIÓN DE BAR','sp-desc':'Tu bar. Tus datos. Tu manera.<br/>Briefings de turno, personal, recibos con IA, recetas, galería — todo en una app.',
-    'sp-badge':'⭐ OFERTA DE MIEMBRO FUNDADOR — $50/MES','sp-btn':'VER LA APP →','sp-note':'Bilingüe EN/ES · Cancela cuando quieras · cantinapro.app',
-    'rf-all':'Todos','rf-sig':'Signature','rf-cls':'Clásico','rf-pre':'Premium'
+  const {data:{session}} = await db.auth.getSession();
+  if(session){
+    state.user = session.user;
+    await loadBar();
   }
-};
+  state.appLoading = false;
+  render();
 
-function setLang(l){
-  lang = l;
-  document.getElementById('lb-en').classList.toggle('on', l==='en');
-  document.getElementById('lb-es').classList.toggle('on', l==='es');
-  const t = TR[l];
-  Object.keys(t).forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.innerHTML = t[id];
+  db.auth.onAuthStateChange(async (event, session) => {
+    if(session){
+      state.user = session.user;
+      await loadBar();
+    } else {
+      state.user = null; state.bar = null;
+    }
+    render();
   });
-  // nav labels
-  ['dashboard','shift','gallery','receipts','recipes','closeout','join'].forEach(tab=>{
-    const el = document.getElementById('nl-'+tab);
-    if(el && t[tab]) el.textContent = t[tab];
-  });
-  // splash
-  document.getElementById('sp-desc').innerHTML = t['sp-desc'];
-  // update confirm btn
-  updateConfirmBtn();
-  // re-render recipes
-  renderRecipes();
-  // re-render checklist
-  renderChecklist();
 }
 
-// ── SHIFT ─────────────────────────────────────────────
-function setShiftView(v){
-  shiftView = v;
-  document.getElementById('shift-staff').style.display = v==='staff'?'block':'none';
-  document.getElementById('shift-owner').style.display = v==='owner'?'block':'none';
-  document.getElementById('stab-staff').classList.toggle('on', v==='staff');
-  document.getElementById('stab-owner').classList.toggle('on', v==='owner');
-}
-
-function confirmBriefing(){
-  if(selectedStaff && !briefingRead.includes(selectedStaff)){
-    briefingRead.push(selectedStaff);
-    updateConfirmBtn();
-    updateClockAction();
+async function loadBar(){
+  const {data} = await db.from('bars').select('*').eq('owner_email', state.user.email).single();
+  if(data){
+    state.bar = data;
+    await Promise.all([loadStaff(), loadSales(), loadInventory(), loadPhotos()]);
   }
 }
 
-function updateConfirmBtn(){
-  const btn = document.getElementById('confirm-btn');
-  if(!btn) return;
-  const L = lang==='es';
-  if(selectedStaff && briefingRead.includes(selectedStaff)){
-    btn.className='conbtn read';
-    btn.textContent = L?'✓ BRIEFING CONFIRMADO':'✓ BRIEFING CONFIRMED';
+async function loadStaff(){
+  if(!state.bar) return;
+  const {data} = await db.from('staff').select('*').eq('bar_id', state.bar.id).order('created_at');
+  state.staff = data||[];
+}
+async function loadSales(){
+  if(!state.bar) return;
+  const {data} = await db.from('sales').select('*').eq('bar_id', state.bar.id).order('created_at', {ascending:false}).limit(30);
+  state.sales = data||[];
+}
+async function loadInventory(){
+  if(!state.bar) return;
+  const {data} = await db.from('inventory').select('*').eq('bar_id', state.bar.id).order('name');
+  state.inventory = data||[];
+}
+async function loadPhotos(){
+  if(!state.bar) return;
+  const {data} = await db.from('photos').select('*').eq('bar_id', state.bar.id).order('created_at',{ascending:false}).limit(50);
+  state.photos = data||[];
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────────────
+async function handleAuth(){
+  state.authError=''; state.authLoading=true; render();
+  const email = state.loginEmail.trim();
+  const password = state.loginPassword.trim();
+
+  if(state.authMode==='login'){
+    const {data,error} = await db.auth.signInWithPassword({email,password});
+    if(error){ state.authError=error.message; state.authLoading=false; render(); return; }
   } else {
-    btn.className='conbtn unread';
-    btn.textContent = L?'✓ CONFIRMAR QUE LEÍSTE':'✓ CONFIRM YOU\'VE READ THIS';
+    if(!state.loginBarName.trim()){ state.authError='Bar name is required'; state.authLoading=false; render(); return; }
+    const {data,error} = await db.auth.signUp({email,password});
+    if(error){ state.authError=error.message; state.authLoading=false; render(); return; }
+    if(data.user){
+      await db.from('bars').insert({
+        name: state.loginBarName.trim(),
+        location: state.loginLocation.trim(),
+        owner_email: email,
+      });
+    }
   }
+  state.authLoading=false; render();
 }
 
-function selectStaff(id){
-  selectedStaff = id;
-  document.querySelectorAll('.spick').forEach((el,i)=>{
-    el.classList.toggle('sel', i+1===id);
+async function logout(){
+  await db.auth.signOut();
+  state.user=null; state.bar=null; state.staff=[]; state.sales=[]; state.inventory=[]; state.photos=[];
+  state.checklist={}; state.closeoutSubmitted=false;
+  render();
+}
+
+// ── STAFF ──────────────────────────────────────────────────────────────────
+async function saveStaff(){
+  if(!state.newStaff.name||!state.bar) return;
+  await db.from('staff').insert({bar_id:state.bar.id,...state.newStaff});
+  state.newStaff={name:'',role:'',pin:''};
+  state.showStaffModal=false;
+  await loadStaff(); render();
+}
+async function deleteStaff(id){
+  await db.from('staff').delete().eq('id',id);
+  await loadStaff(); render();
+}
+
+// ── SALES ──────────────────────────────────────────────────────────────────
+async function saveSale(){
+  if(!state.bar) return;
+  await db.from('sales').insert({bar_id:state.bar.id,...state.newSale});
+  state.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};
+  state.showSaleModal=false;
+  await loadSales(); render();
+}
+
+// ── INVENTORY ──────────────────────────────────────────────────────────────
+async function saveInv(){
+  if(!state.newInv.name||!state.bar) return;
+  await db.from('inventory').insert({bar_id:state.bar.id,...state.newInv,stock:parseFloat(state.newInv.stock)||0,par_level:parseFloat(state.newInv.par_level)||0});
+  state.newInv={name:'',category:'',unit:'',stock:'',par_level:''};
+  state.showInvModal=false;
+  await loadInventory(); render();
+}
+async function deleteInv(id){
+  await db.from('inventory').delete().eq('id',id);
+  await loadInventory(); render();
+}
+async function updateStock(id, newStock){
+  await db.from('inventory').update({stock:newStock,updated_at:new Date()}).eq('id',id);
+  await loadInventory(); render();
+}
+
+// ── CHECKLIST ──────────────────────────────────────────────────────────────
+function toggleCheck(item){
+  state.checklist[item]=!state.checklist[item];
+  render();
+}
+async function submitCloseout(){
+  const all = ALL_ITEMS;
+  if(all.filter(i=>state.checklist[i]).length < all.length) return;
+  if(!state.bar) return;
+  await db.from('checklist_logs').insert({
+    bar_id: state.bar.id,
+    completed_by: state.newSale.submitted_by||'Manager',
+    items_completed: state.checklist,
   });
-  updateConfirmBtn();
-  updateClockAction();
+  state.closeoutSubmitted=true; render();
 }
 
-function updateClockAction(){
-  const wrap = document.getElementById('clock-action');
-  const L = lang==='es';
-  if(!selectedStaff){
-    wrap.innerHTML=`<button class="cbtn dis">${L?'SELECCIONA TU NOMBRE':'SELECT YOUR NAME'}</button>`;
-    return;
+// ── PHOTOS ─────────────────────────────────────────────────────────────────
+async function handlePhotoUpload(e){
+  const files = Array.from(e.target.files);
+  for(const file of files){
+    const reader = new FileReader();
+    reader.onload = async ev => {
+      await db.from('photos').insert({
+        bar_id: state.bar.id,
+        label: state.photoNote||file.name,
+        tag: state.photoTag,
+        staff_name: '',
+        url: ev.target.result,
+        created_at: new Date(),
+      });
+      await loadPhotos(); render();
+    };
+    reader.readAsDataURL(file);
   }
-  const needsRead = !briefingRead.includes(selectedStaff);
-  const isIn = clockedIn.includes(selectedStaff);
-  if(needsRead){
-    wrap.innerHTML=`<div class="mustread"><strong style="display:block;font-family:'Bebas Neue',cursive;letter-spacing:1px;margin-bottom:4px">⚠️ ${L?'LEE EL BRIEFING PRIMERO':'READ BRIEFING FIRST'}</strong>${L?'Sube y confirma que leíste el briefing.':'Scroll up and confirm you\'ve read the shift briefing.'}</div><button class="cbtn dis">${L?'LEE EL BRIEFING':'READ BRIEFING FIRST'}</button>`;
-    return;
-  }
-  if(isIn){
-    wrap.innerHTML=`<div style="text-align:center;margin-bottom:12px"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)">CLOCKED IN</div><div style="font-family:'Bebas Neue',cursive;font-size:28px;color:var(--green)">ACTIVE</div></div><button class="cbtn out" onclick="clockOut()">${L?'⏹ FINALIZAR TURNO':'⏹ CLOCK OUT'}</button>`;
-  } else {
-    wrap.innerHTML=`<button class="cbtn in" onclick="clockIn()">${L?'▶ INICIAR TURNO':'▶ CLOCK IN'}</button>`;
-  }
+  state.photoNote=''; e.target.value='';
 }
 
-function clockIn(){
-  if(selectedStaff && !clockedIn.includes(selectedStaff)){
-    clockedIn.push(selectedStaff);
-    const statusEl = document.getElementById('spick-'+selectedStaff+'-status');
-    if(statusEl){statusEl.className='spick-status in';statusEl.textContent='● ON CLOCK';}
-    document.getElementById('clocked-count').textContent = clockedIn.length;
-    updateClockAction();
-  }
-}
-
-function clockOut(){
-  if(selectedStaff){
-    clockedIn = clockedIn.filter(id=>id!==selectedStaff);
-    const statusEl = document.getElementById('spick-'+selectedStaff+'-status');
-    if(statusEl){statusEl.className='spick-status out';statusEl.textContent='○ OFF';}
-    document.getElementById('clocked-count').textContent = clockedIn.length;
-    updateClockAction();
-  }
-}
-
-// ── GALLERY ───────────────────────────────────────────
-function openPhoto(idx){
-  currentPhoto = PHOTOS[idx];
-  currentCaption = null;
-  document.getElementById('gallery-grid').style.display='none';
-  document.getElementById('gallery-detail').style.display='block';
-  document.getElementById('detail-emoji').textContent = currentPhoto.emoji;
-  document.getElementById('detail-label').textContent = currentPhoto.label;
-  document.getElementById('cap-box').style.display='none';
-  document.getElementById('cap-spinner').style.display='none';
-}
-
-function closePhoto(){
-  document.getElementById('gallery-grid').style.display='block';
-  document.getElementById('gallery-detail').style.display='none';
-}
-
-async function generateCaption(){
-  if(!currentPhoto) return;
-  document.getElementById('cap-spinner').style.display='block';
-  document.getElementById('cap-box').style.display='none';
+async function generateCaption(photo){
+  state.generatingCaption=true; state.photoCaption=null; render();
   try{
     const res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
-        messages:[{role:'user',content:`Write a fun engaging Instagram caption for a bar. The photo shows: "${currentPhoto.label}" taken by ${currentPhoto.staff}. Make it authentic, include 1-2 emojis, end with 3-4 hashtags. Under 150 chars before hashtags.`}]})
+        messages:[{role:'user',content:`Write a fun Instagram caption for ${state.bar?.name||'our bar'}. Photo: "${photo.label}". Include 1-2 emojis and 3-4 hashtags. Under 150 chars before hashtags.`}]})
     });
     const data = await res.json();
-    currentCaption = data.content?.find(b=>b.type==='text')?.text||'Could not generate caption.';
-  }catch{currentCaption='Could not generate caption. Try again.';}
-  document.getElementById('cap-spinner').style.display='none';
-  document.getElementById('cap-text').textContent = currentCaption;
-  document.getElementById('cap-box').style.display='block';
+    state.photoCaption = data.content?.find(b=>b.type==='text')?.text||'Could not generate.';
+  }catch{ state.photoCaption='Could not generate caption.'; }
+  state.generatingCaption=false; render();
 }
 
-function copyCaption(){
-  if(currentCaption) navigator.clipboard?.writeText(currentCaption);
-  document.getElementById('copy-btn').textContent = lang==='es'?'¡COPIADO!':'COPIED!';
-  setTimeout(()=>{ document.getElementById('copy-btn').textContent = lang==='es'?'COPIAR':'COPY'; },2000);
+// ── TRANSLATIONS ───────────────────────────────────────────────────────────
+const T = {
+  en:{dashboard:'Dashboard',shift:'Shift',gallery:'Gallery',inventory:'Inventory',recipes:'Recipes',closeout:'Closeout',
+    addSale:'Log Sales',addStaff:'Add Staff',addItem:'Add Item',save:'Save',cancel:'Cancel',submit:'Submit',
+    todaySales:"Today's Sales",weekSales:'Weekly Revenue',staffCount:'Staff',lowStock:'Low Stock',
+    login:'LOG IN',signup:'SIGN UP',email:'Email',password:'Password',barName:'Bar Name',location:'Location (City, State)',
+    loginTitle:'Welcome Back',signupTitle:'Create Your Bar',
+  },
+  es:{dashboard:'Inicio',shift:'Turno',gallery:'Galería',inventory:'Inventario',recipes:'Recetas',closeout:'Cierre',
+    addSale:'Registrar Ventas',addStaff:'Añadir Personal',addItem:'Añadir Item',save:'Guardar',cancel:'Cancelar',submit:'Enviar',
+    todaySales:'Ventas Hoy',weekSales:'Ingresos Semana',staffCount:'Personal',lowStock:'Stock Bajo',
+    login:'ENTRAR',signup:'REGISTRARSE',email:'Correo',password:'Contraseña',barName:'Nombre del Bar',location:'Ubicación (Ciudad, Estado)',
+    loginTitle:'Bienvenido',signupTitle:'Registra Tu Bar',
+  },
+};
+const t = (k) => T[state.lang][k]||k;
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function render(){
+  const root = document.getElementById('root');
+  if(state.appLoading){ root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>'; return; }
+  if(!state.user||!state.bar){ root.innerHTML = renderAuth(); bindAuth(); return; }
+  root.innerHTML = renderApp();
+  bindApp();
 }
 
-// ── RECEIPTS ──────────────────────────────────────────
-function handleReceiptFile(e){
-  const file = e.target.files[0]; if(!file) return;
-  const url = URL.createObjectURL(file);
-  document.getElementById('upload-zone').style.display='none';
-  document.getElementById('scan-preview-wrap').style.display='block';
-  document.getElementById('scan-preview-img').src = url;
-  document.getElementById('scan-btn').style.display='block';
-  document.getElementById('scan-result').style.display='none';
-  document.getElementById('scan-error').style.display='none';
-  const reader = new FileReader();
-  reader.onload=()=>{ receiptBase64 = reader.result.split(',')[1]; };
-  reader.readAsDataURL(file);
+function renderAuth(){
+  const isLogin = state.authMode==='login';
+  return `
+  <div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab ${isLogin?'on':''}" onclick="state.authMode='login';render()">${t('login')}</button>
+        <button class="auth-tab ${!isLogin?'on':''}" onclick="state.authMode='signup';render()">${t('signup')}</button>
+      </div>
+      <div class="auth-title">${isLogin?t('loginTitle'):t('signupTitle')}</div>
+      ${state.authError?`<div class="auth-err">${state.authError}</div>`:''}
+      ${!isLogin?`
+        <div class="field"><label>${t('barName')}</label><input type="text" placeholder="Local Cantina" value="${state.loginBarName}" oninput="state.loginBarName=this.value"/></div>
+        <div class="field"><label>${t('location')}</label><input type="text" placeholder="Oak Lawn, IL" value="${state.loginLocation}" oninput="state.loginLocation=this.value"/></div>
+      `:''}
+      <div class="field"><label>${t('email')}</label><input type="email" placeholder="owner@mybar.com" value="${state.loginEmail}" oninput="state.loginEmail=this.value"/></div>
+      <div class="field"><label>${t('password')}</label><input type="password" placeholder="••••••••" value="${state.loginPassword}" oninput="state.loginPassword=this.value"/></div>
+      <button class="auth-btn" onclick="handleAuth()" ${state.authLoading?'disabled':''}>${state.authLoading?'...':(isLogin?t('login'):t('signup'))}</button>
+      <div class="auth-note">${isLogin?'New bar? Click SIGN UP above':'Already have an account? Click LOG IN above'}</div>
+    </div>
+    <div style="margin-top:20px;font-size:12px;color:var(--muted)">
+      Not ready to commit? <a href="${STRIPE_LINK}" target="_top" style="color:var(--lcg)">View founding member offer →</a>
+    </div>
+  </div>`;
 }
 
-function clearReceipt(){
-  receiptBase64=null;
-  document.getElementById('upload-zone').style.display='block';
-  document.getElementById('scan-preview-wrap').style.display='none';
-  document.getElementById('scan-btn').style.display='none';
-  document.getElementById('scan-result').style.display='none';
-  document.getElementById('scan-error').style.display='none';
-  document.getElementById('receipt-file').value='';
-}
+function renderApp(){
+  const L = state.lang==='es';
+  const todaySales = state.sales[0] ? (parseFloat(state.sales[0].bar_sales||0)+parseFloat(state.sales[0].food_sales||0)) : 0;
+  const weekSales = state.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
+  const lowItems = state.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
+  const checkedCount = ALL_ITEMS.filter(i=>state.checklist[i]).length;
+  const pct = Math.round((checkedCount/ALL_ITEMS.length)*100);
+  const allDone = checkedCount===ALL_ITEMS.length;
 
-async function scanReceipt(){
-  if(!receiptBase64) return;
-  document.getElementById('scan-spinner').style.display='block';
-  document.getElementById('scan-btn').style.display='none';
-  document.getElementById('scan-error').style.display='none';
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:receiptBase64}},
-          {type:'text',text:'You are a receipt scanner for a bar. Extract: vendor, date, category (Spirits/Beer/Wine/Food/Supplies), total amount, and top line items. Respond ONLY with valid JSON: {"vendor":"","date":"","category":"","total":0,"items":[{"name":"","amount":0}]}. If not a receipt, return {"error":"Not a receipt"}.'}
-        ]}]})
-    });
-    const data = await res.json();
-    const text = data.content?.find(b=>b.type==='text')?.text||'';
-    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
-    if(parsed.error){
-      document.getElementById('scan-error').textContent=parsed.error;
-      document.getElementById('scan-error').style.display='block';
-    } else {
-      document.getElementById('r-vendor').textContent=parsed.vendor||'';
-      document.getElementById('r-date').textContent=parsed.date||'';
-      document.getElementById('r-cat').textContent=parsed.category||'';
-      document.getElementById('r-total').textContent='$'+(parsed.total||0).toFixed(2);
-      const itemsEl=document.getElementById('r-items');
-      itemsEl.innerHTML=(parsed.items||[]).map(i=>`<div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--s1);border-radius:4px;margin-bottom:4px;font-size:12px"><div>${i.name}</div><div style="font-family:'Share Tech Mono',monospace">$${(i.amount||0).toFixed(2)}</div></div>`).join('');
-      document.getElementById('scan-result').style.display='block';
-      window._scanResult=parsed;
-    }
-  }catch{
-    document.getElementById('scan-error').textContent='Could not read receipt. Try a clearer photo.';
-    document.getElementById('scan-error').style.display='block';
-  }
-  document.getElementById('scan-spinner').style.display='none';
-}
+  const TABS = [
+    {key:'dashboard',icon:'📊',label:L?'Inicio':'Dashboard'},
+    {key:'shift',icon:'⏰',label:L?'Turno':'Shift'},
+    {key:'gallery',icon:'📸',label:L?'Galería':'Gallery'},
+    {key:'inventory',icon:'📦',label:L?'Inventario':'Inventory'},
+    {key:'recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
+    {key:'closeout',icon:'✅',label:L?'Cierre':'Closeout'},
+  ];
 
-function logReceipt(){
-  if(!window._scanResult) return;
-  const r=window._scanResult;
-  receiptLog.unshift({vendor:r.vendor,category:r.category,total:r.total,date:'Today'});
-  updateReceiptLog();
-  clearReceipt();
-  window._scanResult=null;
-}
-
-function updateReceiptLog(){
-  const total=receiptLog.reduce((a,r)=>a+r.total,0);
-  document.getElementById('rlog-total').textContent='$'+total.toLocaleString();
-  document.getElementById('rlog-count').textContent=receiptLog.length;
-  document.getElementById('rlog-list').innerHTML=receiptLog.map(r=>`<div class="rlog-item"><div style="font-size:16px">🧾</div><div style="flex:1"><div style="font-weight:700;font-size:13px">${r.vendor}</div><div style="font-size:11px;color:var(--muted)">${r.category} · ${r.date}</div></div><div class="mono" style="color:var(--lcg);font-weight:700">$${r.total}</div></div>`).join('');
-}
-
-// ── RECIPES ───────────────────────────────────────────
-function setRecipeFilter(f){
-  recipeFilter=f;
-  ['All','Signature','Classic','Premium'].forEach(fi=>{
-    const el=document.getElementById('rf-'+fi.toLowerCase().substring(0,3));
-    if(el) el.classList.toggle('on',fi===f);
-  });
-  renderRecipes();
-}
-
-function filterRecipes(){ renderRecipes(); }
-
-function renderRecipes(){
-  const search=(document.getElementById('recipe-search')||{}).value||'';
-  const filtered=RECIPES.filter(r=>{
-    const ms=r.name.toLowerCase().includes(search.toLowerCase())||r.ingredients.some(i=>i.name.toLowerCase().includes(search.toLowerCase()));
-    const mf=recipeFilter==='All'||r.tag===recipeFilter;
+  const filteredRecipes = RECIPES.filter(r=>{
+    const ms = r.name.toLowerCase().includes(state.recipeSearch.toLowerCase());
+    const mf = state.recipeFilter==='All'||r.tag===state.recipeFilter;
     return ms&&mf;
   });
-  const L=lang==='es';
-  document.getElementById('recipe-items').innerHTML=filtered.map(r=>`
-    <div class="ritem" onclick="openRecipe(${r.id})">
-      <div class="ritem-top">
-        <div class="ritem-name">${r.emoji} ${r.name}</div>
-        <div class="rmargin">${Math.round(((r.price-r.cost)/r.price)*100)}% ${L?'margen':'margin'}</div>
+
+  return `
+  <div class="app">
+    <header class="hdr">
+      <div>
+        <div class="hdr-logo">CantinaPro</div>
+        <div class="hdr-bar">${state.bar.name} · ${state.bar.location||''}</div>
       </div>
-      <div class="ritem-meta">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
-    </div>
-  `).join('');
+      <div class="hdr-r">
+        <div class="lang-wrap">
+          <button class="lb ${!L?'on':''}" onclick="state.lang='en';render()">EN</button>
+          <button class="lb ${L?'on':''}" onclick="state.lang='es';render()">ES</button>
+        </div>
+        <button class="logout-btn" onclick="logout()">OUT</button>
+        <div class="sdot"></div>
+      </div>
+    </header>
+
+    <main class="main">
+
+      ${state.tab==='dashboard'?`
+        <div class="sec-title">${L?'RESUMEN DE HOY':'TONIGHT\'S OVERVIEW'}</div>
+        <div class="kpi-grid">
+          <div class="kpi lc"><div class="kl">${t('todaySales')}</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${state.sales.length} entries logged</div></div>
+          <div class="kpi g"><div class="kl">${t('weekSales')}</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
+          <div class="kpi b"><div class="kl">${t('staffCount')}</div><div class="kv">${state.staff.length}</div><div class="kd">${state.clockedIn.length} clocked in</div></div>
+          <div class="kpi r"><div class="kl">${t('lowStock')}</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
+        </div>
+        <button class="action-btn red" onclick="state.showSaleModal=true;render()" style="margin-bottom:12px">+ ${t('addSale')}</button>
+        <div class="card">
+          <div class="ct">${L?'VENTAS RECIENTES':'RECENT SALES'}</div>
+          ${state.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above to add your first entry.</div>`:''}
+          ${state.sales.slice(0,7).map(s=>`
+            <div class="row">
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:13px">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
+                <div style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
+              </div>
+              <div style="font-size:11px;color:var(--muted);text-align:right">
+                <div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div>
+                <div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        ${lowItems>0?`<div style="background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);border-radius:8px;padding:12px;font-size:13px;color:var(--red);margin-bottom:12px">⚠️ ${lowItems} item${lowItems!==1?'s':''} below par level — check inventory</div>`:''}
+      `:''}
+
+      ${state.tab==='shift'?`
+        <div class="sec-title">${L?'GESTIÓN DE TURNO':'SHIFT MANAGEMENT'}</div>
+        <div class="liveclock"><div class="lct" id="clock-display">${state.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${state.bar.name}</div></div>
+        <div class="card">
+          <div class="ct">${L?'BRIEFING DEL TURNO':'SHIFT BRIEFING'}</div>
+          <div class="brtext">${L?'Bienvenidos al turno de hoy. Asegúrense de revisar el inventario, atender a los clientes con reservación y reportar cualquier incidente al manager.':'Welcome to today\'s shift. Make sure to check inventory, attend to reservation guests, and report any incidents to the manager.'}</div>
+        </div>
+        <div class="card">
+          <div class="ct" style="margin-bottom:10px">${L?'ENTRADA/SALIDA DE PERSONAL':'STAFF CLOCK IN/OUT'}</div>
+          ${state.staff.length===0?`<div class="empty-state">No staff added yet.<br/><button class="action-btn blue" onclick="state.tab='shift';state.showStaffModal=true;render()" style="margin-top:10px">+ Add Staff</button></div>`:''}
+          <div class="staff-grid">
+            ${state.staff.map(s=>{
+              const isIn = state.clockedIn.includes(s.id);
+              const color = COLORS[state.staff.indexOf(s)%COLORS.length];
+              return `<div class="staff-pick ${state.selectedStaff===s.id?'on':''}" onclick="state.selectedStaff='${s.id}';render()">
+                <div class="av" style="background:${color}22;color:${color}">${s.name.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
+                <div style="font-weight:700;font-size:13px;margin-top:6px">${s.name}</div>
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${s.role}</div>
+                <div style="font-size:9px;font-weight:700;margin-top:3px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
+              </div>`;
+            }).join('')}
+          </div>
+          ${state.selectedStaff?(()=>{
+            const isIn = state.clockedIn.includes(state.selectedStaff);
+            return isIn
+              ? `<button class="action-btn red" onclick="state.clockedIn=state.clockedIn.filter(id=>id!=='${state.selectedStaff}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>`
+              : `<button class="action-btn green" onclick="state.clockedIn=[...state.clockedIn,'${state.selectedStaff}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`;
+          })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>${L?'SELECCIONA TU NOMBRE':'SELECT YOUR NAME'}</button>`}
+        </div>
+        <button class="action-btn blue" onclick="state.showStaffModal=true;render()">+ ${t('addStaff')}</button>
+      `:''}
+
+      ${state.tab==='gallery'?`
+        <div class="sec-title">📸 ${L?'GALERÍA NOCTURNA':'NIGHT GALLERY'}</div>
+        <div class="card">
+          <div class="ct">${L?'SUBIR FOTO':'ADD PHOTO'}</div>
+          <div class="field"><label>${L?'Etiqueta':'Tag'}</label>
+            <select onchange="state.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none;">
+              ${['Social Media','Gallery','Event','Promo','Behind the Scenes','Staff'].map(t=>`<option ${state.photoTag===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>${L?'Descripción':'Caption'}</label><input type="text" value="${state.photoNote}" oninput="state.photoNote=this.value" placeholder="${L?'¿Qué está pasando?':'What\'s happening in this shot?'}"/></div>
+          <label style="display:block;cursor:pointer">
+            <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
+            <div class="upzone"><div style="font-size:32px;margin-bottom:6px">📷</div><div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR O SUBIR FOTO':'TAKE OR UPLOAD PHOTO'}</div></div>
+          </label>
+        </div>
+        ${state.selectedPhoto?`
+          <div class="card">
+            <button onclick="state.selectedPhoto=null;state.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;margin-bottom:12px">← ${L?'VOLVER':'BACK'}</button>
+            <div style="background:var(--s2);border:1px solid var(--lc);border-radius:10px;overflow:hidden;margin-bottom:12px">
+              <div style="padding:32px;text-align:center;background:linear-gradient(135deg,#1a0008,#0a0a1a);position:relative;min-height:160px;display:flex;align-items:center;justify-content:center">
+                ${state.selectedPhoto.url?`<img src="${state.selectedPhoto.url}" style="max-width:100%;max-height:200px;border-radius:6px"/>`:`<div style="font-size:48px">📷</div>`}
+                <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border-radius:4px;padding:4px 8px">
+                  <div style="font-family:'Bebas Neue',cursive;font-size:10px;color:var(--lc)">CantinaPro</div>
+                  <div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lcg);letter-spacing:1px">${state.bar.name}</div>
+                </div>
+              </div>
+            </div>
+            <button class="action-btn" style="background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff" onclick="generateCaption(state.selectedPhoto)" ${state.generatingCaption?'disabled':''}>✨ ${L?'GENERAR SUBTÍTULO IA':'GENERATE AI CAPTION'}</button>
+            ${state.generatingCaption?'<div class="spinner"></div>':''}
+            ${state.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:8px;padding:12px;font-size:13px;line-height:1.7;margin-top:8px">${state.photoCaption}<button onclick="navigator.clipboard?.writeText('${state.photoCaption.replace(/'/g,"\\'")}');this.textContent='COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:8px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
+          </div>
+        `:`
+          <div class="photo-grid">
+            ${state.photos.map(p=>`
+              <div class="pcard" onclick="state.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};state.photoCaption=null;render()">
+                ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:32px">📷</div>'}
+                <div class="photo-overlay">
+                  <div class="photo-label">${p.label||p.tag}</div>
+                  <div class="photo-time">${new Date(p.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+              </div>
+            `).join('')}
+            ${state.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first shot above!</div>`:''}
+          </div>
+        `}
+      `:''}
+
+      ${state.tab==='inventory'?`
+        <div class="sec-title">${L?'INVENTARIO':'INVENTORY'}</div>
+        <button class="action-btn red" onclick="state.showInvModal=true;render()" style="margin-bottom:12px">+ ${t('addItem')}</button>
+        <div class="card" style="padding:0;overflow:hidden">
+          ${state.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Add your first item above.</div>`:`
+          <div style="overflow-x:auto">
+            <table class="inv-table">
+              <thead><tr><th>${L?'Artículo':'Item'}</th><th>${L?'Unidad':'Unit'}</th><th>${L?'Stock':'Stock'}</th><th>Par</th><th>${L?'Estado':'Status'}</th><th></th></tr></thead>
+              <tbody>
+                ${state.inventory.map(item=>{
+                  const st = item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
+                  return `<tr>
+                    <td><div style="font-weight:700">${item.name}</div><div style="font-size:11px;color:var(--muted)">${item.category||''}</div></td>
+                    <td style="font-size:12px;color:var(--muted)">${item.unit||''}</td>
+                    <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:4px 6px;font-size:13px;width:60px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
+                    <td style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted)">${item.par_level}</td>
+                    <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
+                    <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`}
+        </div>
+      `:''}
+
+      ${state.tab==='recipes'?`
+        <div class="sec-title">${L?'LIBRO DE RECETAS':'RECIPE BOOK'}</div>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+          <span style="color:var(--muted)">🔍</span>
+          <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;flex:1;outline:none;width:100%" placeholder="${L?'Buscar recetas...':'Search recipes...'}" value="${state.recipeSearch}" oninput="state.recipeSearch=this.value;render()"/>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${state.recipeFilter===f?'rgba(200,16,46,.12)':'var(--s2)'};border:1px solid ${state.recipeFilter===f?'var(--lc)':'var(--border)'};color:${state.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:5px 12px;border-radius:20px;cursor:pointer" onclick="state.recipeFilter='${f}';render()">${f==='All'?(L?'Todos':'All'):f}</button>`).join('')}
+        </div>
+        ${filteredRecipes.map(r=>`
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div style="font-weight:700;font-size:14px">${r.emoji} ${r.name}</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green)">${margin(r)}% ${L?'margen':'margin'}</div>
+            </div>
+            <div style="font-size:11px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
+          </div>
+          <div style="display:none;background:var(--s1);border:1px solid var(--lc);border-radius:10px;padding:14px;margin-bottom:12px;margin-top:-4px">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--red)">$${r.cost}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Costo':'Cost'}</div></div>
+              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--lcg)">$${r.price}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Precio':'Price'}</div></div>
+              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--green)">${margin(r)}%</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Margen':'Margin'}</div></div>
+              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--blue)">${r.prepTime}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Tiempo':'Time'}</div></div>
+            </div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">INGREDIENTS</div>
+            ${r.ingredients.map(i=>`<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--teal);width:50px;flex-shrink:0">${i.amount}</div><div style="font-size:13px;font-weight:600;flex:1">${i.name}</div>${i.note?`<div style="font-size:11px;color:var(--muted);font-style:italic">${i.note}</div>`:''}</div>`).join('')}
+            <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin:12px 0 8px">STEPS</div>
+            ${r.steps.map((s,i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:24px;height:24px;border-radius:50%;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:13px;color:var(--lc);flex-shrink:0">${i+1}</div><div style="font-size:13px;line-height:1.6">${s}</div></div>`).join('')}
+          </div>
+        `).join('')}
+      `:''}
+
+      ${state.tab==='closeout'?`
+        <div class="sec-title">${L?'CIERRE DE NOCHE':'END OF NIGHT'}</div>
+        <div class="card">
+          <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${L?'El personal debe completarla antes del cierre':'Staff must complete before submitting closeout'}</div>
+          <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+          ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
+            <div class="cgroup-t">${group}</div>
+            ${items.map(item=>`
+              <div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+                <div class="cbox ${state.checklist[item]?'done':''}">${state.checklist[item]?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
+                <span class="ctxt ${state.checklist[item]?'done':''}">${item}</span>
+              </div>
+            `).join('')}
+          `).join('')}
+        </div>
+        <div class="card">
+          <div class="ct">${L?'FORMULARIO DE CIERRE':'CLOSEOUT FORM'}</div>
+          ${state.closeoutSubmitted?`<div class="success-box">✓ ${L?'CIERRE ENVIADO EXITOSAMENTE':'CLOSEOUT SUBMITTED SUCCESSFULLY!'}</div>`:`
+          <div class="form-grid">
+            <div class="field"><label>${L?'Ventas del Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.bar_sales}" oninput="state.newSale.bar_sales=this.value"/></div>
+            <div class="field"><label>${L?'Ventas de Comida ($)':'Food Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.food_sales}" oninput="state.newSale.food_sales=this.value"/></div>
+            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.cash}" oninput="state.newSale.cash=this.value"/></div>
+            <div class="field"><label>${L?'Tarjeta ($)':'Card Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.card_sales}" oninput="state.newSale.card_sales=this.value"/></div>
+            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.tips}" oninput="state.newSale.tips=this.value"/></div>
+            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.comps}" oninput="state.newSale.comps=this.value"/></div>
+          </div>
+          <div class="field"><label>${L?'Personal de Cierre':'Closing Staff'}</label>
+            <select onchange="state.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none">
+              <option value="">${L?'Seleccionar':'Select staff member'}</option>
+              ${state.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>${L?'Notas':'Notes / Incidents'}</label><textarea style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;resize:vertical;min-height:60px" placeholder="${L?'Cualquier incidente o nota para el dueño...':'Any issues or notes for the owner...'}" oninput="state.newSale.notes=this.value">${state.newSale.notes}</textarea></div>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="submitCloseout()" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`COMPLETA LA LISTA PRIMERO (${ALL_ITEMS.length-checkedCount} restantes)`:`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`)}</button>
+          `}
+        </div>
+      `:''}
+
+    </main>
+
+    <nav class="bot-nav">
+      ${TABS.map(tab=>`<button class="nb ${state.tab===tab.key?'on':''}" onclick="state.tab='${tab.key}';render()"><span class="ni">${tab.icon}</span><span class="nl">${tab.label}</span></button>`).join('')}
+    </nav>
+
+    ${state.showStaffModal?`
+      <div class="modal-bg" onclick="state.showStaffModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">+ ${t('addStaff')}</div>
+          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${state.newStaff.name}" oninput="state.newStaff.name=this.value" placeholder="Maria G."/></div>
+          <div class="field"><label>${L?'Rol':'Role'}</label><input type="text" value="${state.newStaff.role}" oninput="state.newStaff.role=this.value" placeholder="Bartender"/></div>
+          <div class="field"><label>PIN</label><input type="number" value="${state.newStaff.pin}" oninput="state.newStaff.pin=this.value" placeholder="1234"/></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="state.showStaffModal=false;render()">${t('cancel')}</button>
+            <button class="btn-save" onclick="saveStaff()">${t('save')}</button>
+          </div>
+        </div>
+      </div>
+    `:''}
+
+    ${state.showInvModal?`
+      <div class="modal-bg" onclick="state.showInvModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">+ ${t('addItem')}</div>
+          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${state.newInv.name}" oninput="state.newInv.name=this.value" placeholder="Patron Silver"/></div>
+          <div class="field"><label>${L?'Categoría':'Category'}</label><input type="text" value="${state.newInv.category}" oninput="state.newInv.category=this.value" placeholder="Tequila"/></div>
+          <div class="field"><label>${L?'Unidad':'Unit'}</label><input type="text" value="${state.newInv.unit}" oninput="state.newInv.unit=this.value" placeholder="750ml, Keg, Case..."/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>${L?'Stock Actual':'Current Stock'}</label><input type="number" value="${state.newInv.stock}" oninput="state.newInv.stock=this.value"/></div>
+            <div class="field"><label>Par ${L?'Nivel':'Level'}</label><input type="number" value="${state.newInv.par_level}" oninput="state.newInv.par_level=this.value"/></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="state.showInvModal=false;render()">${t('cancel')}</button>
+            <button class="btn-save" onclick="saveInv()">${t('save')}</button>
+          </div>
+        </div>
+      </div>
+    `:''}
+
+    ${state.showSaleModal?`
+      <div class="modal-bg" onclick="state.showSaleModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
+          <div class="modal-title">+ ${t('addSale')}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.bar_sales}" oninput="state.newSale.bar_sales=this.value"/></div>
+            <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.food_sales}" oninput="state.newSale.food_sales=this.value"/></div>
+            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.cash}" oninput="state.newSale.cash=this.value"/></div>
+            <div class="field"><label>${L?'Tarjeta ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.card_sales}" oninput="state.newSale.card_sales=this.value"/></div>
+            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.tips}" oninput="state.newSale.tips=this.value"/></div>
+            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.comps}" oninput="state.newSale.comps=this.value"/></div>
+          </div>
+          <div class="field"><label>${L?'Notas':'Notes'}</label><input type="text" value="${state.newSale.notes}" oninput="state.newSale.notes=this.value" placeholder="${L?'Notas del turno...':'Shift notes...'}"/></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="state.showSaleModal=false;render()">${t('cancel')}</button>
+            <button class="btn-save" onclick="saveSale()">${t('save')}</button>
+          </div>
+        </div>
+      </div>
+    `:''}
+
+  </div>`;
 }
 
-function openRecipe(id){
-  currentRecipe=RECIPES.find(r=>r.id===id);
-  if(!currentRecipe) return;
-  const L=lang==='es';
-  document.getElementById('recipe-list-view').style.display='none';
-  document.getElementById('recipe-detail-view').style.display='block';
-  document.getElementById('rd-emoji').textContent=currentRecipe.emoji;
-  document.getElementById('rd-name').textContent=currentRecipe.name;
-  document.getElementById('rd-meta').textContent=`${currentRecipe.tag} · ${currentRecipe.glass} · ${currentRecipe.garnish}`;
-  document.getElementById('rd-cost').textContent='$'+currentRecipe.cost;
-  document.getElementById('rd-price').textContent='$'+currentRecipe.price;
-  document.getElementById('rd-margin').textContent=Math.round(((currentRecipe.price-currentRecipe.cost)/currentRecipe.price)*100)+'%';
-  document.getElementById('rd-time').textContent=currentRecipe.prepTime;
-  document.getElementById('rd-ingredients').innerHTML=currentRecipe.ingredients.map(i=>`<div class="ingrow"><div class="ingamt">${i.amount}</div><div class="ingname">${i.name}</div>${i.note?`<div class="ingnote">${i.note}</div>`:''}</div>`).join('');
-  document.getElementById('rd-steps').innerHTML=currentRecipe.steps.map((s,i)=>`<div class="steprow"><div class="stepnum">${i+1}</div><div class="steptext">${s}</div></div>`).join('');
-}
-
-function closeRecipe(){
-  document.getElementById('recipe-list-view').style.display='block';
-  document.getElementById('recipe-detail-view').style.display='none';
-}
-
-// ── CHECKLIST ─────────────────────────────────────────
-function renderChecklist(){
-  const L=lang==='es';
-  const container=document.getElementById('checklist-items');
-  let html='';
-  Object.entries(CHECKLIST).forEach(([group,items])=>{
-    html+=`<div class="cgroup-t">${group}</div>`;
-    items.forEach(item=>{
-      const done=checked[item]||false;
-      html+=`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-        <div class="cbox ${done?'done':''}">${done?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
-        <span class="ctxt ${done?'done':''}">${item}</span>
-      </div>`;
-    });
+function bindAuth(){
+  document.querySelectorAll('input').forEach(input=>{
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') handleAuth(); });
   });
-  container.innerHTML=html;
-  updateChecklistProgress();
 }
+function bindApp(){}
 
-function toggleCheck(item){
-  checked[item]=!checked[item];
-  renderChecklist();
-}
-
-function updateChecklistProgress(){
-  const all=Object.values(CHECKLIST).flat();
-  const done=all.filter(i=>checked[i]).length;
-  const pct=Math.round((done/all.length)*100);
-  document.getElementById('check-bar').style.width=pct+'%';
-  document.getElementById('check-count').textContent=`${done}/${all.length} complete — ${pct}%`;
-  const btn=document.getElementById('submit-btn');
-  const L=lang==='es';
-  if(done===all.length){
-    btn.className='subbtn ready';
-    btn.textContent=L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT';
-  } else {
-    btn.className='subbtn locked';
-    btn.textContent=L?`COMPLETA LA LISTA PRIMERO (${all.length-done} restantes)`:`COMPLETE CHECKLIST FIRST (${all.length-done} remaining)`;
-  }
-}
-
-function submitCloseout(){
-  const all=Object.values(CHECKLIST).flat();
-  const done=all.filter(i=>checked[i]).length;
-  if(done<all.length) return;
-  document.getElementById('closeout-submitted').style.display='block';
-  document.getElementById('closeout-form-inner').style.display='none';
-}
-
-// ── INIT ──────────────────────────────────────────────
-renderRecipes();
-renderChecklist();
+init();
 </script>
 </body>
 </html>
