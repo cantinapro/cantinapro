@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>CantinaPro — Bar Management App</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0f;--s1:#111118;--s2:#1a1a24;--s3:#222234;
+  --border:#2a2a3a;--gold:#f5a623;--amber:#e8820c;
+  --red:#ff4455;--green:#00e87a;--blue:#4488ff;--purple:#a855f7;--teal:#00d4aa;
+  --text:#e8e8f0;--muted:#6b6b80;--lc:#c8102e;--lcg:#d4a017;
+}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;position:relative;}
+
+/* SPLASH */
+.splash{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;transition:opacity .5s;}
+.splash.hidden{opacity:0;pointer-events:none;}
+.sp-name{font-family:'Bebas Neue',cursive;font-size:56px;letter-spacing:8px;color:var(--lc);line-height:1;}
+.sp-tagline{font-family:'Rajdhani',sans-serif;font-size:16px;color:var(--lcg);letter-spacing:3px;text-transform:uppercase;margin-top:6px;}
+.sp-div{width:60px;height:2px;background:linear-gradient(90deg,var(--lc),var(--lcg));margin:24px auto;}
+.sp-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px;max-width:320px;}
+.sp-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);border-radius:20px;padding:6px 16px;font-size:11px;color:var(--lcg);font-family:'Share Tech Mono',monospace;margin-bottom:24px;letter-spacing:1px;}
+.sp-btn{background:linear-gradient(135deg,var(--lc),#a00020);border:none;color:#fff;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;padding:16px 40px;border-radius:10px;cursor:pointer;width:100%;max-width:320px;transition:all .2s;}
+.sp-btn:hover{filter:brightness(1.1);transform:translateY(-2px);}
+.sp-note{font-size:11px;color:var(--muted);margin-top:14px;font-family:'Share Tech Mono',monospace;}
+
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.hdr-logo{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:4px;color:var(--lc);}
+.hdr-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+.hdr-r{display:flex;align-items:center;gap:10px;}
+.lang-wrap{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;padding:5px 10px;cursor:pointer;transition:all .2s;}
+.lb.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* BOTTOM NAV */
+.bot-nav{background:var(--s1);border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:100;}
+.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-top:2px solid transparent;transition:all .2s;position:relative;}
+.nb.on{color:var(--lc);border-top-color:var(--lc);}
+.ni{font-size:20px;line-height:1;}
+.nl{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.nbadge{position:absolute;top:5px;right:16%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 4px;font-weight:700;}
+
+/* MAIN */
+.main{flex:1;padding:14px;padding-bottom:74px;}
+.tab-content{display:none;}
+.tab-content.on{display:block;}
+.sec-title{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+.ct{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--muted);margin-bottom:12px;}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.lc::before{background:linear-gradient(90deg,var(--lc),var(--lcg));}
+.kpi.g::before{background:var(--green);}
+.kpi.r::before{background:var(--red);}
+.kpi.b::before{background:var(--blue);}
+.kl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.kv{font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px;line-height:1;}
+.kpi.lc .kv{color:var(--lc);}
+.kpi.g .kv{color:var(--green);}
+.kpi.r .kv{color:var(--red);}
+.kpi.b .kv{color:var(--blue);}
+.kd{font-size:11px;font-weight:600;color:var(--green);}
+.kd.dn{color:var(--red);}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;margin-bottom:4px;}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;}
+.bci{flex:1;display:flex;align-items:flex-end;width:100%;}
+.bar{width:100%;border-radius:3px 3px 0 0;min-height:4px;transition:all .3s;}
+.bar:hover{filter:brightness(1.3);}
+.bl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* ROWS */
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.row:last-child{border-bottom:none;}
+.rank{font-family:'Bebas Neue',cursive;font-size:18px;color:var(--border);width:20px;text-align:center;}
+.rank.top{color:var(--lcg);}
+.bar-wrap{flex:1;background:var(--s2);border-radius:2px;height:3px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--lc),var(--lcg));border-radius:2px;}
+.mono{font-family:'Share Tech Mono',monospace;}
+
+/* ALERTS */
+.adot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.adot.danger{background:var(--red);box-shadow:0 0 5px var(--red);}
+.adot.warn{background:var(--gold);box-shadow:0 0 5px var(--gold);}
+.adot.ok{background:var(--green);}
+
+/* PILLS */
+.pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;}
+.pill.in{background:rgba(0,232,122,.15);color:var(--green);}
+.pill.out{background:rgba(107,107,128,.15);color:var(--muted);}
+.rpill{border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;}
+.rpill.yes{background:rgba(0,232,122,.12);color:var(--green);}
+.rpill.no{background:rgba(255,68,85,.12);color:var(--red);}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;}
+
+/* SHIFT */
+.shift-toggle{display:flex;background:var(--s1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.stab{flex:1;padding:10px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
+.stab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.brhdr{padding:16px;border-radius:8px 8px 0 0;background:linear-gradient(135deg,#1a0008,#0a0a1a);}
+.brhdr-t{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;color:#fff;}
+.brhdr-s{font-size:11px;color:rgba(255,255,255,.55);font-family:'Share Tech Mono',monospace;margin-top:4px;}
+.brbody{padding:14px;background:var(--s1);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none;margin-bottom:12px;}
+.brsec-t{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px;margin-top:12px;}
+.brtext{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:6px;padding:10px;font-size:13px;line-height:1.7;}
+.rescard{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;}
+.restop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.restime{background:rgba(212,160,23,.15);color:var(--lcg);border:1px solid rgba(212,160,23,.25);border-radius:4px;padding:2px 7px;font-size:11px;font-family:'Share Tech Mono',monospace;}
+.resnote{margin-top:6px;font-size:12px;color:var(--lcg);background:rgba(212,160,23,.06);border-radius:4px;padding:5px 8px;}
+.specrow{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border-radius:6px;margin-bottom:6px;font-size:13px;}
+.spectag{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;}
+.spectag.push{background:rgba(0,232,122,.15);color:var(--green);}
+.spectag.eightysix{background:rgba(255,68,85,.15);color:var(--red);}
+.spectag.special{background:rgba(212,160,23,.15);color:var(--lcg);}
+.liveclock{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;}
+.lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
+.lcd{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;}
+.spicker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.spick{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .2s;}
+.spick:hover{border-color:var(--lc);}
+.spick.sel{background:rgba(200,16,46,.1);border-color:var(--lc);}
+.spick.clk{background:rgba(0,232,122,.06);border-color:var(--green);}
+.spick-name{font-weight:700;font-size:13px;margin-top:6px;}
+.spick-role{font-size:10px;color:var(--muted);text-transform:uppercase;}
+.spick-status{font-size:9px;font-weight:700;letter-spacing:1px;margin-top:3px;}
+.spick-status.in{color:var(--green);}
+.spick-status.out{color:var(--muted);}
+.cbtn{width:100%;padding:16px;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-bottom:8px;}
+.cbtn.in{background:linear-gradient(135deg,var(--green),#00c060);color:#000;}
+.cbtn.out{background:linear-gradient(135deg,var(--red),#cc2233);color:#fff;}
+.cbtn.dis{background:var(--s2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed;}
+.mustread{background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.25);border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px;}
+.conbtn{width:100%;padding:14px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.conbtn.unread{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.conbtn.read{background:rgba(0,232,122,.1);color:var(--green);border:1px solid rgba(0,232,122,.25);}
+.htable{width:100%;border-collapse:collapse;}
+.htable th{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);padding:8px;text-align:left;border-bottom:1px solid var(--border);}
+.htable td{padding:9px 8px;border-bottom:1px solid rgba(42,42,58,.4);font-size:12px;}
+.htable tr:last-child td{border-bottom:none;}
+
+/* GALLERY */
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pcard{border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;}
+.pcard:hover{border-color:var(--lc);transform:scale(1.02);}
+.pemoji{font-size:36px;}
+.plabel{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;text-align:center;padding:0 6px;margin-top:6px;}
+.pstaff{position:absolute;bottom:6px;left:6px;font-size:9px;color:rgba(255,255,255,.45);}
+.ptime{position:absolute;bottom:6px;right:6px;font-size:9px;color:rgba(255,255,255,.45);font-family:'Share Tech Mono',monospace;}
+.pwm{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border-radius:4px;padding:3px 6px;}
+.backbtn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:12px;padding:0;}
+.backbtn:hover{color:var(--text);}
+.wmprev{background:var(--s2);border:1px solid var(--lc);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.wminner{padding:40px 32px;text-align:center;background:linear-gradient(135deg,#1a0008,#0a0a1a);position:relative;}
+.wm-stamp{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.7);border-radius:6px;padding:5px 8px;}
+.action-btn{width:100%;padding:13px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:8px;transition:all .2s;}
+.action-btn.red{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
+.action-btn.purple{background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff;}
+.action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
+.action-btn:hover{filter:brightness(1.1);}
+.capbox{background:var(--s2);border:1px solid var(--purple);border-radius:8px;padding:12px;font-size:13px;line-height:1.7;margin-bottom:10px;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:12px auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* RECEIPTS */
+.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.upzone:hover{border-color:var(--lc);background:rgba(200,16,46,.04);}
+.rbox{background:var(--s2);border:1px solid var(--lc);border-radius:8px;padding:14px;margin-bottom:10px;}
+.rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.rrow:last-child{border-bottom:none;}
+.rkey{color:var(--muted);font-weight:600;}
+.rval{font-family:'Share Tech Mono',monospace;}
+.rval.money{color:var(--lcg);font-size:22px;font-family:'Bebas Neue',cursive;}
+.rlog-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.rlog-item:last-child{border-bottom:none;}
+
+/* RECIPES */
+.sbox{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.sbox:focus-within{border-color:var(--lc);}
+.sinput{background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;flex:1;outline:none;width:100%;}
+.frow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.fchip{background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;}
+.fchip.on{background:rgba(200,16,46,.12);border-color:var(--lc);color:var(--lc);}
+.ritem{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.ritem:hover{border-color:var(--lc);background:rgba(200,16,46,.05);}
+.ritem-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.ritem-name{font-weight:700;font-size:14px;}
+.rmargin{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green);}
+.ritem-meta{font-size:11px;color:var(--muted);}
+.rdetail{background:var(--s1);border:1px solid var(--lc);border-radius:10px;padding:16px;}
+.rdetail-name{font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:3px;margin-bottom:4px;}
+.rstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.rstat{background:var(--s2);border-radius:6px;padding:10px;text-align:center;}
+.rstat-val{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:1px;margin-bottom:2px;}
+.rstat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.ingrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.ingrow:last-child{border-bottom:none;}
+.ingamt{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0;}
+.ingname{font-size:13px;font-weight:600;flex:1;}
+.ingnote{font-size:11px;color:var(--muted);font-style:italic;}
+.steprow{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.steprow:last-child{border-bottom:none;}
+.stepnum{width:26px;height:26px;border-radius:50%;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0;}
+.steptext{font-size:13px;line-height:1.6;}
+
+/* JOIN */
+.fcta{background:linear-gradient(135deg,rgba(200,16,46,.1),rgba(212,160,23,.05));border:1px solid rgba(200,16,46,.25);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;}
+.fcta-price{font-family:'Bebas Neue',cursive;font-size:56px;color:var(--green);line-height:1;}
+.spots{display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);border-radius:8px;padding:12px;margin:12px 0;}
+.spots-n{font-family:'Bebas Neue',cursive;font-size:32px;color:var(--red);letter-spacing:2px;}
+.sfire{font-size:24px;animation:fire .6s ease infinite;}
+@keyframes fire{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.joinbtn{width:100%;padding:16px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-bottom:10px;text-decoration:none;display:block;text-align:center;}
+.joinbtn:hover{filter:brightness(1.1);transform:translateY(-2px);}
+.feat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.feat-row:last-child{border-bottom:none;}
+
+/* CHECKLIST */
+.cprog{background:var(--s2);border-radius:4px;overflow:hidden;height:6px;margin-bottom:10px;}
+.cbar{height:100%;background:var(--green);border-radius:4px;transition:width .3s;}
+.cgroup-t{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:14px;font-weight:700;}
+.citem{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.citem:last-child{border-bottom:none;}
+.cbox{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.cbox.done{background:var(--green);border-color:var(--green);}
+.ctxt{font-size:14px;font-weight:500;}
+.ctxt.done{color:var(--muted);text-decoration:line-through;}
+.subbtn{width:100%;padding:14px;border-radius:6px;border:none;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:14px;}
+.subbtn.ready{background:var(--gold);color:#000;}
+.subbtn.locked{background:var(--s2);color:var(--muted);cursor:not-allowed;border:1px solid var(--border);}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.fld label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.fld input,.fld select,.fld textarea{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--lc);}
+.fld textarea{resize:vertical;min-height:60px;}
+.clo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.success-box{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;color:var(--green);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="sp-name">CantinaPro</div>
+  <div class="sp-tagline">Bar Management System</div>
+  <div class="sp-div"></div>
+  <div class="sp-desc" id="sp-desc">Your bar. Your data. Your way.<br/>Shift briefings, staff clock-in, AI receipts, recipe book, night gallery — all in one app.</div>
+  <div class="sp-badge" id="sp-badge">⭐ FOUNDING MEMBER OFFER — $50/MO</div>
+  <button class="sp-btn" onclick="document.getElementById('splash').classList.add('hidden')" id="sp-btn">SEE THE APP →</button>
+  <div class="sp-note" id="sp-note">Bilingual EN/ES · Cancel anytime · cantinapro.app</div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div>
+    <div class="hdr-logo">CantinaPro</div>
+    <div class="hdr-sub" id="hdr-sub">BAR MANAGEMENT SYSTEM</div>
+  </div>
+  <div class="hdr-r">
+    <div class="lang-wrap">
+      <button class="lb on" onclick="setLang('en')" id="lb-en">EN</button>
+      <button class="lb" onclick="setLang('es')" id="lb-es">ES</button>
+    </div>
+    <div class="sdot"></div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="tab-content on" id="tab-dashboard">
+    <div class="sec-title" id="dash-title">TONIGHT'S OVERVIEW</div>
+    <div class="kpi-grid">
+      <div class="kpi lc"><div class="kl" id="k1">Today's Sales</div><div class="kv">$6,890</div><div class="kd">▲ 31% vs last Sat</div></div>
+      <div class="kpi g"><div class="kl" id="k2">Weekly Revenue</div><div class="kv">$26,130</div><div class="kd">▲ 18% this week</div></div>
+      <div class="kpi r"><div class="kl" id="k3">Expenses</div><div class="kv">$4,120</div><div class="kd dn">▼ 5% from last week</div></div>
+      <div class="kpi b"><div class="kl" id="k4">Staff On Clock</div><div class="kv" id="clocked-count">2</div><div class="kd" id="k4-sub">of 5 scheduled</div></div>
+    </div>
+    <div class="card">
+      <div class="ct" id="weekly-title">WEEKLY SALES</div>
+      <div class="bar-chart">
+        <div class="bc"><div class="bci"><div class="bar" style="height:31%;background:var(--s3)"></div></div><div class="bl">MON</div></div>
+        <div class="bc"><div class="bci"><div class="bar" style="height:29%;background:var(--s3)"></div></div><div class="bl">TUE</div></div>
+        <div class="bc"><div class="bci"><div class="bar" style="height:37%;background:var(--s3)"></div></div><div class="bl">WED</div></div>
+        <div class="bc"><div class="bci"><div class="bar" style="height:45%;background:var(--s3)"></div></div><div class="bl">THU</div></div>
+        <div class="bc"><div class="bci"><div class="bar" style="height:76%;background:var(--s3)"></div></div><div class="bl">FRI</div></div>
+        <div class="bc"><div class="bci"><div class="bar" style="height:100%;background:linear-gradient(180deg,var(--lcg),var(--amber))"></div></div><div class="bl">SAT</div></div>
+        <div class="bc"><div class="bci"><div class="bar" style="height:61%;background:var(--s3)"></div></div><div class="bl">SUN</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct" id="sellers-title">TOP SELLERS</div>
+      <div class="row"><div class="rank top">1</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Modelo Especial</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Beer</div></div><div class="bar-wrap"><div class="bar-fill" style="width:100%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$1,840</div></div>
+      <div class="row"><div class="rank">2</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Don Julio Margarita</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cocktail</div></div><div class="bar-wrap"><div class="bar-fill" style="width:77%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$1,420</div></div>
+      <div class="row"><div class="rank">3</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Michelada</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Beer</div></div><div class="bar-wrap"><div class="bar-fill" style="width:53%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$980</div></div>
+      <div class="row"><div class="rank">4</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Paloma</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cocktail</div></div><div class="bar-wrap"><div class="bar-fill" style="width:41%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$760</div></div>
+      <div class="row"><div class="rank">5</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Corona</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Beer</div></div><div class="bar-wrap"><div class="bar-fill" style="width:29%"></div></div><div class="mono" style="font-size:12px;color:var(--lcg)">$540</div></div>
+    </div>
+    <div class="card">
+      <div class="ct" id="alerts-title">ALERTS & REMINDERS</div>
+      <div class="row"><div class="adot danger"></div><div style="flex:1;font-size:13px" id="a1">Tequila Blanco — LOW STOCK (2 bottles left)</div><div class="mono" style="font-size:10px;color:var(--muted)">Now</div></div>
+      <div class="row"><div class="adot warn"></div><div style="flex:1;font-size:13px" id="a2">Liquor license renewal — 18 days</div><div class="mono" style="font-size:10px;color:var(--muted)">Reminder</div></div>
+      <div class="row"><div class="adot warn"></div><div style="flex:1;font-size:13px" id="a3">Modelo keg — reorder today</div><div class="mono" style="font-size:10px;color:var(--muted)">Today</div></div>
+      <div class="row"><div class="adot ok"></div><div style="flex:1;font-size:13px" id="a4">Health inspection passed ✓</div><div class="mono" style="font-size:10px;color:var(--muted)">Mon</div></div>
+    </div>
+    <div class="card">
+      <div class="ct" id="staff-status-title">STAFF STATUS</div>
+      <div class="row" id="s1-row"><div class="av" style="background:#c8102e22;color:#c8102e">MG</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Maria G.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Bartender</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill in" id="s1-status">On clock</span><span class="rpill yes" id="s1-read">Read</span></div></div>
+      <div class="row"><div class="av" style="background:#d4a01722;color:#d4a017">CR</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Carlos R.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Bartender</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill in" id="s2-status">On clock</span><span class="rpill yes" id="s2-read">Read</span></div></div>
+      <div class="row"><div class="av" style="background:#00e87a22;color:#00e87a">JT</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Jess T.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Server</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill out" id="s3-status">Off</span><span class="rpill no" id="s3-read">Unread</span></div></div>
+      <div class="row"><div class="av" style="background:#4488ff22;color:#4488ff">MS</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Mike S.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Barback</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill out" id="s4-status">Off</span><span class="rpill no" id="s4-read">Unread</span></div></div>
+      <div class="row"><div class="av" style="background:#a855f722;color:#a855f7">AP</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Ana P.</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Server</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="pill out" id="s5-status">Off</span><span class="rpill no" id="s5-read">Unread</span></div></div>
+    </div>
+    <div class="card">
+      <div class="ct" id="res-title">TONIGHT'S RESERVATIONS</div>
+      <div class="row"><div style="width:7px;height:7px;border-radius:50%;background:var(--lc);flex-shrink:0"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Hernandez Birthday Party</div><div style="font-size:11px;color:var(--muted)">7:00 PM · 22 guests · 🎂 Birthday</div></div></div>
+      <div class="row"><div style="width:7px;height:7px;border-radius:50%;background:var(--lc);flex-shrink:0"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Oak Lawn Business Assoc.</div><div style="font-size:11px;color:var(--muted)">6:30 PM · 15 guests · 💼 Corporate</div></div></div>
+      <div class="row"><div style="width:7px;height:7px;border-radius:50%;background:var(--lc);flex-shrink:0"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Morales Anniversary</div><div style="font-size:11px;color:var(--muted)">8:00 PM · 2 guests · ❤️ Anniversary</div></div></div>
+    </div>
+  </div>
+
+  <!-- SHIFT -->
+  <div class="tab-content" id="tab-shift">
+    <div class="shift-toggle">
+      <button class="stab on" onclick="setShiftView('staff')" id="stab-staff">👤 <span id="stab-s-lbl">STAFF</span></button>
+      <button class="stab" onclick="setShiftView('owner')" id="stab-owner">👑 <span id="stab-o-lbl">OWNER</span></button>
+    </div>
+    <div id="shift-staff">
+      <div class="brhdr">
+        <div class="brhdr-t">📋 <span id="br-title">TONIGHT'S SHIFT BRIEFING</span></div>
+        <div class="brhdr-s" id="br-sub">Monday, April 6 · 5:00 PM – 2:00 AM</div>
+      </div>
+      <div class="brbody">
+        <div class="brsec-t">📣 <span id="br-from">FROM THE OWNER</span></div>
+        <div class="brtext" id="br-text">Big Friday night — expect a packed house by 8PM.&#10;&#10;Last Friday we hit $5,240. Tonight we push for $6k. Hernandez party of 22 at 7PM — treat them right, they come every month.&#10;&#10;Reminder: card minimum is $10. No exceptions.</div>
+        <div class="brsec-t">🎟️ <span id="br-res">RESERVATIONS</span></div>
+        <div class="rescard"><div class="restop"><div style="font-weight:700;font-size:13px">Hernandez Birthday Party</div><div class="restime">7:00 PM</div></div><div style="font-size:12px;color:var(--muted)">👥 22 guests · 🎂 Birthday</div><div class="resnote">📌 Call ahead confirmed. Set up section B.</div></div>
+        <div class="rescard"><div class="restop"><div style="font-weight:700;font-size:13px">Oak Lawn Business Assoc.</div><div class="restime">6:30 PM</div></div><div style="font-size:12px;color:var(--muted)">👥 15 guests · 💼 Corporate</div><div class="resnote">📌 Running tab authorized.</div></div>
+        <div class="rescard"><div class="restop"><div style="font-weight:700;font-size:13px">Morales Anniversary</div><div class="restime">8:00 PM</div></div><div style="font-size:12px;color:var(--muted)">👥 2 guests · ❤️ Anniversary</div><div class="resnote">📌 Champagne on arrival — confirmed.</div></div>
+        <div class="brsec-t">🎯 <span id="br-spec">SPECIALS & 86'S</span></div>
+        <div class="specrow"><div>🍺</div><div style="flex:1">Modelo Buckets — 5 for $28 until 9PM</div><span class="spectag special">SPECIAL</span></div>
+        <div class="specrow"><div>🍖</div><div style="flex:1">Free appetizer with bottle service tonight</div><span class="spectag special">SPECIAL</span></div>
+        <div class="specrow"><div>💰</div><div style="flex:1">Push Don Julio Reposado — great margin</div><span class="spectag push">PUSH</span></div>
+        <div class="specrow"><div>🚫</div><div style="flex:1">Tequila Blanco — 86'd. Offer Espolon instead.</div><span class="spectag eightysix">86'D</span></div>
+        <button class="conbtn unread" id="confirm-btn" onclick="confirmBriefing()" style="margin-top:14px" id="br-confirm-btn">✓ CONFIRM YOU'VE READ THIS</button>
+      </div>
+      <div class="liveclock"><div class="lct" id="clock-display">12:00:00 PM</div><div class="lcd" id="clock-date">Monday, April 6 · CantinaPro</div></div>
+      <div class="card">
+        <div class="ct" id="clockin-title" style="margin-bottom:10px">⏱️ CLOCK IN / OUT</div>
+        <div class="spicker">
+          <div class="spick" id="spick-1" onclick="selectStaff(1)"><div class="av" style="background:#c8102e22;color:#c8102e;width:34px;height:34px;font-size:11px">MG</div><div class="spick-name">Maria G.</div><div class="spick-role">Bartender</div><div class="spick-status in" id="spick-1-status">● ON CLOCK</div></div>
+          <div class="spick" id="spick-2" onclick="selectStaff(2)"><div class="av" style="background:#d4a01722;color:#d4a017;width:34px;height:34px;font-size:11px">CR</div><div class="spick-name">Carlos R.</div><div class="spick-role">Bartender</div><div class="spick-status in" id="spick-2-status">● ON CLOCK</div></div>
+          <div class="spick" id="spick-3" onclick="selectStaff(3)"><div class="av" style="background:#00e87a22;color:#00e87a;width:34px;height:34px;font-size:11px">JT</div><div class="spick-name">Jess T.</div><div class="spick-role">Server</div><div class="spick-status out" id="spick-3-status">○ OFF</div></div>
+          <div class="spick" id="spick-4" onclick="selectStaff(4)"><div class="av" style="background:#4488ff22;color:#4488ff;width:34px;height:34px;font-size:11px">MS</div><div class="spick-name">Mike S.</div><div class="spick-role">Barback</div><div class="spick-status out" id="spick-4-status">○ OFF</div></div>
+          <div class="spick" id="spick-5" onclick="selectStaff(5)"><div class="av" style="background:#a855f722;color:#a855f7;width:34px;height:34px;font-size:11px">AP</div><div class="spick-name">Ana P.</div><div class="spick-role">Server</div><div class="spick-status out" id="spick-5-status">○ OFF</div></div>
+        </div>
+        <div id="clock-action"><button class="cbtn dis" id="select-lbl">SELECT YOUR NAME</button></div>
+      </div>
+    </div>
+    <div id="shift-owner" style="display:none">
+      <div class="card">
+        <div class="ct" style="color:var(--lc)">SHIFT LOG — OWNER VIEW</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+          <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--green)" id="owner-clocked">2</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">On Clock</div></div>
+          <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--blue)">2</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Read</div></div>
+          <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--red)">3</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Unread</div></div>
+        </div>
+        <table class="htable">
+          <thead><tr><th>NAME</th><th>IN</th><th>OUT</th><th>HRS</th><th>READ</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#c8102e22;color:#c8102e;width:22px;height:22px;font-size:9px">MG</div>Maria G.</div></td><td class="mono" style="color:var(--green);font-size:11px">4:52 PM</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">Active</td><td><span class="rpill yes">Yes</span></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#d4a01722;color:#d4a017;width:22px;height:22px;font-size:9px">CR</div>Carlos R.</div></td><td class="mono" style="color:var(--green);font-size:11px">4:58 PM</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">Active</td><td><span class="rpill yes">Yes</span></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#00e87a22;color:#00e87a;width:22px;height:22px;font-size:9px">JT</div>Jess T.</div></td><td class="mono" style="color:var(--green);font-size:11px">—</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">—</td><td><span class="rpill no">No</span></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#4488ff22;color:#4488ff;width:22px;height:22px;font-size:9px">MS</div>Mike S.</div></td><td class="mono" style="color:var(--green);font-size:11px">—</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">—</td><td><span class="rpill no">No</span></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="av" style="background:#a855f722;color:#a855f7;width:22px;height:22px;font-size:9px">AP</div>Ana P.</div></td><td class="mono" style="color:var(--green);font-size:11px">—</td><td class="mono" style="color:var(--red);font-size:11px">—</td><td class="mono" style="color:var(--gold);font-size:11px">—</td><td><span class="rpill no">No</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="tab-content" id="tab-gallery">
+    <div class="sec-title" id="gallery-title">NIGHT GALLERY</div>
+    <div id="gallery-grid">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px" id="gallery-hint">TAP A PHOTO TO EDIT & DOWNLOAD</div>
+      <div class="photo-grid">
+        <div class="pcard" style="background:#1a0a12" onclick="openPhoto(0)"><div class="pemoji">🥂</div><div class="plabel">Friday Night Crowd</div><div class="pstaff">Maria G.</div><div class="ptime">9:42 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
+        <div class="pcard" style="background:#0a1a0a" onclick="openPhoto(1)"><div class="pemoji">🎉</div><div class="plabel">Hernandez Birthday</div><div class="pstaff">Carlos R.</div><div class="ptime">10:15 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
+        <div class="pcard" style="background:#0a0a1a" onclick="openPhoto(2)"><div class="pemoji">🌃</div><div class="plabel">VIP Section</div><div class="pstaff">Ana P.</div><div class="ptime">11:00 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
+        <div class="pcard" style="background:#1a1a0a" onclick="openPhoto(3)"><div class="pemoji">🍺</div><div class="plabel">Happy Hour</div><div class="pstaff">Mike S.</div><div class="ptime">6:30 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
+        <div class="pcard" style="background:#1a0a1a" onclick="openPhoto(4)"><div class="pemoji">🎵</div><div class="plabel">Live Music Night</div><div class="pstaff">Jess T.</div><div class="ptime">8:45 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
+        <div class="pcard" style="background:#0a1a1a" onclick="openPhoto(5)"><div class="pemoji">🌮</div><div class="plabel">Taco Tuesday</div><div class="pstaff">Carlos R.</div><div class="ptime">7:00 PM</div><div class="pwm"><div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lc)">CantinaPro</div></div></div>
+      </div>
+      <div style="margin-top:12px;border:1px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer" onclick="document.getElementById('photo-upload').click()">
+        <input type="file" id="photo-upload" accept="image/*" multiple style="display:none"/>
+        <div style="font-size:28px;margin-bottom:6px">📷</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--muted)" id="add-photo-lbl">ADD PHOTO</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="add-photo-sub">Staff takes photos during shift</div>
+      </div>
+    </div>
+    <div id="gallery-detail" style="display:none">
+      <button class="backbtn" onclick="closePhoto()">← <span id="back-lbl">BACK</span></button>
+      <div class="wmprev">
+        <div class="wminner">
+          <div style="font-size:64px" id="detail-emoji">🥂</div>
+          <div style="font-size:15px;color:rgba(255,255,255,.5);font-weight:700;margin-top:8px" id="detail-label">Friday Night Crowd</div>
+          <div class="wm-stamp">
+            <div style="font-family:'Bebas Neue',cursive;font-size:12px;color:var(--lc)">CantinaPro</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg);letter-spacing:2px">cantinapro.app</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px" id="wm-note">Preview with CantinaPro watermark</div>
+      <button class="action-btn red" id="dl-btn">⬇️ DOWNLOAD WITH LOGO</button>
+      <button class="action-btn purple" id="cap-btn" onclick="generateCaption()">✨ GENERATE AI CAPTION</button>
+      <div class="spinner" id="cap-spinner" style="display:none"></div>
+      <div class="capbox" id="cap-box" style="display:none">
+        <div style="font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;color:var(--purple);margin-bottom:6px">AI CAPTION</div>
+        <div id="cap-text"></div>
+        <button onclick="copyCaption()" style="margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:4px;padding:5px 12px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px" id="copy-btn">COPY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPTS -->
+  <div class="tab-content" id="tab-receipts">
+    <div class="sec-title" id="receipts-title">RECEIPT SCANNER</div>
+    <div class="card">
+      <div class="ct" style="color:var(--lc)" id="scan-title">📸 SCAN RECEIPT WITH AI</div>
+      <div class="upzone" onclick="document.getElementById('receipt-file').click()" id="upload-zone">
+        <input type="file" id="receipt-file" accept="image/*" capture="environment" style="display:none" onchange="handleReceiptFile(event)"/>
+        <div style="font-size:40px;margin-bottom:8px">🧾</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;margin-bottom:4px" id="scan-upload-lbl">TAKE OR UPLOAD PHOTO</div>
+        <div style="font-size:12px;color:var(--muted)" id="scan-upload-sub">Photo of any vendor receipt</div>
+      </div>
+      <div id="scan-preview-wrap" style="display:none;margin-bottom:12px;text-align:center">
+        <img id="scan-preview-img" style="max-width:100%;max-height:200px;object-fit:contain;border-radius:6px"/>
+        <button onclick="clearReceipt()" style="margin-top:8px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">✕ Remove</button>
+      </div>
+      <button class="action-btn red" id="scan-btn" onclick="scanReceipt()" style="display:none" id="scan-action-btn">✨ ANALYZE RECEIPT WITH AI</button>
+      <div class="spinner" id="scan-spinner" style="display:none"></div>
+      <div id="scan-error" style="display:none;background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);border-radius:8px;padding:12px;font-size:13px;color:var(--red)"></div>
+      <div class="rbox" id="scan-result" style="display:none">
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">✓ RECEIPT DETECTED</div>
+        <div class="rrow"><div class="rkey" id="r-vendor-lbl">Vendor</div><div class="rval" id="r-vendor"></div></div>
+        <div class="rrow"><div class="rkey" id="r-date-lbl">Date</div><div class="rval" id="r-date"></div></div>
+        <div class="rrow"><div class="rkey" id="r-cat-lbl">Category</div><div class="rval" id="r-cat"></div></div>
+        <div id="r-items"></div>
+        <div class="rrow" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><div class="rkey" style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;color:var(--text)" id="r-total-lbl">TOTAL</div><div class="rval money" id="r-total">$0.00</div></div>
+        <button class="action-btn green" onclick="logReceipt()" style="margin-top:10px" id="log-btn">✓ LOG THIS RECEIPT</button>
+        <button onclick="clearReceipt()" style="width:100%;padding:8px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;font-size:12px;margin-top:6px" id="scan-again-btn">Scan again</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct" id="rlog-title">RECEIPT LOG</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--lc)" id="rlog-total">$1,260</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase" id="rlog-total-lbl">Total Spent</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--blue)" id="rlog-count">2</div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase" id="rlog-count-lbl">Receipts</div></div>
+      </div>
+      <div id="rlog-list">
+        <div class="rlog-item"><div style="font-size:16px">🧾</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Republic National</div><div style="font-size:11px;color:var(--muted)">Spirits · Apr 2</div></div><div class="mono" style="color:var(--lcg);font-weight:700">$840</div></div>
+        <div class="rlog-item"><div style="font-size:16px">🧾</div><div style="flex:1"><div style="font-weight:700;font-size:13px">Marca's Distributing</div><div style="font-size:11px;color:var(--muted)">Beer · Apr 1</div></div><div class="mono" style="color:var(--lcg);font-weight:700">$420</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIPES -->
+  <div class="tab-content" id="tab-recipes">
+    <div class="sec-title" id="recipes-title">RECIPE BOOK</div>
+    <div id="recipe-list-view">
+      <div class="sbox"><span style="color:var(--muted)">🔍</span><input class="sinput" id="recipe-search" placeholder="Search drinks or ingredients..." oninput="filterRecipes()"/></div>
+      <div class="frow">
+        <button class="fchip on" onclick="setRecipeFilter('All')" id="rf-all">All</button>
+        <button class="fchip" onclick="setRecipeFilter('Signature')" id="rf-sig">Signature</button>
+        <button class="fchip" onclick="setRecipeFilter('Classic')" id="rf-cls">Classic</button>
+        <button class="fchip" onclick="setRecipeFilter('Premium')" id="rf-pre">Premium</button>
+      </div>
+      <div id="recipe-items"></div>
+    </div>
+    <div id="recipe-detail-view" style="display:none">
+      <button class="backbtn" onclick="closeRecipe()">← <span id="recipe-back-lbl">BACK</span></button>
+      <div class="rdetail">
+        <div style="font-size:56px;text-align:center;margin-bottom:10px" id="rd-emoji"></div>
+        <div class="rdetail-name" id="rd-name"></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;font-family:'Share Tech Mono',monospace" id="rd-meta"></div>
+        <div class="rstats">
+          <div class="rstat"><div class="rstat-val" style="color:var(--red)" id="rd-cost"></div><div class="rstat-lbl" id="rd-cost-lbl">Cost</div></div>
+          <div class="rstat"><div class="rstat-val" style="color:var(--lcg)" id="rd-price"></div><div class="rstat-lbl" id="rd-price-lbl">Price</div></div>
+          <div class="rstat"><div class="rstat-val" style="color:var(--green)" id="rd-margin"></div><div class="rstat-lbl" id="rd-margin-lbl">Margin</div></div>
+          <div class="rstat"><div class="rstat-val" style="color:var(--blue)" id="rd-time"></div><div class="rstat-lbl" id="rd-time-lbl">Time</div></div>
+        </div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px" id="rd-ing-title">INGREDIENTS</div>
+        <div id="rd-ingredients"></div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 8px" id="rd-steps-title">STEPS</div>
+        <div id="rd-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOIN -->
+  <div class="tab-content" id="tab-join">
+    <div class="sec-title" id="join-title">JOIN CANTINAPRO</div>
+    <div class="fcta">
+      <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:3px;color:var(--lcg);margin-bottom:4px" id="join-founding">FOUNDING MEMBER PRICE</div>
+      <div class="fcta-price">$50</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="join-mo">/month · locked forever</div>
+      <div style="font-size:12px;color:var(--lcg);margin-bottom:16px" id="join-after">After launch $99/mo — you never change</div>
+      <div class="spots">
+        <div class="sfire">🔥</div>
+        <div><div class="spots-n">47</div><div style="font-size:12px;color:var(--muted);line-height:1.4" id="join-spots">founding spots remaining</div></div>
+        <div class="sfire">🔥</div>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:999px;height:10px;overflow:hidden;margin:12px 0">
+        <div style="height:100%;border-radius:999px;background:linear-gradient(90deg,var(--lc),var(--lcg));width:53%"></div>
+      </div>
+      <a href="https://buy.stripe.com/YOUR_LINK_HERE" target="_blank" class="joinbtn" id="join-btn">🔒 LOCK IN MY SPOT — $50/MO</a>
+      <div style="font-size:11px;color:var(--muted)" id="join-note">🔒 No contracts · Cancel anytime · Secure via Stripe</div>
+    </div>
+    <div class="card">
+      <div class="ct" id="join-included">WHAT'S INCLUDED</div>
+      <div class="feat-row"><div style="font-size:18px">📋</div><div style="font-size:13px;font-weight:600;flex:1" id="f1">Shift briefings & reservations</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">⏰</div><div style="font-size:13px;font-weight:600;flex:1" id="f2">Staff clock in / out</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">🧾</div><div style="font-size:13px;font-weight:600;flex:1" id="f3">AI receipt scanner</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">🍹</div><div style="font-size:13px;font-weight:600;flex:1" id="f4">Recipe book with profit margins</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">📸</div><div style="font-size:13px;font-weight:600;flex:1" id="f5">Watermarked gallery + AI captions</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">✅</div><div style="font-size:13px;font-weight:600;flex:1" id="f6">End of night checklist & closeout</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">🌎</div><div style="font-size:13px;font-weight:600;flex:1" id="f7">Fully bilingual EN/ES</div><div style="color:var(--green)">✓</div></div>
+      <div class="feat-row"><div style="font-size:18px">💰</div><div style="font-size:13px;font-weight:600;flex:1" id="f8">Referral program — earn $20/mo per bar</div><div style="color:var(--green)">✓</div></div>
+    </div>
+    <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:20px">Questions? <span style="color:var(--lc)">hello@cantinapro.app</span></div>
+  </div>
+
+  <!-- CLOSEOUT -->
+  <div class="tab-content" id="tab-closeout">
+    <div class="sec-title" id="closeout-title">END OF NIGHT</div>
+    <div class="card">
+      <div class="ct" id="checklist-title">CLOSING CHECKLIST</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="checklist-sub">Staff must complete before submitting closeout</div>
+      <div class="cprog"><div class="cbar" id="check-bar" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px" id="check-count">0/16 complete — 0%</div>
+      <div id="checklist-items"></div>
+    </div>
+    <div class="card" id="closeout-form-card">
+      <div class="ct" id="closeout-form-title">END OF NIGHT CLOSEOUT</div>
+      <div id="closeout-submitted" style="display:none" class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>
+      <div id="closeout-form-inner">
+        <div class="clo-grid">
+          <div class="fld"><label id="lbl-bar">Bar Sales ($)</label><input type="number" placeholder="0.00" id="f-bar"/></div>
+          <div class="fld"><label id="lbl-food">Food Sales ($)</label><input type="number" placeholder="0.00" id="f-food"/></div>
+          <div class="fld"><label id="lbl-cash">Cash Collected ($)</label><input type="number" placeholder="0.00" id="f-cash"/></div>
+          <div class="fld"><label id="lbl-cards">Card Sales ($)</label><input type="number" placeholder="0.00" id="f-cards"/></div>
+          <div class="fld"><label id="lbl-tips">Tips Total ($)</label><input type="number" placeholder="0.00" id="f-tips"/></div>
+          <div class="fld"><label id="lbl-comps">Comps & Voids ($)</label><input type="number" placeholder="0.00" id="f-comps"/></div>
+        </div>
+        <div class="fld"><label id="lbl-staff">Closing Staff</label><select id="f-staff"><option value="">Select staff member</option><option>Maria G.</option><option>Carlos R.</option><option>Jess T.</option><option>Mike S.</option><option>Ana P.</option></select></div>
+        <div class="fld"><label id="lbl-notes">Notes / Incidents</label><textarea placeholder="Any issues, incidents, or notes for the owner..." id="f-notes"></textarea></div>
+        <button class="subbtn locked" id="submit-btn" onclick="submitCloseout()">COMPLETE CHECKLIST FIRST</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bot-nav">
+  <button class="nb on" onclick="setTab('dashboard')" id="nav-dashboard"><span class="ni">📊</span><span class="nl" id="nl-dashboard">Dashboard</span></button>
+  <button class="nb" onclick="setTab('shift')" id="nav-shift"><span class="ni">⏰</span><span class="nl" id="nl-shift">Shift</span></button>
+  <button class="nb" onclick="setTab('gallery')" id="nav-gallery"><span class="ni">📸</span><span class="nl" id="nl-gallery">Gallery</span></button>
+  <button class="nb" onclick="setTab('receipts')" id="nav-receipts"><span class="ni">🧾</span><span class="nl" id="nl-receipts">Receipts</span></button>
+  <button class="nb" onclick="setTab('recipes')" id="nav-recipes"><span class="ni">🍹</span><span class="nl" id="nl-recipes">Recipes</span></button>
+  <button class="nb" onclick="setTab('closeout')" id="nav-closeout"><span class="ni">✅</span><span class="nl" id="nl-closeout">Closeout</span></button>
+  <button class="nb" onclick="setTab('join')" id="nav-join"><span class="ni">🔥</span><span class="nl" id="nl-join">Join</span><span class="nbadge">47</span></button>
+</nav>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const RECIPES = [
+  {id:1,emoji:"🍹",name:"Local Cantina Margarita",tag:"Signature",glass:"Rocks",garnish:"Lime + Tajín",prepTime:"2 min",cost:2.80,price:14,
+    ingredients:[{amount:"2 oz",name:"Don Julio Blanco",note:"our well tequila"},{amount:"1 oz",name:"Cointreau",note:""},{amount:"3/4 oz",name:"Fresh lime juice",note:"squeeze to order"},{amount:"1/2 oz",name:"Agave syrup",note:""},{amount:"",name:"Tajín",note:"rim only"},{amount:"",name:"Ice",note:"shaken + fresh rocks"}],
+    steps:["Tajín rim the glass. Fill with fresh ice and set aside.","In a shaker, combine tequila, Cointreau, lime juice, and agave. Add ice and shake hard for 10 seconds.","Double strain over fresh rocks. Garnish with lime wheel."]},
+  {id:2,emoji:"🍺",name:"Local Cantina Michelada",tag:"Signature",glass:"Pint glass",garnish:"Lime + Tajín",prepTime:"1.5 min",cost:1.60,price:10,
+    ingredients:[{amount:"1",name:"Modelo Especial (12 oz)",note:"ice cold"},{amount:"2 oz",name:"Clamato juice",note:""},{amount:"1/2 oz",name:"Fresh lime juice",note:""},{amount:"4 dashes",name:"Valentina hot sauce",note:"adjust to taste"},{amount:"2 dashes",name:"Worcestershire sauce",note:""},{amount:"1 dash",name:"Soy sauce",note:"secret — don't skip"},{amount:"",name:"Tajín",note:"rim + dusting on top"}],
+    steps:["Lime juice + Tajín rim. Fill pint glass with ice.","Mix Clamato, lime, Valentina, Worcestershire, and soy sauce in the glass.","Pour Modelo slowly. Dust Tajín on top. Serve immediately."]},
+  {id:3,emoji:"🍊",name:"Paloma",tag:"Classic",glass:"Highball",garnish:"Lime + salt rim",prepTime:"1.5 min",cost:1.90,price:12,
+    ingredients:[{amount:"2 oz",name:"Blanco Tequila",note:""},{amount:"1/2 oz",name:"Fresh lime juice",note:""},{amount:"Pinch",name:"Salt",note:"in the drink"},{amount:"4 oz",name:"Jarritos Grapefruit",note:"preferred over Squirt"},{amount:"",name:"Ice",note:""}],
+    steps:["Salt rim. Fill highball with ice.","Add tequila and lime juice.","Pinch of salt directly in glass. Top with Jarritos. Stir gently."]},
+  {id:4,emoji:"🥃",name:"Cantina Old Fashioned",tag:"Premium",glass:"Rocks",garnish:"Orange peel",prepTime:"3 min",cost:3.20,price:16,
+    ingredients:[{amount:"2 oz",name:"Bulleit Bourbon",note:""},{amount:"1/4 oz",name:"Demerara syrup",note:"2:1"},{amount:"2 dashes",name:"Angostura bitters",note:""},{amount:"1 dash",name:"Orange bitters",note:""},{amount:"",name:"Large ice cube",note:"use the big cube ONLY"}],
+    steps:["Large ice cube in rocks glass.","Stir all ingredients in mixing glass with ice for 30 seconds.","Strain over the big cube. Express orange peel, rim glass, drop in."]}
+];
+
+const PHOTOS = [
+  {emoji:"🥂",label:"Friday Night Crowd",staff:"Maria G.",time:"9:42 PM"},
+  {emoji:"🎉",label:"Hernandez Birthday",staff:"Carlos R.",time:"10:15 PM"},
+  {emoji:"🌃",label:"VIP Section",staff:"Ana P.",time:"11:00 PM"},
+  {emoji:"🍺",label:"Happy Hour",staff:"Mike S.",time:"6:30 PM"},
+  {emoji:"🎵",label:"Live Music Night",staff:"Jess T.",time:"8:45 PM"},
+  {emoji:"🌮",label:"Taco Tuesday",staff:"Carlos R.",time:"7:00 PM"}
+];
+
+const CHECKLIST = {
+  "🧹 Cleaning":["Wipe down all bar surfaces","Clean beer taps & lines","Mop floors","Empty trash & replace bags","Clean bathrooms"],
+  "🍺 Bar":["Count remaining liquor bottles","Log any breakage or spillage","Restock for next shift","Lock liquor storage"],
+  "💰 Cash":["Count cash drawer","Separate tips","Prepare bank deposit","Reconcile card totals"],
+  "🔒 Security":["Check all doors & windows locked","Turn off all equipment","Set alarm"]
+};
+
+// ── STATE ─────────────────────────────────────────────
+let lang = 'en';
+let currentTab = 'dashboard';
+let shiftView = 'staff';
+let selectedStaff = null;
+let briefingRead = [1,2];
+let clockedIn = [1,2];
+let checked = {};
+let receiptLog = [{vendor:"Republic National",category:"Spirits",total:840,date:"Apr 2"},{vendor:"Marca's Distributing",category:"Beer",total:420,date:"Apr 1"}];
+let currentRecipe = null;
+let currentPhoto = null;
+let currentCaption = null;
+let receiptBase64 = null;
+let recipeFilter = 'All';
+
+// ── CLOCK ─────────────────────────────────────────────
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock-display').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── TABS ──────────────────────────────────────────────
+function setTab(t){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(el=>el.classList.remove('on'));
+  document.getElementById('tab-'+t).classList.add('on');
+  document.getElementById('nav-'+t).classList.add('on');
+  currentTab = t;
+}
+
+// ── LANGUAGE ──────────────────────────────────────────
+const TR = {
+  en:{
+    dashboard:'Dashboard',shift:'Shift',gallery:'Gallery',receipts:'Receipts',recipes:'Recipes',closeout:'Closeout',join:'Join',
+    'dash-title':'TONIGHT\'S OVERVIEW','k1':'Today\'s Sales','k2':'Weekly Revenue','k3':'Expenses','k4':'Staff On Clock','k4-sub':'of 5 scheduled',
+    'weekly-title':'WEEKLY SALES','sellers-title':'TOP SELLERS','alerts-title':'ALERTS & REMINDERS','staff-status-title':'STAFF STATUS','res-title':'TONIGHT\'S RESERVATIONS',
+    'stab-s-lbl':'STAFF','stab-o-lbl':'OWNER','br-title':'TONIGHT\'S SHIFT BRIEFING','br-from':'FROM THE OWNER','br-res':'RESERVATIONS','br-spec':'SPECIALS & 86\'S',
+    'br-confirm-btn-unread':'✓ CONFIRM YOU\'VE READ THIS','br-confirm-btn-read':'✓ BRIEFING CONFIRMED',
+    'clockin-title':'⏱️ CLOCK IN / OUT','select-lbl':'SELECT YOUR NAME',
+    'gallery-title':'NIGHT GALLERY','gallery-hint':'TAP A PHOTO TO EDIT & DOWNLOAD','add-photo-lbl':'ADD PHOTO','add-photo-sub':'Staff takes photos during shift',
+    'back-lbl':'BACK','wm-note':'Preview with CantinaPro watermark','dl-btn':'⬇️ DOWNLOAD WITH LOGO','cap-btn':'✨ GENERATE AI CAPTION','copy-btn':'COPY',
+    'receipts-title':'RECEIPT SCANNER','scan-title':'📸 SCAN RECEIPT WITH AI','scan-upload-lbl':'TAKE OR UPLOAD PHOTO','scan-upload-sub':'Photo of any vendor receipt',
+    'scan-action-btn':'✨ ANALYZE RECEIPT WITH AI','r-vendor-lbl':'Vendor','r-date-lbl':'Date','r-cat-lbl':'Category','r-total-lbl':'TOTAL',
+    'log-btn':'✓ LOG THIS RECEIPT','scan-again-btn':'Scan again','rlog-title':'RECEIPT LOG','rlog-total-lbl':'Total Spent','rlog-count-lbl':'Receipts',
+    'recipes-title':'RECIPE BOOK','recipe-back-lbl':'BACK','rd-cost-lbl':'Cost','rd-price-lbl':'Price','rd-margin-lbl':'Margin','rd-time-lbl':'Time',
+    'rd-ing-title':'INGREDIENTS','rd-steps-title':'STEPS',
+    'closeout-title':'END OF NIGHT','checklist-title':'CLOSING CHECKLIST','checklist-sub':'Staff must complete before submitting closeout',
+    'closeout-form-title':'END OF NIGHT CLOSEOUT','lbl-bar':'Bar Sales ($)','lbl-food':'Food Sales ($)','lbl-cash':'Cash Collected ($)',
+    'lbl-cards':'Card Sales ($)','lbl-tips':'Tips Total ($)','lbl-comps':'Comps & Voids ($)','lbl-staff':'Closing Staff','lbl-notes':'Notes / Incidents',
+    'join-title':'JOIN CANTINAPRO','join-founding':'FOUNDING MEMBER PRICE','join-mo':'/month · locked forever','join-after':'After launch $99/mo — you never change',
+    'join-spots':'founding spots remaining','join-btn':'🔒 LOCK IN MY SPOT — $50/MO','join-note':'🔒 No contracts · Cancel anytime · Secure via Stripe',
+    'join-included':'WHAT\'S INCLUDED',
+    'f1':'Shift briefings & reservations','f2':'Staff clock in / out','f3':'AI receipt scanner','f4':'Recipe book with profit margins',
+    'f5':'Watermarked gallery + AI captions','f6':'End of night checklist & closeout','f7':'Fully bilingual EN/ES','f8':'Referral program — earn $20/mo per bar',
+    's1-status':'On clock','s2-status':'On clock','s3-status':'Off','s4-status':'Off','s5-status':'Off',
+    's1-read':'Read','s2-read':'Read','s3-read':'Unread','s4-read':'Unread','s5-read':'Unread',
+    'hdr-sub':'BAR MANAGEMENT SYSTEM','sp-desc':'Your bar. Your data. Your way.<br/>Shift briefings, staff clock-in, AI receipts, recipe book, night gallery — all in one app.',
+    'sp-badge':'⭐ FOUNDING MEMBER HOLLA — $50/MO','sp-btn':'SEE THE APP →','sp-note':'Bilingual EN/ES · Cancel anytime · cantinapro.app',
+    'rf-all':'All','rf-sig':'Signature','rf-cls':'Classic','rf-pre':'Premium'
+  },
+  es:{
+    dashboard:'Inicio',shift:'Turno',gallery:'Galería',receipts:'Recibos',recipes:'Recetas',closeout:'Cierre',join:'Únete',
+    'dash-title':'RESUMEN DE HOY','k1':'Ventas Hoy','k2':'Ingresos Semana','k3':'Gastos','k4':'Personal En Turno','k4-sub':'de 5 programados',
+    'weekly-title':'VENTAS SEMANALES','sellers-title':'LO MÁS VENDIDO','alerts-title':'ALERTAS','staff-status-title':'ESTADO DEL PERSONAL','res-title':'RESERVACIONES DE HOY',
+    'stab-s-lbl':'PERSONAL','stab-o-lbl':'DUEÑO','br-title':'BRIEFING DE HOY EN LA NOCHE','br-from':'DEL DUEÑO','br-res':'RESERVACIONES','br-spec':'ESPECIALES Y 86\'S',
+    'br-confirm-btn-unread':'✓ CONFIRMAR QUE LEÍSTE','br-confirm-btn-read':'✓ BRIEFING CONFIRMADO',
+    'clockin-title':'⏱️ MARCAR ENTRADA/SALIDA','select-lbl':'SELECCIONA TU NOMBRE',
+    'gallery-title':'GALERÍA NOCTURNA','gallery-hint':'TOCA UNA FOTO PARA EDITAR','add-photo-lbl':'AÑADIR FOTO','add-photo-sub':'El personal toma fotos durante el turno',
+    'back-lbl':'VOLVER','wm-note':'Vista previa con marca de agua','dl-btn':'⬇️ DESCARGAR CON LOGO','cap-btn':'✨ GENERAR SUBTÍTULO IA','copy-btn':'COPIAR',
+    'receipts-title':'ESCÁNER DE RECIBOS','scan-title':'📸 ESCANEAR RECIBO CON IA','scan-upload-lbl':'TOMAR O SUBIR FOTO','scan-upload-sub':'Foto de cualquier recibo de proveedor',
+    'scan-action-btn':'✨ ANALIZAR RECIBO CON IA','r-vendor-lbl':'Proveedor','r-date-lbl':'Fecha','r-cat-lbl':'Categoría','r-total-lbl':'TOTAL',
+    'log-btn':'✓ REGISTRAR EN EL LOG','scan-again-btn':'Volver a escanear','rlog-title':'REGISTRO DE RECIBOS','rlog-total-lbl':'Total Gastado','rlog-count-lbl':'Recibos',
+    'recipes-title':'LIBRO DE RECETAS','recipe-back-lbl':'VOLVER','rd-cost-lbl':'Costo','rd-price-lbl':'Precio','rd-margin-lbl':'Margen','rd-time-lbl':'Tiempo',
+    'rd-ing-title':'INGREDIENTES','rd-steps-title':'PASOS',
+    'closeout-title':'CIERRE DE NOCHE','checklist-title':'LISTA DE CIERRE','checklist-sub':'El personal debe completarla antes del cierre',
+    'closeout-form-title':'CIERRE DE NOCHE','lbl-bar':'Ventas del Bar ($)','lbl-food':'Ventas de Comida ($)','lbl-cash':'Efectivo Recibido ($)',
+    'lbl-cards':'Ventas con Tarjeta ($)','lbl-tips':'Total de Propinas ($)','lbl-comps':'Cortesías ($)','lbl-staff':'Personal de Cierre','lbl-notes':'Notas / Incidentes',
+    'join-title':'ÚNETE A CANTINAPRO','join-founding':'PRECIO DE MIEMBRO FUNDADOR','join-mo':'/mes · bloqueado para siempre','join-after':'Después $99/mes — nunca cambias',
+    'join-spots':'lugares fundadores restantes','join-btn':'🔒 ASEGURAR MI LUGAR — $50/MES','join-note':'🔒 Sin contratos · Cancela cuando quieras',
+    'join-included':'QUÉ INCLUYE',
+    'f1':'Briefings de turno y reservaciones','f2':'Registro de entrada/salida del personal','f3':'Escáner de recibos con IA','f4':'Libro de recetas con márgenes',
+    'f5':'Galería con marca de agua + subtítulos IA','f6':'Lista de cierre de noche','f7':'Completamente bilingüe EN/ES','f8':'Programa de referidos — $20/mes por referido',
+    's1-status':'En turno','s2-status':'En turno','s3-status':'Fuera','s4-status':'Fuera','s5-status':'Fuera',
+    's1-read':'Leyó','s2-read':'Leyó','s3-read':'Sin leer','s4-read':'Sin leer','s5-read':'Sin leer',
+    'hdr-sub':'SISTEMA DE GESTIÓN DE BAR','sp-desc':'Tu bar. Tus datos. Tu manera.<br/>Briefings de turno, personal, recibos con IA, recetas, galería — todo en una app.',
+    'sp-badge':'⭐ OFERTA DE MIEMBRO FUNDADOR — $50/MES','sp-btn':'VER LA APP →','sp-note':'Bilingüe EN/ES · Cancela cuando quieras · cantinapro.app',
+    'rf-all':'Todos','rf-sig':'Signature','rf-cls':'Clásico','rf-pre':'Premium'
+  }
+};
+
+function setLang(l){
+  lang = l;
+  document.getElementById('lb-en').classList.toggle('on', l==='en');
+  document.getElementById('lb-es').classList.toggle('on', l==='es');
+  const t = TR[l];
+  Object.keys(t).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = t[id];
+  });
+  // nav labels
+  ['dashboard','shift','gallery','receipts','recipes','closeout','join'].forEach(tab=>{
+    const el = document.getElementById('nl-'+tab);
+    if(el && t[tab]) el.textContent = t[tab];
+  });
+  // splash
+  document.getElementById('sp-desc').innerHTML = t['sp-desc'];
+  // update confirm btn
+  updateConfirmBtn();
+  // re-render recipes
+  renderRecipes();
+  // re-render checklist
+  renderChecklist();
+}
+
+// ── SHIFT ─────────────────────────────────────────────
+function setShiftView(v){
+  shiftView = v;
+  document.getElementById('shift-staff').style.display = v==='staff'?'block':'none';
+  document.getElementById('shift-owner').style.display = v==='owner'?'block':'none';
+  document.getElementById('stab-staff').classList.toggle('on', v==='staff');
+  document.getElementById('stab-owner').classList.toggle('on', v==='owner');
+}
+
+function confirmBriefing(){
+  if(selectedStaff && !briefingRead.includes(selectedStaff)){
+    briefingRead.push(selectedStaff);
+    updateConfirmBtn();
+    updateClockAction();
+  }
+}
+
+function updateConfirmBtn(){
+  const btn = document.getElementById('confirm-btn');
+  if(!btn) return;
+  const L = lang==='es';
+  if(selectedStaff && briefingRead.includes(selectedStaff)){
+    btn.className='conbtn read';
+    btn.textContent = L?'✓ BRIEFING CONFIRMADO':'✓ BRIEFING CONFIRMED';
+  } else {
+    btn.className='conbtn unread';
+    btn.textContent = L?'✓ CONFIRMAR QUE LEÍSTE':'✓ CONFIRM YOU\'VE READ THIS';
+  }
+}
+
+function selectStaff(id){
+  selectedStaff = id;
+  document.querySelectorAll('.spick').forEach((el,i)=>{
+    el.classList.toggle('sel', i+1===id);
+  });
+  updateConfirmBtn();
+  updateClockAction();
+}
+
+function updateClockAction(){
+  const wrap = document.getElementById('clock-action');
+  const L = lang==='es';
+  if(!selectedStaff){
+    wrap.innerHTML=`<button class="cbtn dis">${L?'SELECCIONA TU NOMBRE':'SELECT YOUR NAME'}</button>`;
+    return;
+  }
+  const needsRead = !briefingRead.includes(selectedStaff);
+  const isIn = clockedIn.includes(selectedStaff);
+  if(needsRead){
+    wrap.innerHTML=`<div class="mustread"><strong style="display:block;font-family:'Bebas Neue',cursive;letter-spacing:1px;margin-bottom:4px">⚠️ ${L?'LEE EL BRIEFING PRIMERO':'READ BRIEFING FIRST'}</strong>${L?'Sube y confirma que leíste el briefing.':'Scroll up and confirm you\'ve read the shift briefing.'}</div><button class="cbtn dis">${L?'LEE EL BRIEFING':'READ BRIEFING FIRST'}</button>`;
+    return;
+  }
+  if(isIn){
+    wrap.innerHTML=`<div style="text-align:center;margin-bottom:12px"><div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)">CLOCKED IN</div><div style="font-family:'Bebas Neue',cursive;font-size:28px;color:var(--green)">ACTIVE</div></div><button class="cbtn out" onclick="clockOut()">${L?'⏹ FINALIZAR TURNO':'⏹ CLOCK OUT'}</button>`;
+  } else {
+    wrap.innerHTML=`<button class="cbtn in" onclick="clockIn()">${L?'▶ INICIAR TURNO':'▶ CLOCK IN'}</button>`;
+  }
+}
+
+function clockIn(){
+  if(selectedStaff && !clockedIn.includes(selectedStaff)){
+    clockedIn.push(selectedStaff);
+    const statusEl = document.getElementById('spick-'+selectedStaff+'-status');
+    if(statusEl){statusEl.className='spick-status in';statusEl.textContent='● ON CLOCK';}
+    document.getElementById('clocked-count').textContent = clockedIn.length;
+    updateClockAction();
+  }
+}
+
+function clockOut(){
+  if(selectedStaff){
+    clockedIn = clockedIn.filter(id=>id!==selectedStaff);
+    const statusEl = document.getElementById('spick-'+selectedStaff+'-status');
+    if(statusEl){statusEl.className='spick-status out';statusEl.textContent='○ OFF';}
+    document.getElementById('clocked-count').textContent = clockedIn.length;
+    updateClockAction();
+  }
+}
+
+// ── GALLERY ───────────────────────────────────────────
+function openPhoto(idx){
+  currentPhoto = PHOTOS[idx];
+  currentCaption = null;
+  document.getElementById('gallery-grid').style.display='none';
+  document.getElementById('gallery-detail').style.display='block';
+  document.getElementById('detail-emoji').textContent = currentPhoto.emoji;
+  document.getElementById('detail-label').textContent = currentPhoto.label;
+  document.getElementById('cap-box').style.display='none';
+  document.getElementById('cap-spinner').style.display='none';
+}
+
+function closePhoto(){
+  document.getElementById('gallery-grid').style.display='block';
+  document.getElementById('gallery-detail').style.display='none';
+}
+
+async function generateCaption(){
+  if(!currentPhoto) return;
+  document.getElementById('cap-spinner').style.display='block';
+  document.getElementById('cap-box').style.display='none';
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+        messages:[{role:'user',content:`Write a fun engaging Instagram caption for a bar. The photo shows: "${currentPhoto.label}" taken by ${currentPhoto.staff}. Make it authentic, include 1-2 emojis, end with 3-4 hashtags. Under 150 chars before hashtags.`}]})
+    });
+    const data = await res.json();
+    currentCaption = data.content?.find(b=>b.type==='text')?.text||'Could not generate caption.';
+  }catch{currentCaption='Could not generate caption. Try again.';}
+  document.getElementById('cap-spinner').style.display='none';
+  document.getElementById('cap-text').textContent = currentCaption;
+  document.getElementById('cap-box').style.display='block';
+}
+
+function copyCaption(){
+  if(currentCaption) navigator.clipboard?.writeText(currentCaption);
+  document.getElementById('copy-btn').textContent = lang==='es'?'¡COPIADO!':'COPIED!';
+  setTimeout(()=>{ document.getElementById('copy-btn').textContent = lang==='es'?'COPIAR':'COPY'; },2000);
+}
+
+// ── RECEIPTS ──────────────────────────────────────────
+function handleReceiptFile(e){
+  const file = e.target.files[0]; if(!file) return;
+  const url = URL.createObjectURL(file);
+  document.getElementById('upload-zone').style.display='none';
+  document.getElementById('scan-preview-wrap').style.display='block';
+  document.getElementById('scan-preview-img').src = url;
+  document.getElementById('scan-btn').style.display='block';
+  document.getElementById('scan-result').style.display='none';
+  document.getElementById('scan-error').style.display='none';
+  const reader = new FileReader();
+  reader.onload=()=>{ receiptBase64 = reader.result.split(',')[1]; };
+  reader.readAsDataURL(file);
+}
+
+function clearReceipt(){
+  receiptBase64=null;
+  document.getElementById('upload-zone').style.display='block';
+  document.getElementById('scan-preview-wrap').style.display='none';
+  document.getElementById('scan-btn').style.display='none';
+  document.getElementById('scan-result').style.display='none';
+  document.getElementById('scan-error').style.display='none';
+  document.getElementById('receipt-file').value='';
+}
+
+async function scanReceipt(){
+  if(!receiptBase64) return;
+  document.getElementById('scan-spinner').style.display='block';
+  document.getElementById('scan-btn').style.display='none';
+  document.getElementById('scan-error').style.display='none';
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:receiptBase64}},
+          {type:'text',text:'You are a receipt scanner for a bar. Extract: vendor, date, category (Spirits/Beer/Wine/Food/Supplies), total amount, and top line items. Respond ONLY with valid JSON: {"vendor":"","date":"","category":"","total":0,"items":[{"name":"","amount":0}]}. If not a receipt, return {"error":"Not a receipt"}.'}
+        ]}]})
+    });
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==='text')?.text||'';
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(parsed.error){
+      document.getElementById('scan-error').textContent=parsed.error;
+      document.getElementById('scan-error').style.display='block';
+    } else {
+      document.getElementById('r-vendor').textContent=parsed.vendor||'';
+      document.getElementById('r-date').textContent=parsed.date||'';
+      document.getElementById('r-cat').textContent=parsed.category||'';
+      document.getElementById('r-total').textContent='$'+(parsed.total||0).toFixed(2);
+      const itemsEl=document.getElementById('r-items');
+      itemsEl.innerHTML=(parsed.items||[]).map(i=>`<div style="display:flex;justify-content:space-between;padding:5px 8px;background:var(--s1);border-radius:4px;margin-bottom:4px;font-size:12px"><div>${i.name}</div><div style="font-family:'Share Tech Mono',monospace">$${(i.amount||0).toFixed(2)}</div></div>`).join('');
+      document.getElementById('scan-result').style.display='block';
+      window._scanResult=parsed;
+    }
+  }catch{
+    document.getElementById('scan-error').textContent='Could not read receipt. Try a clearer photo.';
+    document.getElementById('scan-error').style.display='block';
+  }
+  document.getElementById('scan-spinner').style.display='none';
+}
+
+function logReceipt(){
+  if(!window._scanResult) return;
+  const r=window._scanResult;
+  receiptLog.unshift({vendor:r.vendor,category:r.category,total:r.total,date:'Today'});
+  updateReceiptLog();
+  clearReceipt();
+  window._scanResult=null;
+}
+
+function updateReceiptLog(){
+  const total=receiptLog.reduce((a,r)=>a+r.total,0);
+  document.getElementById('rlog-total').textContent='$'+total.toLocaleString();
+  document.getElementById('rlog-count').textContent=receiptLog.length;
+  document.getElementById('rlog-list').innerHTML=receiptLog.map(r=>`<div class="rlog-item"><div style="font-size:16px">🧾</div><div style="flex:1"><div style="font-weight:700;font-size:13px">${r.vendor}</div><div style="font-size:11px;color:var(--muted)">${r.category} · ${r.date}</div></div><div class="mono" style="color:var(--lcg);font-weight:700">$${r.total}</div></div>`).join('');
+}
+
+// ── RECIPES ───────────────────────────────────────────
+function setRecipeFilter(f){
+  recipeFilter=f;
+  ['All','Signature','Classic','Premium'].forEach(fi=>{
+    const el=document.getElementById('rf-'+fi.toLowerCase().substring(0,3));
+    if(el) el.classList.toggle('on',fi===f);
+  });
+  renderRecipes();
+}
+
+function filterRecipes(){ renderRecipes(); }
+
+function renderRecipes(){
+  const search=(document.getElementById('recipe-search')||{}).value||'';
+  const filtered=RECIPES.filter(r=>{
+    const ms=r.name.toLowerCase().includes(search.toLowerCase())||r.ingredients.some(i=>i.name.toLowerCase().includes(search.toLowerCase()));
+    const mf=recipeFilter==='All'||r.tag===recipeFilter;
+    return ms&&mf;
+  });
+  const L=lang==='es';
+  document.getElementById('recipe-items').innerHTML=filtered.map(r=>`
+    <div class="ritem" onclick="openRecipe(${r.id})">
+      <div class="ritem-top">
+        <div class="ritem-name">${r.emoji} ${r.name}</div>
+        <div class="rmargin">${Math.round(((r.price-r.cost)/r.price)*100)}% ${L?'margen':'margin'}</div>
+      </div>
+      <div class="ritem-meta">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
+    </div>
+  `).join('');
+}
+
+function openRecipe(id){
+  currentRecipe=RECIPES.find(r=>r.id===id);
+  if(!currentRecipe) return;
+  const L=lang==='es';
+  document.getElementById('recipe-list-view').style.display='none';
+  document.getElementById('recipe-detail-view').style.display='block';
+  document.getElementById('rd-emoji').textContent=currentRecipe.emoji;
+  document.getElementById('rd-name').textContent=currentRecipe.name;
+  document.getElementById('rd-meta').textContent=`${currentRecipe.tag} · ${currentRecipe.glass} · ${currentRecipe.garnish}`;
+  document.getElementById('rd-cost').textContent='$'+currentRecipe.cost;
+  document.getElementById('rd-price').textContent='$'+currentRecipe.price;
+  document.getElementById('rd-margin').textContent=Math.round(((currentRecipe.price-currentRecipe.cost)/currentRecipe.price)*100)+'%';
+  document.getElementById('rd-time').textContent=currentRecipe.prepTime;
+  document.getElementById('rd-ingredients').innerHTML=currentRecipe.ingredients.map(i=>`<div class="ingrow"><div class="ingamt">${i.amount}</div><div class="ingname">${i.name}</div>${i.note?`<div class="ingnote">${i.note}</div>`:''}</div>`).join('');
+  document.getElementById('rd-steps').innerHTML=currentRecipe.steps.map((s,i)=>`<div class="steprow"><div class="stepnum">${i+1}</div><div class="steptext">${s}</div></div>`).join('');
+}
+
+function closeRecipe(){
+  document.getElementById('recipe-list-view').style.display='block';
+  document.getElementById('recipe-detail-view').style.display='none';
+}
+
+// ── CHECKLIST ─────────────────────────────────────────
+function renderChecklist(){
+  const L=lang==='es';
+  const container=document.getElementById('checklist-items');
+  let html='';
+  Object.entries(CHECKLIST).forEach(([group,items])=>{
+    html+=`<div class="cgroup-t">${group}</div>`;
+    items.forEach(item=>{
+      const done=checked[item]||false;
+      html+=`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+        <div class="cbox ${done?'done':''}">${done?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
+        <span class="ctxt ${done?'done':''}">${item}</span>
+      </div>`;
+    });
+  });
+  container.innerHTML=html;
+  updateChecklistProgress();
+}
+
+function toggleCheck(item){
+  checked[item]=!checked[item];
+  renderChecklist();
+}
+
+function updateChecklistProgress(){
+  const all=Object.values(CHECKLIST).flat();
+  const done=all.filter(i=>checked[i]).length;
+  const pct=Math.round((done/all.length)*100);
+  document.getElementById('check-bar').style.width=pct+'%';
+  document.getElementById('check-count').textContent=`${done}/${all.length} complete — ${pct}%`;
+  const btn=document.getElementById('submit-btn');
+  const L=lang==='es';
+  if(done===all.length){
+    btn.className='subbtn ready';
+    btn.textContent=L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT';
+  } else {
+    btn.className='subbtn locked';
+    btn.textContent=L?`COMPLETA LA LISTA PRIMERO (${all.length-done} restantes)`:`COMPLETE CHECKLIST FIRST (${all.length-done} remaining)`;
+  }
+}
+
+function submitCloseout(){
+  const all=Object.values(CHECKLIST).flat();
+  const done=all.filter(i=>checked[i]).length;
+  if(done<all.length) return;
+  document.getElementById('closeout-submitted').style.display='block';
+  document.getElementById('closeout-form-inner').style.display='none';
+}
+
+// ── INIT ──────────────────────────────────────────────
+renderRecipes();
+renderChecklist();
+</script>
+</body>
+</html>
