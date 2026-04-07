@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>CantinaPro — Bar Management App</title>
@@ -20,7 +20,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .auth-tabs{display:flex;background:var(--s2);border-radius:8px;overflow:hidden;margin-bottom:20px;}
 .auth-tab{flex:1;padding:10px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
 .auth-tab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.mode-toggle{display:flex;gap:10px;margin-bottom:20px;justify-content:center;}
+.mode-toggle{display:flex;gap:10px;margin-bottom:20px;justify-content:center;width:100%;max-width:360px;}
 .mode-btn{padding:12px 20px;border:1px solid var(--border);border-radius:10px;background:var(--s2);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .2s;flex:1;}
 .mode-btn.on{background:linear-gradient(135deg,var(--lc),#a00020);border-color:var(--lc);color:#fff;}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
@@ -34,11 +34,10 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0;}
 .pin-btn{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;cursor:pointer;transition:all .2s;text-align:center;}
 .pin-btn:hover{background:var(--s3);border-color:var(--lc);}
-.pin-btn.del{color:var(--red);}
 .pin-display{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:28px;letter-spacing:8px;margin-bottom:4px;min-height:54px;}
 .staff-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;}
 .staff-sel-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .2s;text-align:center;}
-.staff-sel-card:hover,.staff-sel-card.on{border-color:var(--lc);background:rgba(200,16,46,.1);}
+.staff-sel-card:hover{border-color:var(--lc);background:rgba(200,16,46,.1);}
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
 .hdr-logo{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:var(--lc);}
 .hdr-bar{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--lcg);letter-spacing:1px;}
@@ -80,6 +79,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
 .action-btn.blue{background:linear-gradient(135deg,var(--blue),#2266cc);color:#fff;}
 .action-btn.purple{background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff;}
+.action-btn.gold{background:linear-gradient(135deg,var(--gold),var(--amber));color:#000;}
 .action-btn:disabled{opacity:.5;cursor:not-allowed;}
 .btn-sm{padding:5px 10px;border:none;border-radius:5px;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;cursor:pointer;}
 .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
@@ -130,7 +130,6 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .day-tab{flex-shrink:0;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--s2);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s;text-align:center;min-width:48px;}
 .day-tab.on{background:var(--lc);border-color:var(--lc);color:#fff;}
 .day-tab.has-open{border-color:var(--red);color:var(--red);}
-.day-tab.on.has-open{background:var(--lc);border-color:var(--lc);color:#fff;}
 .shift-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
 .shift-card.open{border-color:rgba(255,68,85,.4);background:rgba(255,68,85,.04);}
 .shift-card.covered{border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.04);}
@@ -152,6 +151,8 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .lct{font-family:'Bebas Neue',cursive;font-size:44px;letter-spacing:4px;color:var(--lc);line-height:1;}
 .lcd{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;}
 .my-shift-highlight{background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.3);border-radius:8px;padding:14px;margin-bottom:12px;text-align:center;}
+.link-box{background:var(--s2);border:1px solid var(--lcg);border-radius:8px;padding:12px;margin-bottom:8px;}
+.link-url{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);word-break:break-all;margin-bottom:10px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -189,21 +190,23 @@ const RECIPES=[
     steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
 ];
 
+// ── URL PARAM ──────────────────────────────────────────
+function getBarIdFromURL(){
+  const params=new URLSearchParams(window.location.search);
+  return params.get('bar');
+}
+
 // ── STATE ──────────────────────────────────────────────
 let S={
-  // auth
   user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
   checklist:{},closeoutSubmitted:false,
   tab:'dashboard',lang:'en',authMode:'login',authLoading:false,authError:'',appLoading:true,
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
-  // staff login
-  loginMode:'owner', // 'owner' or 'staff'
-  staffLoginStep:'select', // 'select' or 'pin'
-  staffLoginBar:null,staffLoginBars:[],staffLoginStaff:[],
+  loginMode:'owner',
+  staffLoginStep:'select',staffLoginStaff:[],
   staffLoginSelected:null,staffPinInput:'',staffPinError:'',
-  staffUser:null, // logged in staff member
-  // modals
-  showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
+  staffUser:null,
+  showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,showStaffLinkModal:false,
   newStaff:{name:'',role:'',pin:''},newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
   newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
   newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:''},
@@ -212,11 +215,13 @@ let S={
   liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
   recipeSearch:'',recipeFilter:'All',
   schedDay:new Date().getDay(),
+  urlBarId:null,
 };
 
 function ac(idx){return COLORS[idx%COLORS.length];}
 function ai(name){return(name||'?').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();}
 function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
+function getStaffLink(){return `${window.location.origin}${window.location.pathname}?bar=${S.bar?.id}`;}
 
 // ── INIT ───────────────────────────────────────────────
 async function init(){
@@ -224,7 +229,23 @@ async function init(){
     S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
   },1000);
-  const {data:{session}}=await db.auth.getSession();
+
+  // Check URL for bar ID (staff link)
+  const urlBarId=getBarIdFromURL();
+  if(urlBarId){
+    S.urlBarId=urlBarId;
+    S.loginMode='staff';
+    // Load bar and staff directly
+    const{data:bar}=await db.from('bars').select('*').eq('id',urlBarId).single();
+    if(bar){
+      S.bar=bar;
+      const{data:staff}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
+      S.staffLoginStaff=staff||[];
+    }
+    S.appLoading=false;render();return;
+  }
+
+  const{data:{session}}=await db.auth.getSession();
   if(session){S.user=session.user;await loadBar();}
   S.appLoading=false;render();
   db.auth.onAuthStateChange(async(_,session)=>{
@@ -235,7 +256,7 @@ async function init(){
 }
 
 async function loadBar(){
-  const {data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
+  const{data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
   if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules()]);}
 }
 async function loadStaff(){if(!S.bar)return;const{data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
@@ -250,16 +271,6 @@ async function loadSchedules(){
 }
 
 // ── STAFF LOGIN ─────────────────────────────────────────
-async function loadBarsForStaffLogin(){
-  const{data}=await db.from('bars').select('id,name,location').order('name');
-  S.staffLoginBars=data||[];
-}
-async function selectBarForStaff(bar){
-  S.staffLoginBar=bar;
-  const{data}=await db.from('staff').select('*').eq('bar_id',bar.id).order('name');
-  S.staffLoginStaff=data||[];
-  S.staffLoginStep='select';render();
-}
 async function selectStaffMember(member){
   S.staffLoginSelected=member;
   S.staffLoginStep='pin';S.staffPinInput='';S.staffPinError='';render();
@@ -267,16 +278,13 @@ async function selectStaffMember(member){
 function pinPress(val){
   if(val==='del'){S.staffPinInput=S.staffPinInput.slice(0,-1);}
   else if(S.staffPinInput.length<4){S.staffPinInput+=val;}
-  if(S.staffPinInput.length===4) verifyPin();
+  if(S.staffPinInput.length===4)verifyPin();
   else render();
 }
 async function verifyPin(){
-  render();
   const member=S.staffLoginSelected;
   if(!member.pin||member.pin.toString()===S.staffPinInput.toString()){
-    // PIN correct (or no PIN set)
     S.staffUser=member;
-    S.bar=S.staffLoginBar;
     await loadSchedules();
     await loadStaff();
     S.tab='my-schedule';
@@ -288,9 +296,17 @@ async function verifyPin(){
   render();
 }
 function staffLogout(){
-  S.staffUser=null;S.bar=null;S.staffLoginBar=null;S.staffLoginSelected=null;
-  S.staffLoginStep='select';S.staffPinInput='';S.schedules=[];S.bids=[];S.staff=[];
-  S.loginMode='owner';S.checklist={};S.closeoutSubmitted=false;
+  S.staffUser=null;
+  if(S.urlBarId){
+    // Staff came via link — go back to staff select
+    S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';
+    S.schedules=[];S.bids=[];S.staff=S.staffLoginStaff;
+    S.checklist={};S.closeoutSubmitted=false;S.clockedIn=[];
+  }else{
+    S.staffUser=null;S.bar=null;S.staffLoginStaff=[];S.staffLoginStep='select';
+    S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.staff=[];
+    S.loginMode='owner';S.checklist={};S.closeoutSubmitted=false;
+  }
   render();
 }
 
@@ -312,7 +328,9 @@ async function handleAuth(){
 async function logout(){
   await db.auth.signOut();
   Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,staffUser:null});
-  render();
+  // If came via URL, reload to clear params
+  if(S.urlBarId)window.location.href=window.location.pathname;
+  else render();
 }
 
 // ── DATA OPS ────────────────────────────────────────────
@@ -324,8 +342,8 @@ async function deleteInv(id){await db.from('inventory').delete().eq('id',id);awa
 async function updateStock(id,val){await db.from('inventory').update({stock:val,updated_at:new Date()}).eq('id',id);await loadInventory();render();}
 async function saveShift(){
   if(!S.newShift.start_time||!S.newShift.end_time||!S.bar)return;
-  const staffMember=S.staff.find(s=>s.id===S.newShift.staff_id);
-  await db.from('schedules').insert({bar_id:S.bar.id,staff_id:S.newShift.staff_id||null,staff_name:staffMember?staffMember.name:'OPEN',day_of_week:parseInt(S.newShift.day_of_week),start_time:S.newShift.start_time,end_time:S.newShift.end_time,role:S.newShift.role,status:S.newShift.staff_id?'scheduled':'open'});
+  const sm=S.staff.find(s=>s.id===S.newShift.staff_id);
+  await db.from('schedules').insert({bar_id:S.bar.id,staff_id:S.newShift.staff_id||null,staff_name:sm?sm.name:'OPEN',day_of_week:parseInt(S.newShift.day_of_week),start_time:S.newShift.start_time,end_time:S.newShift.end_time,role:S.newShift.role,status:S.newShift.staff_id?'scheduled':'open'});
   S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:''};S.showShiftModal=false;await loadSchedules();render();
 }
 async function deleteShift(id){await db.from('schedules').delete().eq('id',id);await loadSchedules();render();}
@@ -370,85 +388,36 @@ async function generateCaption(photo){
   }catch{S.photoCaption='Could not generate caption.';}
   S.generatingCaption=false;render();
 }
+function copyStaffLink(){
+  const link=getStaffLink();
+  navigator.clipboard?.writeText(link).then(()=>{
+    const btn=document.getElementById('copy-link-btn');
+    if(btn){btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='📋 COPY LINK',2000);}
+  });
+}
 
 // ── RENDER ─────────────────────────────────────────────
 function render(){
   const root=document.getElementById('root');
   if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
-  // Staff logged in
   if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();return;}
-  // Owner logged in
   if(S.user&&S.bar){root.innerHTML=renderOwnerApp();return;}
-  // Auth screen
+  // Staff came via URL
+  if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
   root.innerHTML=renderAuth();
 }
 
-// ── AUTH SCREEN ─────────────────────────────────────────
-function renderAuth(){
-  if(S.loginMode==='staff'){
-    return renderStaffAuth();
-  }
-  const isLogin=S.authMode==='login';
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
-    <div class="auth-div"></div>
-    <div class="mode-toggle">
-      <button class="mode-btn on">👑 OWNER</button>
-      <button class="mode-btn" onclick="S.loginMode='staff';loadBarsForStaffLogin();render()">👤 I'M STAFF</button>
-    </div>
-    <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="auth-tab ${isLogin?'on':''}" onclick="S.authMode='login';render()">LOG IN</button>
-        <button class="auth-tab ${!isLogin?'on':''}" onclick="S.authMode='signup';render()">SIGN UP</button>
-      </div>
-      <div class="auth-title">${isLogin?'Welcome Back':'Create Your Bar'}</div>
-      ${S.authError?`<div class="auth-err">${S.authError}</div>`:''}
-      ${!isLogin?`
-        <div class="field"><label>Bar Name</label><input type="text" placeholder="Local Cantina" value="${S.loginBarName}" oninput="S.loginBarName=this.value"/></div>
-        <div class="field"><label>Location</label><input type="text" placeholder="Oak Lawn, IL" value="${S.loginLocation}" oninput="S.loginLocation=this.value"/></div>
-      `:''}
-      <div class="field"><label>Email</label><input type="email" placeholder="owner@mybar.com" value="${S.loginEmail}" oninput="S.loginEmail=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
-      <div class="field"><label>Password</label><input type="password" placeholder="••••••••" value="${S.loginPassword}" oninput="S.loginPassword=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
-      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'...':(isLogin?'LOG IN':'SIGN UP')}</button>
-      <div style="font-size:11px;color:var(--muted);margin-top:12px">${isLogin?'New bar? Click SIGN UP above':'Already registered? Click LOG IN'}</div>
-    </div>
-  </div>`;
-}
-
-function renderStaffAuth(){
-  if(!S.staffLoginBar){
-    return `<div class="auth-wrap">
-      <div class="auth-logo">CantinaPro</div>
-      <div class="auth-sub">STAFF LOGIN</div>
-      <div class="auth-div"></div>
-      <div class="mode-toggle">
-        <button class="mode-btn" onclick="S.loginMode='owner';render()">👑 OWNER</button>
-        <button class="mode-btn on">👤 I'M STAFF</button>
-      </div>
-      <div class="auth-card">
-        <div class="auth-title">SELECT YOUR BAR</div>
-        ${S.staffLoginBars.length===0?`<div class="spinner"></div>`:''}
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${S.staffLoginBars.map(bar=>`
-            <button onclick="selectBarForStaff(${JSON.stringify(bar).replace(/"/g,'&quot;')})" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);cursor:pointer;text-align:left;transition:all .2s" onmouseover="this.style.borderColor='var(--lc)'" onmouseout="this.style.borderColor='var(--border)'">
-              <div style="font-weight:700;font-size:14px">${bar.name}</div>
-              <div style="font-size:11px;color:var(--muted)">${bar.location||''}</div>
-            </button>
-          `).join('')}
-        </div>
-      </div>
-    </div>`;
-  }
-
+// ── STAFF VIA LINK ──────────────────────────────────────
+function renderStaffViaLink(){
   if(S.staffLoginStep==='select'){
     return `<div class="auth-wrap">
       <div class="auth-logo">CantinaPro</div>
-      <div class="auth-sub">${S.staffLoginBar.name.toUpperCase()}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--lc);margin-top:8px">${S.bar.name}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px">📍 ${S.bar.location||''}</div>
       <div class="auth-div"></div>
       <div class="auth-card">
         <div class="auth-title">WHO ARE YOU?</div>
-        ${S.staffLoginStaff.length===0?`<div class="empty-state">No staff found for this bar.<br/>Ask your manager to add you.</div>`:''}
+        ${S.staffLoginStaff.length===0?`<div class="empty-state">No staff found.<br/>Ask your manager to add you to the app.</div>`:''}
         <div class="staff-select-grid">
           ${S.staffLoginStaff.map((s,i)=>`
             <div class="staff-sel-card" onclick="selectStaffMember(${JSON.stringify(s).replace(/"/g,'&quot;')})">
@@ -458,7 +427,6 @@ function renderStaffAuth(){
             </div>
           `).join('')}
         </div>
-        <button onclick="S.staffLoginBar=null;render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;margin-top:10px">← Different bar</button>
       </div>
     </div>`;
   }
@@ -481,7 +449,7 @@ function renderStaffAuth(){
         <div class="pin-display">${dots}</div>
         <div class="pin-grid">
           ${['1','2','3','4','5','6','7','8','9','','0','del'].map(k=>k===''?`<div></div>`:
-            `<button class="pin-btn ${k==='del'?'del':''}" onclick="pinPress('${k}')">${k==='del'?'⌫':k}</button>`).join('')}
+            `<button class="pin-btn" onclick="pinPress('${k}')">${k==='del'?'⌫':k}</button>`).join('')}
         </div>
         <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;margin-top:8px;width:100%;text-align:center">← Back</button>
       </div>
@@ -489,18 +457,44 @@ function renderStaffAuth(){
   }
 }
 
+// ── AUTH SCREEN ─────────────────────────────────────────
+function renderAuth(){
+  const isLogin=S.authMode==='login';
+  return `<div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab ${isLogin?'on':''}" onclick="S.authMode='login';render()">OWNER LOGIN</button>
+        <button class="auth-tab ${!isLogin?'on':''}" onclick="S.authMode='signup';render()">NEW BAR</button>
+      </div>
+      <div class="auth-title">${isLogin?'Welcome Back':'Create Your Bar'}</div>
+      ${S.authError?`<div class="auth-err">${S.authError}</div>`:''}
+      ${!isLogin?`
+        <div class="field"><label>Bar Name</label><input type="text" placeholder="Local Cantina" value="${S.loginBarName}" oninput="S.loginBarName=this.value"/></div>
+        <div class="field"><label>Location</label><input type="text" placeholder="Oak Lawn, IL" value="${S.loginLocation}" oninput="S.loginLocation=this.value"/></div>
+      `:''}
+      <div class="field"><label>Email</label><input type="email" placeholder="owner@mybar.com" value="${S.loginEmail}" oninput="S.loginEmail=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
+      <div class="field"><label>Password</label><input type="password" placeholder="••••••••" value="${S.loginPassword}" oninput="S.loginPassword=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
+      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'...':(isLogin?'LOG IN':'CREATE BAR')}</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px">${isLogin?'New bar? Click NEW BAR above':'Already registered? Click OWNER LOGIN'}</div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
+  </div>`;
+}
+
 // ── STAFF APP ───────────────────────────────────────────
 function renderStaffApp(){
   const L=S.lang==='es';
   const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
-  const todayShifts=S.schedules.filter(s=>s.day_of_week===new Date().getDay());
   const myTodayShift=myShifts.find(s=>s.day_of_week===new Date().getDay());
   const openShifts=S.schedules.filter(s=>s.status==='open');
-  const myBids=S.bids.filter(b=>b.staff_id===S.staffUser.id&&b.status==='pending');
   const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
   const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
   const allDone=checkedCount===ALL_ITEMS.length;
   const isClockedIn=S.clockedIn.includes(S.staffUser.id);
+  const filteredRecipes=RECIPES.filter(r=>r.name.toLowerCase().includes(S.recipeSearch.toLowerCase())&&(S.recipeFilter==='All'||r.tag===S.recipeFilter));
 
   const STAFF_TABS=[
     {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
@@ -509,18 +503,9 @@ function renderStaffApp(){
     {key:'staff-closeout',icon:'✅',label:L?'Cierre':'Closeout'},
   ];
 
-  const filteredRecipes=RECIPES.filter(r=>{
-    const ms=r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
-    const mf=S.recipeFilter==='All'||r.tag===S.recipeFilter;
-    return ms&&mf;
-  });
-
   return `<div class="app">
     <header class="hdr">
-      <div>
-        <div class="hdr-logo">CantinaPro</div>
-        <div class="hdr-bar">${S.bar.name} · ${S.bar.location||''}</div>
-      </div>
+      <div><div class="hdr-logo">CantinaPro</div><div class="hdr-bar">${S.bar.name}</div></div>
       <div class="hdr-r">
         <div class="lang-wrap">
           <button class="lb ${!L?'on':''}" onclick="S.lang='en';render()">EN</button>
@@ -530,24 +515,16 @@ function renderStaffApp(){
         <button class="logout-btn" onclick="staffLogout()">OUT</button>
       </div>
     </header>
-
     <main class="main">
 
     ${S.tab==='my-schedule'?`
       <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
-
       ${myTodayShift?`<div class="my-shift-highlight">
         <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:4px">YOUR SHIFT TODAY</div>
         <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:3px">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
         <div style="font-size:12px;color:var(--muted)">${myTodayShift.role||'Staff'}</div>
       </div>`:''}
-
-      ${openShifts.length>0?`<div class="open-banner">
-        <div style="font-size:20px">🔴</div>
-        <div><div style="font-weight:700;font-size:14px">${openShifts.length} Open Shift${openShifts.length!==1?'s':''} Available</div>
-        <div style="font-size:12px;color:var(--muted)">Tap any open shift to bid</div></div>
-      </div>`:''}
-
+      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:20px">🔴</div><div><div style="font-weight:700;font-size:14px">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:12px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
       <div class="day-tabs">
         ${DAYS.map((d,i)=>{
           const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
@@ -556,9 +533,7 @@ function renderStaffApp(){
           </button>`;
         }).join('')}
       </div>
-
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.</div>`:''}
-
+      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.</div>`:''}
       ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
         const isMyShift=shift.staff_id===S.staffUser.id;
         const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
@@ -577,18 +552,16 @@ function renderStaffApp(){
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
               ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red)" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              ${shift.status==='open'&&!isMyShift?
-                hasBid?`<span style="font-size:10px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
+              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:10px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
                 `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green)" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
             </div>
           </div>
         </div>`;
       }).join('')}
-
       ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">DROP THIS SHIFT</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:14px">This will mark your shift as open so other staff can bid. Your manager will be notified.</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Your shift will open up for others to bid. Your manager will be notified.</div>
           <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
@@ -605,18 +578,15 @@ function renderStaffApp(){
         <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:4px">TODAY'S SHIFT</div>
         <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:3px">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
         <div style="font-size:12px;color:var(--muted)">${myTodayShift.role||'Staff'}</div>
-      </div>`:`<div style="background:rgba(107,107,128,.08);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;text-align:center;color:var(--muted);font-size:13px">No shift scheduled for today.<br/>Check the Schedule tab for open shifts.</div>`}
+      </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;text-align:center;color:var(--muted);font-size:13px">No shift scheduled for today.</div>`}
       <div class="card">
         ${isClockedIn?`
-          <div style="text-align:center;margin-bottom:12px">
-            <div style="font-size:12px;color:var(--muted);letter-spacing:1px">CLOCKED IN</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:32px;color:var(--green)">ACTIVE</div>
-          </div>
+          <div style="text-align:center;margin-bottom:12px"><div style="font-size:12px;color:var(--muted);letter-spacing:1px">CLOCKED IN</div><div style="font-family:'Bebas Neue',cursive;font-size:32px;color:var(--green)">ACTIVE</div></div>
           <button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.staffUser.id}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>
         `:`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.staffUser.id}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`}
       </div>
       <div class="card">
-        <div class="ct">${L?'BRIEFING':'SHIFT BRIEFING'}</div>
+        <div class="ct">BRIEFING</div>
         <div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:6px;padding:10px;font-size:13px;line-height:1.7">${L?'Bienvenidos al turno. Revisen el inventario, atiendan a los clientes con reservación y reporten incidentes al manager.':'Welcome to your shift. Check inventory levels, take care of reservation guests, and report any incidents to the manager.'}</div>
       </div>
     `:''}
@@ -625,17 +595,14 @@ function renderStaffApp(){
       <div class="sec-title">🍹 ${L?'RECETAS':'RECIPE BOOK'}</div>
       <div style="display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px">
         <span style="color:var(--muted)">🔍</span>
-        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;flex:1;outline:none;width:100%" placeholder="${L?'Buscar recetas...':'Search recipes...'}" value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
+        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
         ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.12)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:5px 12px;border-radius:20px;cursor:pointer" onclick="S.recipeFilter='${f}';render()">${f==='All'?(L?'Todos':'All'):f}</button>`).join('')}
       </div>
       ${filteredRecipes.map(r=>`
         <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="font-weight:700;font-size:14px">${r.emoji} ${r.name}</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green)">${margin(r)}% margin</div>
-          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-weight:700;font-size:14px">${r.emoji} ${r.name}</div><div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green)">${margin(r)}% margin</div></div>
           <div style="font-size:11px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime}</div>
         </div>
         <div style="display:none;background:var(--s1);border:1px solid var(--lc);border-radius:10px;padding:14px;margin-bottom:12px;margin-top:-4px">
@@ -648,29 +615,25 @@ function renderStaffApp(){
     `:''}
 
     ${S.tab==='staff-closeout'?`
-      <div class="sec-title">✅ ${L?'CIERRE DE NOCHE':'END OF NIGHT'}</div>
+      <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
       <div class="card">
-        <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${L?'Completa todo antes de irte':'Complete all items before leaving'}</div>
+        <div class="ct">CLOSING CHECKLIST</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${checkedCount}/${ALL_ITEMS.length} — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`
-            <div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-              <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
-              <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-            </div>
-          `).join('')}
+          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
+            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+          </div>`).join('')}
         `).join('')}
-        ${S.closeoutSubmitted?`<div class="success-box">✓ ${L?'CIERRE ENVIADO':'CLOSEOUT SUBMITTED!'}</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
+        ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
         `}
       </div>
     `:''}
 
     </main>
-
     <nav class="bot-nav">
       ${STAFF_TABS.map(tab=>`<button class="nb ${S.tab===tab.key?'on':''}" onclick="S.tab='${tab.key}';render()"><span class="ni">${tab.icon}</span><span class="nl">${tab.label}</span></button>`).join('')}
     </nav>
@@ -688,6 +651,8 @@ function renderOwnerApp(){
   const allDone=checkedCount===ALL_ITEMS.length;
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
+  const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
+  const filteredRecipes=RECIPES.filter(r=>r.name.toLowerCase().includes(S.recipeSearch.toLowerCase())&&(S.recipeFilter==='All'||r.tag===S.recipeFilter));
 
   const TABS=[
     {key:'dashboard',icon:'📊',label:L?'Inicio':'Home'},
@@ -697,13 +662,6 @@ function renderOwnerApp(){
     {key:'gallery',icon:'📸',label:L?'Galería':'Gallery'},
     {key:'closeout',icon:'✅',label:L?'Cierre':'Close'},
   ];
-
-  const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
-  const filteredRecipes=RECIPES.filter(r=>{
-    const ms=r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
-    const mf=S.recipeFilter==='All'||r.tag===S.recipeFilter;
-    return ms&&mf;
-  });
 
   return `<div class="app">
     <header class="hdr">
@@ -717,29 +675,39 @@ function renderOwnerApp(){
         <div class="sdot"></div>
       </div>
     </header>
-
     <main class="main">
 
     ${S.tab==='dashboard'?`
       <div class="sec-title">${L?'RESUMEN':'OVERVIEW'}</div>
       <div class="kpi-grid">
-        <div class="kpi lc"><div class="kl">${L?'Ventas Hoy':'Today\'s Sales'}</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries</div></div>
-        <div class="kpi g"><div class="kl">${L?'Semana':'Week'}</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
-        <div class="kpi b"><div class="kl">${L?'Personal':'Staff'}</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
-        <div class="kpi r"><div class="kl">${L?'Stock Bajo':'Low Stock'}</div><div class="kv">${lowItems}</div><div class="kd">Below par</div></div>
+        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries</div></div>
+        <div class="kpi g"><div class="kl">Week</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
+        <div class="kpi b"><div class="kl">Staff</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
+        <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Below par</div></div>
       </div>
       ${openShifts>0?`<div class="open-banner"><div style="font-size:20px">⚠️</div><div><div style="font-weight:700;font-size:14px">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:12px;color:var(--muted)">Staff needed</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
       ${pendingBids>0?`<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:8px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px"><div style="font-size:20px">🙋</div><div><div style="font-weight:700;font-size:14px">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:12px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
-      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:12px">+ ${L?'Registrar Ventas':'Log Sales'}</button>
+
+      <!-- STAFF LINK BOX -->
       <div class="card">
-        <div class="ct">${L?'VENTAS RECIENTES':'RECENT SALES'}</div>
+        <div class="ct">👤 STAFF PORTAL LINK</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share this link with your staff. They tap it, select their name, enter their PIN, and they're in.</div>
+        <div class="link-box">
+          <div class="link-url">${getStaffLink()}</div>
+          <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
+        </div>
+      </div>
+
+      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:12px">+ LOG SALES</button>
+      <div class="card">
+        <div class="ct">RECENT SALES</div>
         ${S.sales.length===0?`<div class="empty-state">No sales logged yet.</div>`:
           S.sales.slice(0,5).map(s=>`<div class="row"><div style="flex:1"><div style="font-weight:700;font-size:14px">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div><div style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div></div><div style="font-size:11px;color:var(--muted);text-align:right"><div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div><div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div></div></div>`).join('')}
       </div>
     `:''}
 
     ${S.tab==='schedule'?`
-      <div class="sec-title">📅 ${L?'HORARIO':'SCHEDULE'}</div>
+      <div class="sec-title">📅 SCHEDULE</div>
       <div class="day-tabs">
         ${DAYS.map((d,i)=>{
           const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
@@ -748,8 +716,8 @@ function renderOwnerApp(){
           </button>`;
         }).join('')}
       </div>
-      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:12px">+ ${L?'Añadir Turno':'Add Shift'}</button>
-      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap "+ Add Shift" above.</div>`:''}
+      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:12px">+ ADD SHIFT</button>
+      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.</div>`:''}
       ${dayShifts.map(shift=>{
         const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
         const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
@@ -772,7 +740,7 @@ function renderOwnerApp(){
           </div>
           ${shift.status==='open'&&S.staff.length>0?`
             <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-              <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">AVAILABLE STAFF TO BID</div>
+              <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">AVAILABLE STAFF</div>
               ${S.staff.map((st,i)=>{
                 const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
                 return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
@@ -796,7 +764,6 @@ function renderOwnerApp(){
           `:''}
         </div>`;
       }).join('')}
-
       ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay]}</div>
@@ -817,7 +784,6 @@ function renderOwnerApp(){
           </div>
         </div>
       </div>`:''}
-
       ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">DROP SHIFT</div>
@@ -831,11 +797,11 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='shift'?`
-      <div class="sec-title">⏰ ${L?'TURNO':'SHIFT'}</div>
+      <div class="sec-title">⏰ SHIFT</div>
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
       <div class="card">
         <div class="ct">CLOCK IN / OUT</div>
-        ${S.staff.length===0?`<div class="empty-state">No staff yet. Add staff in the Shift tab.</div>`:''}
+        ${S.staff.length===0?`<div class="empty-state">No staff yet.</div>`:''}
         <div class="staff-grid">
           ${S.staff.map((s,i)=>{
             const isIn=S.clockedIn.includes(s.id);
@@ -870,7 +836,7 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='inventory'?`
-      <div class="sec-title">📦 ${L?'INVENTARIO':'INVENTORY'}</div>
+      <div class="sec-title">📦 INVENTORY</div>
       <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:12px">+ ADD ITEM</button>
       <div class="card" style="padding:0;overflow:hidden">
         ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory yet.</div>`:`
@@ -912,7 +878,7 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='gallery'?`
-      <div class="sec-title">📸 ${L?'GALERÍA':'GALLERY'}</div>
+      <div class="sec-title">📸 GALLERY</div>
       ${S.selectedPhoto?`
         <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;margin-bottom:12px">← BACK</button>
         <div class="card">
@@ -949,7 +915,7 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='closeout'?`
-      <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
+      <div class="sec-title">✅ END OF NIGHT</div>
       <div class="card">
         <div class="ct">CLOSING CHECKLIST</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
@@ -1005,7 +971,6 @@ function renderOwnerApp(){
     </div>`:''}
 
     </main>
-
     <nav class="bot-nav">
       ${TABS.map(tab=>`<button class="nb ${S.tab===tab.key?'on':''}" onclick="S.tab='${tab.key}';render()"><span class="ni">${tab.icon}</span><span class="nl">${tab.label}</span>${tab.badge?`<span class="nbadge">${tab.badge}</span>`:''}</button>`).join('')}
     </nav>
