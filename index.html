@@ -23,25 +23,24 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .auth-sub{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--lcg);margin-top:4px;}
 .auth-div{width:60px;height:2px;background:linear-gradient(90deg,var(--lc),var(--lcg));margin:24px auto;}
 .auth-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:360px;}
-.auth-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;color:var(--text);margin-bottom:20px;}
+.auth-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;margin-bottom:20px;}
 .auth-tabs{display:flex;background:var(--s2);border-radius:8px;overflow:hidden;margin-bottom:20px;}
 .auth-tab{flex:1;padding:10px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
 .auth-tab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
 .field label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
-.field input{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;}
-.field input:focus{border-color:var(--lc);}
-.auth-btn{width:100%;padding:14px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-top:4px;}
-.auth-btn:hover{filter:brightness(1.1);}
+.field input,.field select,.field textarea{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;}
+.field input:focus,.field select:focus{border-color:var(--lc);}
+.field textarea{resize:vertical;min-height:60px;}
+.auth-btn{width:100%;padding:14px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:3px;cursor:pointer;margin-top:4px;}
 .auth-btn:disabled{opacity:.6;cursor:not-allowed;}
 .auth-err{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.3);border-radius:6px;padding:10px;font-size:13px;color:var(--red);margin-bottom:12px;}
-.auth-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;}
 
 /* HEADER */
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
 .hdr-logo{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:var(--lc);}
-.hdr-bar{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--lcg);letter-spacing:1px;margin-top:1px;}
-.hdr-r{display:flex;align-items:center;gap:10px;}
+.hdr-bar{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--lcg);letter-spacing:1px;}
+.hdr-r{display:flex;align-items:center;gap:8px;}
 .lang-wrap{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
 .lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:4px 8px;cursor:pointer;}
 .lb.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
@@ -51,16 +50,17 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 
 /* BOTTOM NAV */
 .bot-nav{background:var(--s1);border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:100;}
-.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-top:2px solid transparent;transition:all .2s;}
+.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:8px 2px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-top:2px solid transparent;transition:all .2s;position:relative;}
 .nb.on{color:var(--lc);border-top-color:var(--lc);}
-.ni{font-size:18px;line-height:1;}
-.nl{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.ni{font-size:16px;line-height:1;}
+.nl{font-size:8px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.nbadge{position:absolute;top:4px;right:10%;background:var(--red);color:#fff;font-size:8px;border-radius:8px;padding:1px 4px;font-weight:700;}
 
 /* MAIN */
 .main{flex:1;padding:14px;padding-bottom:74px;}
 .tab-content{display:none;}
 .tab-content.on{display:block;}
-.sec-title{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sec-title{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
 .ct{font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--muted);margin-bottom:12px;}
@@ -81,34 +81,30 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .kpi.b .kv{color:var(--blue);}
 .kd{font-size:11px;color:var(--muted);}
 
-/* FORMS */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.action-btn{width:100%;padding:13px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:8px;}
+/* BUTTONS */
+.action-btn{width:100%;padding:12px;border:none;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:8px;}
 .action-btn.red{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
 .action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
 .action-btn.blue{background:linear-gradient(135deg,var(--blue),#2266cc);color:#fff;}
 .action-btn.gold{background:linear-gradient(135deg,var(--gold),var(--amber));color:#000;}
+.action-btn.purple{background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff;}
 .action-btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sm{padding:6px 12px;border:none;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer;}
 
 /* ROWS */
 .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
 .row:last-child{border-bottom:none;}
 .mono{font-family:'Share Tech Mono',monospace;}
 
-/* STAFF */
-.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.staff-pick{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .2s;position:relative;}
-.staff-pick:hover{border-color:var(--lc);}
-.staff-pick.on{background:rgba(200,16,46,.1);border-color:var(--lc);}
+/* AVATAR */
 .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;}
-.del-btn{position:absolute;top:6px;right:6px;background:rgba(255,68,85,.15);border:none;color:var(--red);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
 
 /* INVENTORY */
 .inv-table{width:100%;border-collapse:collapse;}
-.inv-table th{font-size:10px;letter-spacing:1px;color:var(--muted);padding:8px;text-align:left;border-bottom:1px solid var(--border);text-transform:uppercase;}
-.inv-table td{padding:10px 8px;border-bottom:1px solid var(--border);font-size:13px;}
+.inv-table th{font-size:9px;letter-spacing:1px;color:var(--muted);padding:8px;text-align:left;border-bottom:1px solid var(--border);text-transform:uppercase;}
+.inv-table td{padding:9px 8px;border-bottom:1px solid var(--border);font-size:13px;}
 .inv-table tr:last-child td{border-bottom:none;}
-.stock-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.stock-pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;}
 .stock-ok{background:#0d3320;color:var(--green);}
 .stock-low{background:#3d1800;color:#ff9040;}
 .stock-out{background:#2d0008;color:var(--red);}
@@ -116,14 +112,14 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 /* CHECKLIST */
 .cprog{background:var(--s2);border-radius:4px;overflow:hidden;height:6px;margin-bottom:10px;}
 .cbar{height:100%;background:var(--green);border-radius:4px;transition:width .3s;}
-.cgroup-t{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:14px;font-weight:700;}
-.citem{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.cgroup-t{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:12px;font-weight:700;}
+.citem{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;}
 .citem:last-child{border-bottom:none;}
 .cbox{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .cbox.done{background:var(--green);border-color:var(--green);}
-.ctxt{font-size:14px;font-weight:500;}
+.ctxt{font-size:13px;font-weight:500;}
 .ctxt.done{color:var(--muted);text-decoration:line-through;}
-.subbtn{width:100%;padding:14px;border-radius:6px;border:none;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:14px;}
+.subbtn{width:100%;padding:14px;border-radius:6px;border:none;font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:12px;}
 .subbtn.ready{background:var(--gold);color:#000;}
 .subbtn.locked{background:var(--s2);color:var(--muted);cursor:not-allowed;border:1px solid var(--border);}
 
@@ -132,366 +128,351 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .pcard{border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .2s;background:var(--s2);}
 .pcard:hover{border-color:var(--lc);}
 .pcard img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-.photo-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:8px;}
+.photo-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:8px;}
 .photo-label{font-size:10px;color:#fff;font-weight:700;}
 .photo-time{font-size:9px;color:rgba(255,255,255,.6);font-family:'Share Tech Mono',monospace;}
-.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.upzone{border:2px dashed var(--border);border-radius:12px;padding:20px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;}
 .upzone:hover{border-color:var(--lc);}
 
 /* SPINNER */
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:12px auto;}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:12px auto;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-txt{text-align:center;color:var(--muted);font-size:13px;padding:20px;}
+.empty-state{text-align:center;padding:28px 16px;color:var(--muted);font-size:13px;line-height:1.7;}
 
-/* PILLS */
-.pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;}
-.pill.in{background:rgba(0,232,122,.15);color:var(--green);}
-.pill.out{background:rgba(107,107,128,.15);color:var(--muted);}
-.success-box{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:12px;}
-.empty-state{text-align:center;padding:32px 16px;color:var(--muted);font-size:14px;}
+/* SUCCESS */
+.success-box{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:14px;text-align:center;font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;color:var(--green);margin-bottom:12px;}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;}
-.modal{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:20px;width:100%;max-width:360px;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center;z-index:500;padding:0;}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
 .modal-title{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;margin-bottom:16px;}
 .modal-actions{display:flex;gap:8px;margin-top:14px;}
 .modal-actions button{flex:1;padding:10px;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;border:none;cursor:pointer;}
 .btn-cancel{background:var(--s3);color:var(--muted);}
 .btn-save{background:var(--lc);color:#fff;}
 
-/* SHIFT */
-.briefing-hdr{padding:16px;border-radius:8px 8px 0 0;background:linear-gradient(135deg,#1a0008,#0a0a1a);margin-bottom:0;}
-.briefing-body{padding:14px;background:var(--s1);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none;margin-bottom:12px;}
-.brtext{background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:6px;padding:10px;font-size:13px;line-height:1.7;}
-.liveclock{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;}
-.lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
+/* SCHEDULE */
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.week-nav button{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;}
+.week-label{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);}
+.day-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;padding-bottom:2px;}
+.day-tabs::-webkit-scrollbar{display:none;}
+.day-tab{flex-shrink:0;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--s2);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s;text-align:center;min-width:52px;}
+.day-tab.on{background:var(--lc);border-color:var(--lc);color:#fff;}
+.day-tab.has-shifts{border-color:var(--lcg);color:var(--lcg);}
+.day-tab.on.has-shifts{background:var(--lc);border-color:var(--lc);color:#fff;}
+.shift-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;position:relative;}
+.shift-card.open{border-color:rgba(255,68,85,.4);background:rgba(255,68,85,.05);}
+.shift-card.covered{border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.04);}
+.shift-time{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--text);}
+.shift-role{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.shift-staff{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.shift-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.5px;}
+.shift-badge.scheduled{background:rgba(68,136,255,.15);color:var(--blue);}
+.shift-badge.open{background:rgba(255,68,85,.15);color:var(--red);}
+.shift-badge.pending{background:rgba(245,166,35,.15);color:var(--gold);}
+.shift-badge.covered{background:rgba(0,232,122,.15);color:var(--green);}
+.bid-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.bid-row:last-child{border-bottom:none;}
+.open-shifts-banner{background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.25);border-radius:8px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.staff-sched-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
+.sched-day-label{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.my-shift-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;}
+.my-shift-time{font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--text);}
+.clock-wrap{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;}
+.lct{font-family:'Bebas Neue',cursive;font-size:44px;letter-spacing:4px;color:var(--lc);line-height:1;}
 .lcd{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px;}
+.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.staff-pick{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all .2s;}
+.staff-pick:hover,.staff-pick.on{background:rgba(200,16,46,.1);border-color:var(--lc);}
 </style>
 </head>
 <body>
 <div id="root"></div>
-
 <script>
-const SUPABASE_URL = 'https://hfndlrfqijwuxhwydhns.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_IB2dOie5ji9zbXl-JZPu6w_CCrDW2kT';
-const STRIPE_LINK = 'https://buy.stripe.com/3cI5kDeBLgjJ90b8ujbV601';
+const SUPABASE_URL='https://hfndlrfqijwuxhwydhns.supabase.co';
+const SUPABASE_KEY='sb_publishable_IB2dOie5ji9zbXl-JZPu6w_CCrDW2kT';
+const STRIPE_LINK='https://buy.stripe.com/3cI5kDeBLgjJ90b8ujbV601';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const COLORS=['#c8102e','#d4a017','#00e87a','#4488ff','#a855f7','#00d4aa','#ff8c42','#ff6eb4'];
 
-// ── STATE ──────────────────────────────────────────────────────────────────
-let state = {
-  user: null, bar: null, staff: [], sales: [], inventory: [], photos: [],
-  checklist: {}, closeoutSubmitted: false,
-  tab: 'dashboard', lang: 'en', authMode: 'login',
-  authLoading: false, authError: '', appLoading: true,
-  showStaffModal: false, showInvModal: false, showSaleModal: false,
-  newStaff: {name:'',role:'',pin:''},
-  newInv: {name:'',category:'',unit:'',stock:'',par_level:''},
-  newSale: {bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
-  loginEmail:'', loginPassword:'', loginBarName:'', loginLocation:'',
-  clockedIn: [], selectedStaff: null, briefingRead: [],
-  liveTime: '', photoCaption: null, generatingCaption: false,
-  selectedPhoto: null, photoTag: 'Social Media', photoNote: '',
-  recipeSearch: '', recipeFilter: 'All',
-};
-
-const CHECKLIST_DATA = {
+const CHECKLIST_DATA={
   '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms'],
   '🍺 Bar':['Count remaining liquor bottles','Log any breakage or spillage','Restock for next shift','Lock liquor storage'],
   '💰 Cash':['Count cash drawer','Separate tips','Prepare bank deposit','Reconcile card totals'],
   '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm'],
 };
-const ALL_ITEMS = Object.values(CHECKLIST_DATA).flat();
+const ALL_ITEMS=Object.values(CHECKLIST_DATA).flat();
 
-const COLORS = ['#c8102e','#d4a017','#00e87a','#4488ff','#a855f7','#00d4aa','#ff8c42','#ff6eb4'];
-
-const RECIPES = [
+const RECIPES=[
   {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',cost:2.80,price:14,
     ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
-    steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice for 10 seconds.','Double strain over fresh rocks. Lime wheel garnish.']},
+    steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
   {id:2,emoji:'🍺',name:'Michelada',tag:'Signature',glass:'Pint glass',prepTime:'1.5 min',cost:1.60,price:10,
-    ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:"secret — don't skip"}],
+    ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:"secret"}],
     steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
   {id:3,emoji:'🍊',name:'Paloma',tag:'Classic',glass:'Highball',prepTime:'1.5 min',cost:1.90,price:12,
-    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred over Squirt'}],
+    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
     steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
   {id:4,emoji:'🥃',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prepTime:'3 min',cost:3.20,price:16,
     ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
-    steps:['Large ice cube in rocks glass.','Stir all ingredients with ice for 30 seconds.','Strain over the big cube. Orange peel garnish.']},
+    steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
 ];
 
-function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
+// ── STATE ──────────────────────────────────────────────
+let S={
+  user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
+  checklist:{},closeoutSubmitted:false,
+  tab:'dashboard',lang:'en',authMode:'login',
+  authLoading:false,authError:'',appLoading:true,
+  showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
+  newStaff:{name:'',role:'',pin:''},
+  newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
+  newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
+  newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:''},
+  loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
+  clockedIn:[],selectedStaff:null,
+  liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
+  recipeSearch:'',recipeFilter:'All',selectedRecipe:null,
+  schedDay:new Date().getDay(),weekOffset:0,
+  dropShiftId:null,dropReason:'',
+};
 
-// ── INIT ───────────────────────────────────────────────────────────────────
+function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
+function getWeekStart(offset=0){const d=new Date();d.setDate(d.getDate()-d.getDay()+(offset*7));d.setHours(0,0,0,0);return d;}
+function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function avatarColor(idx){return COLORS[idx%COLORS.length];}
+function avatarInitials(name){return name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();}
+
+// ── INIT ───────────────────────────────────────────────
 async function init(){
   setInterval(()=>{
-    const now = new Date();
-    state.liveTime = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const el = document.getElementById('clock-display');
-    if(el) el.textContent = state.liveTime;
+    S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
   },1000);
-
-  const {data:{session}} = await db.auth.getSession();
-  if(session){
-    state.user = session.user;
-    await loadBar();
-  }
-  state.appLoading = false;
-  render();
-
-  db.auth.onAuthStateChange(async (event, session) => {
-    if(session){
-      state.user = session.user;
-      await loadBar();
-    } else {
-      state.user = null; state.bar = null;
-    }
+  const {data:{session}}=await db.auth.getSession();
+  if(session){S.user=session.user;await loadBar();}
+  S.appLoading=false;render();
+  db.auth.onAuthStateChange(async(_,session)=>{
+    if(session){S.user=session.user;await loadBar();}
+    else{S.user=null;S.bar=null;}
     render();
   });
 }
 
 async function loadBar(){
-  const {data} = await db.from('bars').select('*').eq('owner_email', state.user.email).single();
-  if(data){
-    state.bar = data;
-    await Promise.all([loadStaff(), loadSales(), loadInventory(), loadPhotos()]);
-  }
+  const {data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
+  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules()]);}
+}
+async function loadStaff(){if(!S.bar)return;const {data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
+async function loadSales(){if(!S.bar)return;const {data}=await db.from('sales').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(30);S.sales=data||[];}
+async function loadInventory(){if(!S.bar)return;const {data}=await db.from('inventory').select('*').eq('bar_id',S.bar.id).order('name');S.inventory=data||[];}
+async function loadPhotos(){if(!S.bar)return;const {data}=await db.from('photos').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(50);S.photos=data||[];}
+async function loadSchedules(){
+  if(!S.bar)return;
+  const ws=getWeekStart(S.weekOffset);
+  const we=new Date(ws);we.setDate(we.getDate()+6);
+  const {data:scheds}=await db.from('schedules').select('*').eq('bar_id',S.bar.id).order('day_of_week').order('start_time');
+  const {data:bids}=await db.from('shift_bids').select('*').eq('bar_id',S.bar.id);
+  S.schedules=scheds||[];S.bids=bids||[];
 }
 
-async function loadStaff(){
-  if(!state.bar) return;
-  const {data} = await db.from('staff').select('*').eq('bar_id', state.bar.id).order('created_at');
-  state.staff = data||[];
-}
-async function loadSales(){
-  if(!state.bar) return;
-  const {data} = await db.from('sales').select('*').eq('bar_id', state.bar.id).order('created_at', {ascending:false}).limit(30);
-  state.sales = data||[];
-}
-async function loadInventory(){
-  if(!state.bar) return;
-  const {data} = await db.from('inventory').select('*').eq('bar_id', state.bar.id).order('name');
-  state.inventory = data||[];
-}
-async function loadPhotos(){
-  if(!state.bar) return;
-  const {data} = await db.from('photos').select('*').eq('bar_id', state.bar.id).order('created_at',{ascending:false}).limit(50);
-  state.photos = data||[];
-}
-
-// ── AUTH ───────────────────────────────────────────────────────────────────
+// ── AUTH ───────────────────────────────────────────────
 async function handleAuth(){
-  state.authError=''; state.authLoading=true; render();
-  const email = state.loginEmail.trim();
-  const password = state.loginPassword.trim();
-
-  if(state.authMode==='login'){
-    const {data,error} = await db.auth.signInWithPassword({email,password});
-    if(error){ state.authError=error.message; state.authLoading=false; render(); return; }
-  } else {
-    if(!state.loginBarName.trim()){ state.authError='Bar name is required'; state.authLoading=false; render(); return; }
-    const {data,error} = await db.auth.signUp({email,password});
-    if(error){ state.authError=error.message; state.authLoading=false; render(); return; }
-    if(data.user){
-      await db.from('bars').insert({
-        name: state.loginBarName.trim(),
-        location: state.loginLocation.trim(),
-        owner_email: email,
-      });
-    }
+  S.authError='';S.authLoading=true;render();
+  const email=S.loginEmail.trim(),password=S.loginPassword.trim();
+  if(S.authMode==='login'){
+    const {error}=await db.auth.signInWithPassword({email,password});
+    if(error){S.authError=error.message;S.authLoading=false;render();return;}
+  }else{
+    if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
+    const {data,error}=await db.auth.signUp({email,password});
+    if(error){S.authError=error.message;S.authLoading=false;render();return;}
+    if(data.user){await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});}
   }
-  state.authLoading=false; render();
+  S.authLoading=false;render();
 }
-
 async function logout(){
   await db.auth.signOut();
-  state.user=null; state.bar=null; state.staff=[]; state.sales=[]; state.inventory=[]; state.photos=[];
-  state.checklist={}; state.closeoutSubmitted=false;
+  Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null});
   render();
 }
 
-// ── STAFF ──────────────────────────────────────────────────────────────────
+// ── STAFF ──────────────────────────────────────────────
 async function saveStaff(){
-  if(!state.newStaff.name||!state.bar) return;
-  await db.from('staff').insert({bar_id:state.bar.id,...state.newStaff});
-  state.newStaff={name:'',role:'',pin:''};
-  state.showStaffModal=false;
-  await loadStaff(); render();
+  if(!S.newStaff.name||!S.bar)return;
+  await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});
+  S.newStaff={name:'',role:'',pin:''};S.showStaffModal=false;
+  await loadStaff();render();
 }
-async function deleteStaff(id){
-  await db.from('staff').delete().eq('id',id);
-  await loadStaff(); render();
-}
+async function deleteStaff(id){await db.from('staff').delete().eq('id',id);await loadStaff();render();}
 
-// ── SALES ──────────────────────────────────────────────────────────────────
+// ── SALES ──────────────────────────────────────────────
 async function saveSale(){
-  if(!state.bar) return;
-  await db.from('sales').insert({bar_id:state.bar.id,...state.newSale});
-  state.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};
-  state.showSaleModal=false;
-  await loadSales(); render();
+  if(!S.bar)return;
+  await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});
+  S.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};
+  S.showSaleModal=false;await loadSales();render();
 }
 
-// ── INVENTORY ──────────────────────────────────────────────────────────────
+// ── INVENTORY ──────────────────────────────────────────
 async function saveInv(){
-  if(!state.newInv.name||!state.bar) return;
-  await db.from('inventory').insert({bar_id:state.bar.id,...state.newInv,stock:parseFloat(state.newInv.stock)||0,par_level:parseFloat(state.newInv.par_level)||0});
-  state.newInv={name:'',category:'',unit:'',stock:'',par_level:''};
-  state.showInvModal=false;
-  await loadInventory(); render();
+  if(!S.newInv.name||!S.bar)return;
+  await db.from('inventory').insert({bar_id:S.bar.id,...S.newInv,stock:parseFloat(S.newInv.stock)||0,par_level:parseFloat(S.newInv.par_level)||0});
+  S.newInv={name:'',category:'',unit:'',stock:'',par_level:''};S.showInvModal=false;
+  await loadInventory();render();
 }
-async function deleteInv(id){
-  await db.from('inventory').delete().eq('id',id);
-  await loadInventory(); render();
-}
-async function updateStock(id, newStock){
-  await db.from('inventory').update({stock:newStock,updated_at:new Date()}).eq('id',id);
-  await loadInventory(); render();
-}
+async function deleteInv(id){await db.from('inventory').delete().eq('id',id);await loadInventory();render();}
+async function updateStock(id,val){await db.from('inventory').update({stock:val,updated_at:new Date()}).eq('id',id);await loadInventory();render();}
 
-// ── CHECKLIST ──────────────────────────────────────────────────────────────
-function toggleCheck(item){
-  state.checklist[item]=!state.checklist[item];
-  render();
-}
-async function submitCloseout(){
-  const all = ALL_ITEMS;
-  if(all.filter(i=>state.checklist[i]).length < all.length) return;
-  if(!state.bar) return;
-  await db.from('checklist_logs').insert({
-    bar_id: state.bar.id,
-    completed_by: state.newSale.submitted_by||'Manager',
-    items_completed: state.checklist,
+// ── SCHEDULE ───────────────────────────────────────────
+async function saveShift(){
+  if(!S.newShift.start_time||!S.newShift.end_time||!S.bar)return;
+  await db.from('schedules').insert({
+    bar_id:S.bar.id,
+    staff_id:S.newShift.staff_id||null,
+    staff_name:S.newShift.staff_id?(S.staff.find(s=>s.id===S.newShift.staff_id)?.name||''):'OPEN',
+    day_of_week:parseInt(S.newShift.day_of_week),
+    start_time:S.newShift.start_time,
+    end_time:S.newShift.end_time,
+    role:S.newShift.role,
+    status:S.newShift.staff_id?'scheduled':'open',
   });
-  state.closeoutSubmitted=true; render();
+  S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:''};
+  S.showShiftModal=false;await loadSchedules();render();
+}
+async function deleteShift(id){await db.from('schedules').delete().eq('id',id);await loadSchedules();render();}
+async function dropShift(id){
+  if(!S.dropReason)return;
+  await db.from('schedules').update({status:'open',dropped_by:S.dropReason}).eq('id',id);
+  S.showDropModal=false;S.dropShiftId=null;S.dropReason='';
+  await loadSchedules();render();
+}
+async function bidOnShift(shiftId,staffId,staffName){
+  const existing=S.bids.find(b=>b.shift_id===shiftId&&b.staff_id===staffId);
+  if(existing)return;
+  await db.from('shift_bids').insert({bar_id:S.bar.id,shift_id:shiftId,staff_id:staffId,staff_name:staffName,status:'pending'});
+  await loadSchedules();render();
+}
+async function approveBid(bidId,shiftId,staffId,staffName){
+  await db.from('shift_bids').update({status:'approved'}).eq('id',bidId);
+  await db.from('schedules').update({status:'covered',staff_id:staffId,staff_name:staffName}).eq('id',shiftId);
+  await db.from('shift_bids').update({status:'declined'}).eq('shift_id',shiftId).neq('id',bidId);
+  await loadSchedules();render();
+}
+async function declineBid(bidId){
+  await db.from('shift_bids').update({status:'declined'}).eq('id',bidId);
+  await loadSchedules();render();
 }
 
-// ── PHOTOS ─────────────────────────────────────────────────────────────────
+// ── CHECKLIST ──────────────────────────────────────────
+function toggleCheck(item){S.checklist[item]=!S.checklist[item];render();}
+async function submitCloseout(){
+  if(ALL_ITEMS.filter(i=>S.checklist[i]).length<ALL_ITEMS.length)return;
+  await db.from('checklist_logs').insert({bar_id:S.bar.id,completed_by:S.newSale.submitted_by||'Manager',items_completed:S.checklist});
+  await saveSaleFromCloseout();
+  S.closeoutSubmitted=true;render();
+}
+async function saveSaleFromCloseout(){
+  if(Object.values(S.newSale).some(v=>v&&v!==''))
+    await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});
+}
+
+// ── PHOTOS ─────────────────────────────────────────────
 async function handlePhotoUpload(e){
-  const files = Array.from(e.target.files);
+  const files=Array.from(e.target.files);
   for(const file of files){
-    const reader = new FileReader();
-    reader.onload = async ev => {
-      await db.from('photos').insert({
-        bar_id: state.bar.id,
-        label: state.photoNote||file.name,
-        tag: state.photoTag,
-        staff_name: '',
-        url: ev.target.result,
-        created_at: new Date(),
-      });
-      await loadPhotos(); render();
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+      await db.from('photos').insert({bar_id:S.bar.id,label:S.photoNote||file.name,tag:S.photoTag,url:ev.target.result,created_at:new Date()});
+      await loadPhotos();render();
     };
     reader.readAsDataURL(file);
   }
-  state.photoNote=''; e.target.value='';
+  S.photoNote='';e.target.value='';
 }
-
 async function generateCaption(photo){
-  state.generatingCaption=true; state.photoCaption=null; render();
+  S.generatingCaption=true;S.photoCaption=null;render();
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
-        messages:[{role:'user',content:`Write a fun Instagram caption for ${state.bar?.name||'our bar'}. Photo: "${photo.label}". Include 1-2 emojis and 3-4 hashtags. Under 150 chars before hashtags.`}]})
-    });
-    const data = await res.json();
-    state.photoCaption = data.content?.find(b=>b.type==='text')?.text||'Could not generate.';
-  }catch{ state.photoCaption='Could not generate caption.'; }
-  state.generatingCaption=false; render();
+        messages:[{role:'user',content:`Write a fun Instagram caption for ${S.bar?.name||'our bar'}. Photo: "${photo.label}". Include 1-2 emojis and 3-4 hashtags. Under 150 chars before hashtags.`}]})});
+    const data=await res.json();
+    S.photoCaption=data.content?.find(b=>b.type==='text')?.text||'Could not generate.';
+  }catch{S.photoCaption='Could not generate caption.';}
+  S.generatingCaption=false;render();
 }
 
-// ── TRANSLATIONS ───────────────────────────────────────────────────────────
-const T = {
-  en:{dashboard:'Dashboard',shift:'Shift',gallery:'Gallery',inventory:'Inventory',recipes:'Recipes',closeout:'Closeout',
-    addSale:'Log Sales',addStaff:'Add Staff',addItem:'Add Item',save:'Save',cancel:'Cancel',submit:'Submit',
-    todaySales:"Today's Sales",weekSales:'Weekly Revenue',staffCount:'Staff',lowStock:'Low Stock',
-    login:'LOG IN',signup:'SIGN UP',email:'Email',password:'Password',barName:'Bar Name',location:'Location (City, State)',
-    loginTitle:'Welcome Back',signupTitle:'Create Your Bar',
-  },
-  es:{dashboard:'Inicio',shift:'Turno',gallery:'Galería',inventory:'Inventario',recipes:'Recetas',closeout:'Cierre',
-    addSale:'Registrar Ventas',addStaff:'Añadir Personal',addItem:'Añadir Item',save:'Guardar',cancel:'Cancelar',submit:'Enviar',
-    todaySales:'Ventas Hoy',weekSales:'Ingresos Semana',staffCount:'Personal',lowStock:'Stock Bajo',
-    login:'ENTRAR',signup:'REGISTRARSE',email:'Correo',password:'Contraseña',barName:'Nombre del Bar',location:'Ubicación (Ciudad, Estado)',
-    loginTitle:'Bienvenido',signupTitle:'Registra Tu Bar',
-  },
-};
-const t = (k) => T[state.lang][k]||k;
-
-// ── RENDER ─────────────────────────────────────────────────────────────────
+// ── RENDER ─────────────────────────────────────────────
 function render(){
-  const root = document.getElementById('root');
-  if(state.appLoading){ root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>'; return; }
-  if(!state.user||!state.bar){ root.innerHTML = renderAuth(); bindAuth(); return; }
-  root.innerHTML = renderApp();
-  bindApp();
+  const root=document.getElementById('root');
+  if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
+  if(!S.user||!S.bar){root.innerHTML=renderAuth();return;}
+  root.innerHTML=renderApp();
 }
 
 function renderAuth(){
-  const isLogin = state.authMode==='login';
-  return `
-  <div class="auth-wrap">
+  const isLogin=S.authMode==='login';
+  return `<div class="auth-wrap">
     <div class="auth-logo">CantinaPro</div>
     <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
     <div class="auth-div"></div>
     <div class="auth-card">
       <div class="auth-tabs">
-        <button class="auth-tab ${isLogin?'on':''}" onclick="state.authMode='login';render()">${t('login')}</button>
-        <button class="auth-tab ${!isLogin?'on':''}" onclick="state.authMode='signup';render()">${t('signup')}</button>
+        <button class="auth-tab ${isLogin?'on':''}" onclick="S.authMode='login';render()">LOG IN</button>
+        <button class="auth-tab ${!isLogin?'on':''}" onclick="S.authMode='signup';render()">SIGN UP</button>
       </div>
-      <div class="auth-title">${isLogin?t('loginTitle'):t('signupTitle')}</div>
-      ${state.authError?`<div class="auth-err">${state.authError}</div>`:''}
+      <div class="auth-title">${isLogin?'Welcome Back':'Create Your Bar'}</div>
+      ${S.authError?`<div class="auth-err">${S.authError}</div>`:''}
       ${!isLogin?`
-        <div class="field"><label>${t('barName')}</label><input type="text" placeholder="Local Cantina" value="${state.loginBarName}" oninput="state.loginBarName=this.value"/></div>
-        <div class="field"><label>${t('location')}</label><input type="text" placeholder="Oak Lawn, IL" value="${state.loginLocation}" oninput="state.loginLocation=this.value"/></div>
+        <div class="field"><label>Bar Name</label><input type="text" placeholder="Local Cantina" value="${S.loginBarName}" oninput="S.loginBarName=this.value"/></div>
+        <div class="field"><label>Location</label><input type="text" placeholder="Oak Lawn, IL" value="${S.loginLocation}" oninput="S.loginLocation=this.value"/></div>
       `:''}
-      <div class="field"><label>${t('email')}</label><input type="email" placeholder="owner@mybar.com" value="${state.loginEmail}" oninput="state.loginEmail=this.value"/></div>
-      <div class="field"><label>${t('password')}</label><input type="password" placeholder="••••••••" value="${state.loginPassword}" oninput="state.loginPassword=this.value"/></div>
-      <button class="auth-btn" onclick="handleAuth()" ${state.authLoading?'disabled':''}>${state.authLoading?'...':(isLogin?t('login'):t('signup'))}</button>
-      <div class="auth-note">${isLogin?'New bar? Click SIGN UP above':'Already have an account? Click LOG IN above'}</div>
-    </div>
-    <div style="margin-top:20px;font-size:12px;color:var(--muted)">
-      Not ready to commit? <a href="${STRIPE_LINK}" target="_top" style="color:var(--lcg)">View founding member offer →</a>
+      <div class="field"><label>Email</label><input type="email" placeholder="owner@mybar.com" value="${S.loginEmail}" oninput="S.loginEmail=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
+      <div class="field"><label>Password</label><input type="password" placeholder="••••••••" value="${S.loginPassword}" oninput="S.loginPassword=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
+      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'...':(isLogin?'LOG IN':'SIGN UP')}</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px">${isLogin?'New bar? Click SIGN UP above':'Already registered? Click LOG IN'}</div>
     </div>
   </div>`;
 }
 
 function renderApp(){
-  const L = state.lang==='es';
-  const todaySales = state.sales[0] ? (parseFloat(state.sales[0].bar_sales||0)+parseFloat(state.sales[0].food_sales||0)) : 0;
-  const weekSales = state.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
-  const lowItems = state.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
-  const checkedCount = ALL_ITEMS.filter(i=>state.checklist[i]).length;
-  const pct = Math.round((checkedCount/ALL_ITEMS.length)*100);
-  const allDone = checkedCount===ALL_ITEMS.length;
+  const L=S.lang==='es';
+  const todaySales=S.sales[0]?(parseFloat(S.sales[0].bar_sales||0)+parseFloat(S.sales[0].food_sales||0)):0;
+  const weekSales=S.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
+  const lowItems=S.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
+  const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
+  const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
+  const allDone=checkedCount===ALL_ITEMS.length;
+  const openShifts=S.schedules.filter(s=>s.status==='open').length;
+  const pendingBids=S.bids.filter(b=>b.status==='pending').length;
 
-  const TABS = [
-    {key:'dashboard',icon:'📊',label:L?'Inicio':'Dashboard'},
+  const TABS=[
+    {key:'dashboard',icon:'📊',label:L?'Inicio':'Home'},
+    {key:'schedule',icon:'📅',label:L?'Horario':'Schedule',badge:openShifts+pendingBids},
     {key:'shift',icon:'⏰',label:L?'Turno':'Shift'},
+    {key:'inventory',icon:'📦',label:L?'Inventario':'Stock',badge:lowItems},
     {key:'gallery',icon:'📸',label:L?'Galería':'Gallery'},
-    {key:'inventory',icon:'📦',label:L?'Inventario':'Inventory'},
-    {key:'recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
-    {key:'closeout',icon:'✅',label:L?'Cierre':'Closeout'},
+    {key:'closeout',icon:'✅',label:L?'Cierre':'Close'},
   ];
 
-  const filteredRecipes = RECIPES.filter(r=>{
-    const ms = r.name.toLowerCase().includes(state.recipeSearch.toLowerCase());
-    const mf = state.recipeFilter==='All'||r.tag===state.recipeFilter;
+  const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
+  const filteredRecipes=RECIPES.filter(r=>{
+    const ms=r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
+    const mf=S.recipeFilter==='All'||r.tag===S.recipeFilter;
     return ms&&mf;
   });
 
-  return `
-  <div class="app">
+  return `<div class="app">
     <header class="hdr">
-      <div>
-        <div class="hdr-logo">CantinaPro</div>
-        <div class="hdr-bar">${state.bar.name} · ${state.bar.location||''}</div>
-      </div>
+      <div><div class="hdr-logo">CantinaPro</div><div class="hdr-bar">${S.bar.name} · ${S.bar.location||''}</div></div>
       <div class="hdr-r">
         <div class="lang-wrap">
-          <button class="lb ${!L?'on':''}" onclick="state.lang='en';render()">EN</button>
-          <button class="lb ${L?'on':''}" onclick="state.lang='es';render()">ES</button>
+          <button class="lb ${!L?'on':''}" onclick="S.lang='en';render()">EN</button>
+          <button class="lb ${L?'on':''}" onclick="S.lang='es';render()">ES</button>
         </div>
         <button class="logout-btn" onclick="logout()">OUT</button>
         <div class="sdot"></div>
@@ -500,281 +481,329 @@ function renderApp(){
 
     <main class="main">
 
-      ${state.tab==='dashboard'?`
-        <div class="sec-title">${L?'RESUMEN DE HOY':'TONIGHT\'S OVERVIEW'}</div>
-        <div class="kpi-grid">
-          <div class="kpi lc"><div class="kl">${t('todaySales')}</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${state.sales.length} entries logged</div></div>
-          <div class="kpi g"><div class="kl">${t('weekSales')}</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
-          <div class="kpi b"><div class="kl">${t('staffCount')}</div><div class="kv">${state.staff.length}</div><div class="kd">${state.clockedIn.length} clocked in</div></div>
-          <div class="kpi r"><div class="kl">${t('lowStock')}</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
-        </div>
-        <button class="action-btn red" onclick="state.showSaleModal=true;render()" style="margin-bottom:12px">+ ${t('addSale')}</button>
-        <div class="card">
-          <div class="ct">${L?'VENTAS RECIENTES':'RECENT SALES'}</div>
-          ${state.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above to add your first entry.</div>`:''}
-          ${state.sales.slice(0,7).map(s=>`
-            <div class="row">
-              <div style="flex:1">
-                <div style="font-weight:700;font-size:13px">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
-                <div style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
+    ${S.tab==='dashboard'?`
+      <div class="sec-title">${L?'RESUMEN':'OVERVIEW'}</div>
+      <div class="kpi-grid">
+        <div class="kpi lc"><div class="kl">${L?'Ventas Hoy':'Today\'s Sales'}</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries</div></div>
+        <div class="kpi g"><div class="kl">${L?'Semana':'Week'}</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
+        <div class="kpi b"><div class="kl">${L?'Personal':'Staff'}</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
+        <div class="kpi r"><div class="kl">${L?'Stock Bajo':'Low Stock'}</div><div class="kv">${lowItems}</div><div class="kd">Below par</div></div>
+      </div>
+      ${openShifts>0?`<div class="open-shifts-banner"><div style="font-size:20px">⚠️</div><div><div style="font-weight:700;font-size:14px">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:12px;color:var(--muted)">Staff needed — check Schedule tab</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
+      ${pendingBids>0?`<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:8px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px"><div style="font-size:20px">🙋</div><div><div style="font-weight:700;font-size:14px">${pendingBids} Shift Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:12px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
+      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:12px">+ ${L?'Registrar Ventas':'Log Sales'}</button>
+      <div class="card">
+        <div class="ct">${L?'VENTAS RECIENTES':'RECENT SALES'}</div>
+        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
+          S.sales.slice(0,5).map(s=>`<div class="row">
+            <div style="flex:1"><div style="font-weight:700;font-size:14px">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
+            <div style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div></div>
+            <div style="font-size:11px;color:var(--muted);text-align:right"><div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div><div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div></div>
+          </div>`).join('')}
+      </div>
+    `:''}
+
+    ${S.tab==='schedule'?`
+      <div class="sec-title">📅 ${L?'HORARIO':'SCHEDULE'}</div>
+      <div class="day-tabs">
+        ${DAYS.map((d,i)=>{
+          const hasShifts=S.schedules.some(s=>s.day_of_week===i);
+          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
+          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasShifts&&S.schedDay!==i?'has-shifts':''}" onclick="S.schedDay=${i};render()">
+            <div>${d}</div>
+            ${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
+          </button>`;
+        }).join('')}
+      </div>
+
+      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:12px">+ ${L?'Añadir Turno':'Add Shift'}</button>
+
+      ${dayShifts.length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.<br/>Tap "+ Add Shift" to create one.</div>`:''}
+
+      ${dayShifts.map(shift=>{
+        const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
+        const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
+        const color=staffIdx>=0?avatarColor(staffIdx):'var(--muted)';
+        return `<div class="shift-card ${shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between">
+            <div>
+              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
+              <div class="shift-role">${shift.role||'Staff'}</div>
+              <div class="shift-staff">
+                ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:26px;height:26px;font-size:9px">${shift.staff_name?avatarInitials(shift.staff_name):'?'}</div>`:''}
+                <span class="shift-badge ${shift.status}">${shift.status==='open'?'🔴 OPEN SHIFT':shift.status==='covered'?'✅ COVERED':shift.status==='pending'?'⏳ PENDING':shift.staff_name}</span>
               </div>
-              <div style="font-size:11px;color:var(--muted);text-align:right">
-                <div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div>
-                <div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div>
-              </div>
+              ${shift.dropped_by?`<div style="font-size:11px;color:var(--red);margin-top:4px">Dropped: ${shift.dropped_by}</div>`:''}
             </div>
-          `).join('')}
-        </div>
-        ${lowItems>0?`<div style="background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);border-radius:8px;padding:12px;font-size:13px;color:var(--red);margin-bottom:12px">⚠️ ${lowItems} item${lowItems!==1?'s':''} below par level — check inventory</div>`:''}
-      `:''}
-
-      ${state.tab==='shift'?`
-        <div class="sec-title">${L?'GESTIÓN DE TURNO':'SHIFT MANAGEMENT'}</div>
-        <div class="liveclock"><div class="lct" id="clock-display">${state.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${state.bar.name}</div></div>
-        <div class="card">
-          <div class="ct">${L?'BRIEFING DEL TURNO':'SHIFT BRIEFING'}</div>
-          <div class="brtext">${L?'Bienvenidos al turno de hoy. Asegúrense de revisar el inventario, atender a los clientes con reservación y reportar cualquier incidente al manager.':'Welcome to today\'s shift. Make sure to check inventory, attend to reservation guests, and report any incidents to the manager.'}</div>
-        </div>
-        <div class="card">
-          <div class="ct" style="margin-bottom:10px">${L?'ENTRADA/SALIDA DE PERSONAL':'STAFF CLOCK IN/OUT'}</div>
-          ${state.staff.length===0?`<div class="empty-state">No staff added yet.<br/><button class="action-btn blue" onclick="state.tab='shift';state.showStaffModal=true;render()" style="margin-top:10px">+ Add Staff</button></div>`:''}
-          <div class="staff-grid">
-            ${state.staff.map(s=>{
-              const isIn = state.clockedIn.includes(s.id);
-              const color = COLORS[state.staff.indexOf(s)%COLORS.length];
-              return `<div class="staff-pick ${state.selectedStaff===s.id?'on':''}" onclick="state.selectedStaff='${s.id}';render()">
-                <div class="av" style="background:${color}22;color:${color}">${s.name.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
-                <div style="font-weight:700;font-size:13px;margin-top:6px">${s.name}</div>
-                <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${s.role}</div>
-                <div style="font-size:9px;font-weight:700;margin-top:3px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
-              </div>`;
-            }).join('')}
+            <div style="display:flex;gap:6px">
+              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red)" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
+              <button class="btn-sm" style="background:rgba(255,68,85,.1);color:var(--red)" onclick="deleteShift('${shift.id}')">×</button>
+            </div>
           </div>
-          ${state.selectedStaff?(()=>{
-            const isIn = state.clockedIn.includes(state.selectedStaff);
-            return isIn
-              ? `<button class="action-btn red" onclick="state.clockedIn=state.clockedIn.filter(id=>id!=='${state.selectedStaff}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>`
-              : `<button class="action-btn green" onclick="state.clockedIn=[...state.clockedIn,'${state.selectedStaff}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`;
-          })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>${L?'SELECCIONA TU NOMBRE':'SELECT YOUR NAME'}</button>`}
-        </div>
-        <button class="action-btn blue" onclick="state.showStaffModal=true;render()">+ ${t('addStaff')}</button>
-      `:''}
+          ${shift.status==='open'&&S.staff.length>0?`
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">${L?'PERSONAL DISPONIBLE PARA TOMAR EL TURNO':'AVAILABLE STAFF TO BID'}</div>
+              ${S.staff.map((st,i)=>{
+                const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
+                return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+                  <div class="av" style="background:${avatarColor(i)}22;color:${avatarColor(i)};width:26px;height:26px;font-size:9px">${avatarInitials(st.name)}</div>
+                  <div style="flex:1;font-size:13px;font-weight:600">${st.name}</div>
+                  ${hasBid?`<span style="font-size:10px;color:var(--gold)">BID PLACED</span>`:
+                    `<button class="btn-sm" style="background:rgba(0,232,122,.15);color:var(--green)" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">BID</button>`}
+                </div>`;
+              }).join('')}
+            </div>
+          `:''}
+          ${shiftBids.length>0?`
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">🙋 ${shiftBids.length} BID${shiftBids.length!==1?'S':''} — APPROVE ONE</div>
+              ${shiftBids.map(bid=>`<div class="bid-row">
+                <div style="flex:1;font-size:13px;font-weight:600">${bid.staff_name}</div>
+                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:6px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
+                <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red)" onclick="declineBid('${bid.id}')">✗</button>
+              </div>`).join('')}
+            </div>
+          `:''}
+        </div>`;
+      }).join('')}
 
-      ${state.tab==='gallery'?`
-        <div class="sec-title">📸 ${L?'GALERÍA NOCTURNA':'NIGHT GALLERY'}</div>
-        <div class="card">
-          <div class="ct">${L?'SUBIR FOTO':'ADD PHOTO'}</div>
-          <div class="field"><label>${L?'Etiqueta':'Tag'}</label>
-            <select onchange="state.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none;">
-              ${['Social Media','Gallery','Event','Promo','Behind the Scenes','Staff'].map(t=>`<option ${state.photoTag===t?'selected':''}>${t}</option>`).join('')}
+      ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">+ ${L?'AÑADIR TURNO':'ADD SHIFT'} — ${DAYS[S.schedDay]}</div>
+          <div class="field"><label>${L?'Personal (opcional)':'Staff Member (optional)'}</label>
+            <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none">
+              <option value="">-- Open Shift (no one assigned) --</option>
+              ${S.staff.map(s=>`<option value="${s.id}" ${S.newShift.staff_id===s.id?'selected':''}>${s.name} · ${s.role}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>${L?'Descripción':'Caption'}</label><input type="text" value="${state.photoNote}" oninput="state.photoNote=this.value" placeholder="${L?'¿Qué está pasando?':'What\'s happening in this shot?'}"/></div>
+          <div class="field"><label>${L?'Rol del Turno':'Shift Role'}</label><input type="text" value="${S.newShift.role}" oninput="S.newShift.role=this.value" placeholder="Bartender, Server, Barback..."/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>${L?'Hora Entrada':'Start Time'}</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value"/></div>
+            <div class="field"><label>${L?'Hora Salida':'End Time'}</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value"/></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="S.showShiftModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" onclick="saveShift()">${L?'Guardar':'Save Shift'}</button>
+          </div>
+        </div>
+      </div>`:''}
+
+      ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">DROP SHIFT</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px">This will mark the shift as open so other staff can bid on it. The owner will be notified.</div>
+          <div class="field"><label>Reason for dropping</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
+            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP SHIFT</button>
+          </div>
+        </div>
+      </div>`:''}
+    `:''}
+
+    ${S.tab==='shift'?`
+      <div class="sec-title">⏰ ${L?'TURNO':'SHIFT'}</div>
+      <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
+      <div class="card">
+        <div class="ct">${L?'MARCAR ENTRADA/SALIDA':'CLOCK IN / OUT'}</div>
+        ${S.staff.length===0?`<div class="empty-state">No staff added yet.<br/><button class="action-btn red" onclick="S.tab='schedule';S.showStaffModal=true;render()" style="margin-top:10px;width:auto;padding:8px 16px">+ Add Staff</button></div>`:''}
+        <div class="staff-grid">
+          ${S.staff.map((s,i)=>{
+            const isIn=S.clockedIn.includes(s.id);
+            const color=avatarColor(i);
+            return `<div class="staff-pick ${S.selectedStaff===s.id?'on':''}" onclick="S.selectedStaff='${s.id}';render()">
+              <div class="av" style="background:${color}22;color:${color}">${avatarInitials(s.name)}</div>
+              <div style="font-weight:700;font-size:13px;margin-top:6px">${s.name}</div>
+              <div style="font-size:10px;color:var(--muted);text-transform:uppercase">${s.role}</div>
+              <div style="font-size:9px;font-weight:700;margin-top:3px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        ${S.selectedStaff?(()=>{
+          const isIn=S.clockedIn.includes(S.selectedStaff);
+          return isIn
+            ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>`
+            :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`;
+        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>${L?'SELECCIONA TU NOMBRE':'SELECT YOUR NAME'}</button>`}
+      </div>
+      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ${L?'Añadir Personal':'Add Staff'}</button>
+
+      ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">+ ${L?'AÑADIR PERSONAL':'ADD STAFF'}</div>
+          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria G."/></div>
+          <div class="field"><label>${L?'Rol':'Role'}</label><input type="text" value="${S.newStaff.role}" oninput="S.newStaff.role=this.value" placeholder="Bartender"/></div>
+          <div class="field"><label>PIN</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234"/></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="S.showStaffModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" onclick="saveStaff()">${L?'Guardar':'Save'}</button>
+          </div>
+        </div>
+      </div>`:''}
+    `:''}
+
+    ${S.tab==='inventory'?`
+      <div class="sec-title">📦 ${L?'INVENTARIO':'INVENTORY'}</div>
+      <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:12px">+ ${L?'Añadir Artículo':'Add Item'}</button>
+      <div class="card" style="padding:0;overflow:hidden">
+        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory yet.<br/>Add your first item above.</div>`:`
+        <div style="overflow-x:auto">
+          <table class="inv-table">
+            <thead><tr><th>${L?'Artículo':'Item'}</th><th>${L?'Unidad':'Unit'}</th><th>Stock</th><th>Par</th><th>${L?'Estado':'Status'}</th><th></th></tr></thead>
+            <tbody>
+              ${S.inventory.map(item=>{
+                const st=item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
+                return `<tr>
+                  <td><div style="font-weight:700">${item.name}</div><div style="font-size:11px;color:var(--muted)">${item.category||''}</div></td>
+                  <td style="font-size:12px;color:var(--muted)">${item.unit||''}</td>
+                  <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:4px 6px;font-size:13px;width:56px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
+                  <td style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted)">${item.par_level}</td>
+                  <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
+                  <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`}
+      </div>
+      ${S.showInvModal?`<div class="modal-bg" onclick="S.showInvModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">+ ${L?'AÑADIR ARTÍCULO':'ADD INVENTORY ITEM'}</div>
+          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
+          <div class="field"><label>${L?'Categoría':'Category'}</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila"/></div>
+          <div class="field"><label>${L?'Unidad':'Unit'}</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case..."/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>${L?'Stock Actual':'Current Stock'}</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value"/></div>
+            <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value"/></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="S.showInvModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" onclick="saveInv()">${L?'Guardar':'Save'}</button>
+          </div>
+        </div>
+      </div>`:''}
+    `:''}
+
+    ${S.tab==='gallery'?`
+      <div class="sec-title">📸 ${L?'GALERÍA':'GALLERY'}</div>
+      ${S.selectedPhoto?`
+        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;margin-bottom:12px">← ${L?'VOLVER':'BACK'}</button>
+        <div class="card">
+          <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:8px;overflow:hidden;margin-bottom:12px;min-height:160px;display:flex;align-items:center;justify-content:center;position:relative">
+            ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:240px;object-fit:contain"/>`:''} 
+            <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);border-radius:4px;padding:4px 8px">
+              <div style="font-family:'Bebas Neue',cursive;font-size:10px;color:var(--lc)">CantinaPro</div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lcg)">${S.bar.name}</div>
+            </div>
+          </div>
+          <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ ${L?'GENERAR SUBTÍTULO IA':'GENERATE AI CAPTION'}</button>
+          ${S.generatingCaption?'<div class="spinner"></div>':''}
+          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:8px;padding:12px;font-size:13px;line-height:1.7;margin-top:8px">${S.photoCaption}<button onclick="navigator.clipboard?.writeText(this.parentElement.childNodes[0].textContent.trim());this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:8px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
+        </div>
+      `:`
+        <div class="card">
+          <div class="ct">${L?'AÑADIR FOTO':'ADD PHOTO'}</div>
+          <div class="field"><label>Tag</label>
+            <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none">
+              ${['Social Media','Gallery','Event','Promo','Behind the Scenes','Staff'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>${L?'Descripción':'Caption'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué está pasando?':'What\'s happening?'}"/></div>
           <label style="display:block;cursor:pointer">
             <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
-            <div class="upzone"><div style="font-size:32px;margin-bottom:6px">📷</div><div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR O SUBIR FOTO':'TAKE OR UPLOAD PHOTO'}</div></div>
+            <div class="upzone"><div style="font-size:28px;margin-bottom:6px">📷</div><div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR O SUBIR FOTO':'TAKE OR UPLOAD PHOTO'}</div></div>
           </label>
         </div>
-        ${state.selectedPhoto?`
-          <div class="card">
-            <button onclick="state.selectedPhoto=null;state.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;cursor:pointer;margin-bottom:12px">← ${L?'VOLVER':'BACK'}</button>
-            <div style="background:var(--s2);border:1px solid var(--lc);border-radius:10px;overflow:hidden;margin-bottom:12px">
-              <div style="padding:32px;text-align:center;background:linear-gradient(135deg,#1a0008,#0a0a1a);position:relative;min-height:160px;display:flex;align-items:center;justify-content:center">
-                ${state.selectedPhoto.url?`<img src="${state.selectedPhoto.url}" style="max-width:100%;max-height:200px;border-radius:6px"/>`:`<div style="font-size:48px">📷</div>`}
-                <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border-radius:4px;padding:4px 8px">
-                  <div style="font-family:'Bebas Neue',cursive;font-size:10px;color:var(--lc)">CantinaPro</div>
-                  <div style="font-family:'Bebas Neue',cursive;font-size:8px;color:var(--lcg);letter-spacing:1px">${state.bar.name}</div>
-                </div>
+        <div class="photo-grid">
+          ${S.photos.map(p=>`
+            <div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
+              ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:32px">📷</div>'}
+              <div class="photo-overlay">
+                <div class="photo-label">${p.label||p.tag}</div>
+                <div class="photo-time">${new Date(p.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
               </div>
             </div>
-            <button class="action-btn" style="background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff" onclick="generateCaption(state.selectedPhoto)" ${state.generatingCaption?'disabled':''}>✨ ${L?'GENERAR SUBTÍTULO IA':'GENERATE AI CAPTION'}</button>
-            ${state.generatingCaption?'<div class="spinner"></div>':''}
-            ${state.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:8px;padding:12px;font-size:13px;line-height:1.7;margin-top:8px">${state.photoCaption}<button onclick="navigator.clipboard?.writeText('${state.photoCaption.replace(/'/g,"\\'")}');this.textContent='COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:8px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
-          </div>
-        `:`
-          <div class="photo-grid">
-            ${state.photos.map(p=>`
-              <div class="pcard" onclick="state.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};state.photoCaption=null;render()">
-                ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:32px">📷</div>'}
-                <div class="photo-overlay">
-                  <div class="photo-label">${p.label||p.tag}</div>
-                  <div class="photo-time">${new Date(p.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div>
-                </div>
-              </div>
-            `).join('')}
-            ${state.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first shot above!</div>`:''}
-          </div>
-        `}
-      `:''}
-
-      ${state.tab==='inventory'?`
-        <div class="sec-title">${L?'INVENTARIO':'INVENTORY'}</div>
-        <button class="action-btn red" onclick="state.showInvModal=true;render()" style="margin-bottom:12px">+ ${t('addItem')}</button>
-        <div class="card" style="padding:0;overflow:hidden">
-          ${state.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Add your first item above.</div>`:`
-          <div style="overflow-x:auto">
-            <table class="inv-table">
-              <thead><tr><th>${L?'Artículo':'Item'}</th><th>${L?'Unidad':'Unit'}</th><th>${L?'Stock':'Stock'}</th><th>Par</th><th>${L?'Estado':'Status'}</th><th></th></tr></thead>
-              <tbody>
-                ${state.inventory.map(item=>{
-                  const st = item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
-                  return `<tr>
-                    <td><div style="font-weight:700">${item.name}</div><div style="font-size:11px;color:var(--muted)">${item.category||''}</div></td>
-                    <td style="font-size:12px;color:var(--muted)">${item.unit||''}</td>
-                    <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:4px 6px;font-size:13px;width:60px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
-                    <td style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted)">${item.par_level}</td>
-                    <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
-                    <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">×</button></td>
-                  </tr>`;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>`}
-        </div>
-      `:''}
-
-      ${state.tab==='recipes'?`
-        <div class="sec-title">${L?'LIBRO DE RECETAS':'RECIPE BOOK'}</div>
-        <div style="display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px">
-          <span style="color:var(--muted)">🔍</span>
-          <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;flex:1;outline:none;width:100%" placeholder="${L?'Buscar recetas...':'Search recipes...'}" value="${state.recipeSearch}" oninput="state.recipeSearch=this.value;render()"/>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-          ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${state.recipeFilter===f?'rgba(200,16,46,.12)':'var(--s2)'};border:1px solid ${state.recipeFilter===f?'var(--lc)':'var(--border)'};color:${state.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;padding:5px 12px;border-radius:20px;cursor:pointer" onclick="state.recipeFilter='${f}';render()">${f==='All'?(L?'Todos':'All'):f}</button>`).join('')}
-        </div>
-        ${filteredRecipes.map(r=>`
-          <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <div style="font-weight:700;font-size:14px">${r.emoji} ${r.name}</div>
-              <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--green)">${margin(r)}% ${L?'margen':'margin'}</div>
-            </div>
-            <div style="font-size:11px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
-          </div>
-          <div style="display:none;background:var(--s1);border:1px solid var(--lc);border-radius:10px;padding:14px;margin-bottom:12px;margin-top:-4px">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
-              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--red)">$${r.cost}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Costo':'Cost'}</div></div>
-              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--lcg)">$${r.price}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Precio':'Price'}</div></div>
-              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--green)">${margin(r)}%</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Margen':'Margin'}</div></div>
-              <div style="background:var(--s2);border-radius:6px;padding:8px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:18px;color:var(--blue)">${r.prepTime}</div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">${L?'Tiempo':'Time'}</div></div>
-            </div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">INGREDIENTS</div>
-            ${r.ingredients.map(i=>`<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--teal);width:50px;flex-shrink:0">${i.amount}</div><div style="font-size:13px;font-weight:600;flex:1">${i.name}</div>${i.note?`<div style="font-size:11px;color:var(--muted);font-style:italic">${i.note}</div>`:''}</div>`).join('')}
-            <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin:12px 0 8px">STEPS</div>
-            ${r.steps.map((s,i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:24px;height:24px;border-radius:50%;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:13px;color:var(--lc);flex-shrink:0">${i+1}</div><div style="font-size:13px;line-height:1.6">${s}</div></div>`).join('')}
-          </div>
-        `).join('')}
-      `:''}
-
-      ${state.tab==='closeout'?`
-        <div class="sec-title">${L?'CIERRE DE NOCHE':'END OF NIGHT'}</div>
-        <div class="card">
-          <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${L?'El personal debe completarla antes del cierre':'Staff must complete before submitting closeout'}</div>
-          <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
-          ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-            <div class="cgroup-t">${group}</div>
-            ${items.map(item=>`
-              <div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-                <div class="cbox ${state.checklist[item]?'done':''}">${state.checklist[item]?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
-                <span class="ctxt ${state.checklist[item]?'done':''}">${item}</span>
-              </div>
-            `).join('')}
           `).join('')}
+          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first shot above!</div>`:''}
         </div>
-        <div class="card">
-          <div class="ct">${L?'FORMULARIO DE CIERRE':'CLOSEOUT FORM'}</div>
-          ${state.closeoutSubmitted?`<div class="success-box">✓ ${L?'CIERRE ENVIADO EXITOSAMENTE':'CLOSEOUT SUBMITTED SUCCESSFULLY!'}</div>`:`
-          <div class="form-grid">
-            <div class="field"><label>${L?'Ventas del Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.bar_sales}" oninput="state.newSale.bar_sales=this.value"/></div>
-            <div class="field"><label>${L?'Ventas de Comida ($)':'Food Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.food_sales}" oninput="state.newSale.food_sales=this.value"/></div>
-            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.cash}" oninput="state.newSale.cash=this.value"/></div>
-            <div class="field"><label>${L?'Tarjeta ($)':'Card Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.card_sales}" oninput="state.newSale.card_sales=this.value"/></div>
-            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.tips}" oninput="state.newSale.tips=this.value"/></div>
-            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.comps}" oninput="state.newSale.comps=this.value"/></div>
+      `}
+    `:''}
+
+    ${S.tab==='closeout'?`
+      <div class="sec-title">✅ ${L?'CIERRE DE NOCHE':'END OF NIGHT'}</div>
+      <div class="card">
+        <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${L?'Completa antes de enviar el cierre':'Complete all items before submitting closeout'}</div>
+        <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${checkedCount}/${ALL_ITEMS.length} — ${pct}%</div>
+        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
+          <div class="cgroup-t">${group}</div>
+          ${items.map(item=>`
+            <div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+              <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
+              <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+            </div>
+          `).join('')}
+        `).join('')}
+      </div>
+      <div class="card">
+        <div class="ct">${L?'FORMULARIO DE CIERRE':'CLOSEOUT FORM'}</div>
+        ${S.closeoutSubmitted?`<div class="success-box">✓ ${L?'CIERRE ENVIADO':'CLOSEOUT SUBMITTED!'}</div>`:`
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+            <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
+            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+            <div class="field"><label>${L?'Tarjeta ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
           </div>
           <div class="field"><label>${L?'Personal de Cierre':'Closing Staff'}</label>
-            <select onchange="state.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none">
+            <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;width:100%;outline:none">
               <option value="">${L?'Seleccionar':'Select staff member'}</option>
-              ${state.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
+              ${S.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>${L?'Notas':'Notes / Incidents'}</label><textarea style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;resize:vertical;min-height:60px" placeholder="${L?'Cualquier incidente o nota para el dueño...':'Any issues or notes for the owner...'}" oninput="state.newSale.notes=this.value">${state.newSale.notes}</textarea></div>
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="submitCloseout()" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`COMPLETA LA LISTA PRIMERO (${ALL_ITEMS.length-checkedCount} restantes)`:`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`)}</button>
-          `}
+          <div class="field"><label>${L?'Notas':'Notes'}</label><textarea style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:9px 12px;font-size:14px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;resize:vertical;min-height:60px" placeholder="${L?'Incidentes o notas para el dueño...':'Any incidents or notes...'}" oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`COMPLETE CHECKLIST (${ALL_ITEMS.length-checkedCount} left)`}</button>
+        `}
+      </div>
+    `:''}
+
+    ${S.showSaleModal?`<div class="modal-bg" onclick="S.showSaleModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">+ ${L?'REGISTRAR VENTAS':'LOG SALES'}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+          <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
+          <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+          <div class="field"><label>${L?'Tarjeta ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+          <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+          <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
         </div>
-      `:''}
+        <div class="field"><label>${L?'Notas':'Notes'}</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="${L?'Notas del turno...':'Shift notes...'}"/></div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showSaleModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+          <button class="btn-save" onclick="saveSale()">${L?'Guardar':'Save'}</button>
+        </div>
+      </div>
+    </div>`:''}
 
     </main>
 
     <nav class="bot-nav">
-      ${TABS.map(tab=>`<button class="nb ${state.tab===tab.key?'on':''}" onclick="state.tab='${tab.key}';render()"><span class="ni">${tab.icon}</span><span class="nl">${tab.label}</span></button>`).join('')}
+      ${TABS.map(tab=>`<button class="nb ${S.tab===tab.key?'on':''}" onclick="S.tab='${tab.key}';render()">
+        <span class="ni">${tab.icon}</span>
+        <span class="nl">${tab.label}</span>
+        ${tab.badge?`<span class="nbadge">${tab.badge}</span>`:''}
+      </button>`).join('')}
     </nav>
-
-    ${state.showStaffModal?`
-      <div class="modal-bg" onclick="state.showStaffModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ${t('addStaff')}</div>
-          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${state.newStaff.name}" oninput="state.newStaff.name=this.value" placeholder="Maria G."/></div>
-          <div class="field"><label>${L?'Rol':'Role'}</label><input type="text" value="${state.newStaff.role}" oninput="state.newStaff.role=this.value" placeholder="Bartender"/></div>
-          <div class="field"><label>PIN</label><input type="number" value="${state.newStaff.pin}" oninput="state.newStaff.pin=this.value" placeholder="1234"/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="state.showStaffModal=false;render()">${t('cancel')}</button>
-            <button class="btn-save" onclick="saveStaff()">${t('save')}</button>
-          </div>
-        </div>
-      </div>
-    `:''}
-
-    ${state.showInvModal?`
-      <div class="modal-bg" onclick="state.showInvModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ${t('addItem')}</div>
-          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${state.newInv.name}" oninput="state.newInv.name=this.value" placeholder="Patron Silver"/></div>
-          <div class="field"><label>${L?'Categoría':'Category'}</label><input type="text" value="${state.newInv.category}" oninput="state.newInv.category=this.value" placeholder="Tequila"/></div>
-          <div class="field"><label>${L?'Unidad':'Unit'}</label><input type="text" value="${state.newInv.unit}" oninput="state.newInv.unit=this.value" placeholder="750ml, Keg, Case..."/></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="field"><label>${L?'Stock Actual':'Current Stock'}</label><input type="number" value="${state.newInv.stock}" oninput="state.newInv.stock=this.value"/></div>
-            <div class="field"><label>Par ${L?'Nivel':'Level'}</label><input type="number" value="${state.newInv.par_level}" oninput="state.newInv.par_level=this.value"/></div>
-          </div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="state.showInvModal=false;render()">${t('cancel')}</button>
-            <button class="btn-save" onclick="saveInv()">${t('save')}</button>
-          </div>
-        </div>
-      </div>
-    `:''}
-
-    ${state.showSaleModal?`
-      <div class="modal-bg" onclick="state.showSaleModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()" style="max-width:400px">
-          <div class="modal-title">+ ${t('addSale')}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.bar_sales}" oninput="state.newSale.bar_sales=this.value"/></div>
-            <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.food_sales}" oninput="state.newSale.food_sales=this.value"/></div>
-            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.cash}" oninput="state.newSale.cash=this.value"/></div>
-            <div class="field"><label>${L?'Tarjeta ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.card_sales}" oninput="state.newSale.card_sales=this.value"/></div>
-            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.tips}" oninput="state.newSale.tips=this.value"/></div>
-            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${state.newSale.comps}" oninput="state.newSale.comps=this.value"/></div>
-          </div>
-          <div class="field"><label>${L?'Notas':'Notes'}</label><input type="text" value="${state.newSale.notes}" oninput="state.newSale.notes=this.value" placeholder="${L?'Notas del turno...':'Shift notes...'}"/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="state.showSaleModal=false;render()">${t('cancel')}</button>
-            <button class="btn-save" onclick="saveSale()">${t('save')}</button>
-          </div>
-        </div>
-      </div>
-    `:''}
-
   </div>`;
 }
 
-function bindAuth(){
-  document.querySelectorAll('input').forEach(input=>{
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') handleAuth(); });
-  });
+// Need schedules table in Supabase
+async function ensureScheduleTable(){
+  await db.rpc('create_schedules_if_not_exists').catch(()=>{});
 }
-function bindApp(){}
 
 init();
 </script>
