@@ -3,14 +3,22 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#080810"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CantinaPro"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;CantinaPro&quot;,&quot;short_name&quot;:&quot;CantinaPro&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23080810&quot;,&quot;theme_color&quot;:&quot;%23c8102e&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cantinapro.github.io/cantinapro/icon.png&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;}]}"/>
 <title>CantinaPro — Bar Management App</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#080810;--s1:#12121e;--s2:#1c1c2e;--s3:#26263a;--border:#3a3a55;--gold:#f5a623;--amber:#e8820c;--red:#ff4455;--green:#00e87a;--blue:#4d9fff;--purple:#b366ff;--teal:#00d4aa;--text:#f0f0ff;--muted:#9999bb;--lc:#c8102e;--lcg:#d4a017;}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;font-size:16px;-webkit-font-smoothing:antialiased;}
-.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;}
+html,body{height:100%;width:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;font-size:16px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;}
+#root{min-height:100vh;}
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;position:relative;}
 
 /* AUTH */
 .auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
@@ -18,30 +26,28 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .auth-sub{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;color:var(--lcg);margin-top:6px;}
 .auth-div{width:60px;height:2px;background:linear-gradient(90deg,var(--lc),var(--lcg));margin:20px auto;}
 .auth-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:400px;}
-.auth-title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;margin-bottom:20px;}
+.auth-title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;margin-bottom:20px;color:var(--text);}
 .auth-tabs{display:flex;background:var(--s2);border-radius:8px;overflow:hidden;margin-bottom:20px;}
 .auth-tab{flex:1;padding:12px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
 .auth-tab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
 .field label{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;}
-.field input,.field select{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;}
+.field input,.field select,.field textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;-webkit-appearance:none;}
 .field input:focus,.field select:focus{border-color:var(--lc);}
-.field textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px 14px;font-size:16px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;resize:vertical;min-height:70px;}
+.field textarea{resize:vertical;min-height:70px;}
 .pw-wrap{position:relative;}
-.pw-wrap input{padding-right:50px;}
-.pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;}
-.auth-btn{width:100%;padding:16px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;margin-top:4px;}
-.auth-btn:disabled{opacity:.6;cursor:not-allowed;}
-.auth-err{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.3);border-radius:8px;padding:12px;font-size:15px;color:var(--red);margin-bottom:14px;}
+.pw-wrap input{padding-right:52px;}
+.pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px;line-height:1;}
+.auth-btn{width:100%;padding:16px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;margin-top:6px;-webkit-appearance:none;}
+.auth-btn:disabled{opacity:.6;}
+.auth-err{background:rgba(255,68,85,.12);border:1px solid rgba(255,68,85,.4);border-radius:8px;padding:12px;font-size:15px;color:var(--red);margin-bottom:14px;}
 
 /* PIN */
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
-.pin-btn{padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--s2);color:var(--text);font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;cursor:pointer;transition:all .2s;text-align:center;}
-.pin-btn:hover{background:var(--s3);border-color:var(--lc);}
-.pin-display{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:32px;letter-spacing:10px;margin-bottom:6px;min-height:62px;}
+.pin-btn{padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--s2);color:var(--text);font-family:'Bebas Neue',cursive;font-size:26px;cursor:pointer;text-align:center;-webkit-appearance:none;}
+.pin-display{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:32px;letter-spacing:10px;margin-bottom:6px;min-height:62px;color:var(--lc);}
 .staff-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
-.staff-sel-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;text-align:center;}
-.staff-sel-card:hover{border-color:var(--lc);background:rgba(200,16,46,.1);}
+.staff-sel-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;}
 
 /* HEADER */
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;}
@@ -49,23 +55,23 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .hdr-bar{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--lcg);letter-spacing:1px;}
 .hdr-r{display:flex;align-items:center;gap:8px;}
 .lang-wrap{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-.lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;padding:5px 9px;cursor:pointer;}
+.lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:13px;padding:5px 9px;cursor:pointer;}
 .lb.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;padding:5px 8px;border-radius:4px;cursor:pointer;}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:11px;padding:5px 8px;border-radius:4px;cursor:pointer;}
 .sdot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
-.staff-badge{background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.3);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--lcg);font-family:'Share Tech Mono',monospace;}
+.staff-badge{background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.4);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--lcg);font-family:'Share Tech Mono',monospace;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* NAV */
-.bot-nav{background:var(--s1);border-top:1px solid var(--border);display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:100;}
-.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:9px 2px 7px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:2px solid transparent;transition:all .2s;position:relative;}
+/* BOTTOM NAV - Fixed for Android */
+.bot-nav{background:var(--s1);border-top:2px solid var(--border);display:flex;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:480px;margin:0 auto;z-index:999;padding-bottom:env(safe-area-inset-bottom,0px);}
+.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent;}
 .nb.on{color:var(--lc);border-top-color:var(--lc);}
 .ni{font-size:18px;line-height:1;}
-.nl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
-.nbadge{position:absolute;top:5px;right:8%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;}
+.nl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:inherit;}
+.nbadge{position:absolute;top:5px;right:6%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;}
 
 /* MAIN */
-.main{flex:1;padding:16px;padding-bottom:80px;}
+.main{flex:1;padding:16px;padding-bottom:90px;overflow-y:auto;}
 .sec-title{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
@@ -88,14 +94,14 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .kd{font-size:12px;color:var(--muted);margin-top:2px;}
 
 /* BUTTONS */
-.action-btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:8px;}
+.action-btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;cursor:pointer;margin-top:8px;display:block;text-align:center;-webkit-appearance:none;}
 .action-btn.red{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
 .action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
 .action-btn.blue{background:linear-gradient(135deg,var(--blue),#2266cc);color:#fff;}
 .action-btn.purple{background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff;}
 .action-btn.gold{background:linear-gradient(135deg,var(--gold),var(--amber));color:#000;}
-.action-btn:disabled{opacity:.5;cursor:not-allowed;}
-.btn-sm{padding:6px 12px;border:none;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer;}
+.action-btn:disabled{opacity:.5;}
+.btn-sm{padding:8px 14px;border:none;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer;-webkit-appearance:none;}
 
 /* ROWS */
 .row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
@@ -116,15 +122,15 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .cprog{background:var(--s2);border-radius:4px;overflow:hidden;height:7px;margin-bottom:12px;}
 .cbar{height:100%;background:var(--green);border-radius:4px;transition:width .3s;}
 .cgroup-t{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:14px;font-weight:700;}
-.citem{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.citem{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
 .citem:last-child{border-bottom:none;}
-.cbox{width:24px;height:24px;border-radius:5px;border:2px solid var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.cbox{width:26px;height:26px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .cbox.done{background:var(--green);border-color:var(--green);}
 .ctxt{font-size:15px;font-weight:500;}
 .ctxt.done{color:var(--muted);text-decoration:line-through;}
-.subbtn{width:100%;padding:16px;border-radius:8px;border:none;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;transition:all .2s;margin-top:14px;}
+.subbtn{width:100%;padding:16px;border-radius:8px;border:none;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;margin-top:14px;-webkit-appearance:none;}
 .subbtn.ready{background:var(--gold);color:#000;}
-.subbtn.locked{background:var(--s2);color:var(--muted);cursor:not-allowed;border:1px solid var(--border);}
+.subbtn.locked{background:var(--s2);color:var(--muted);border:1px solid var(--border);}
 
 /* GALLERY */
 .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -132,52 +138,52 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .pcard img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
 .photo-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:10px;}
 .photo-label{font-size:11px;color:#fff;font-weight:700;}
-.photo-time{font-size:10px;color:rgba(255,255,255,.6);font-family:'Share Tech Mono',monospace;}
-.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;}
-.upzone:hover{border-color:var(--lc);}
+.photo-time{font-size:10px;color:rgba(255,255,255,.7);font-family:'Share Tech Mono',monospace;}
+.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;margin-bottom:14px;}
 
 /* MISC */
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:14px auto;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.empty-state{text-align:center;padding:32px 16px;color:var(--muted);font-size:14px;line-height:1.8;}
-.success-box{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:10px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:14px;}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;z-index:500;}
-.modal{background:var(--s2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;}
-.modal-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;margin-bottom:18px;}
+.empty-state{text-align:center;padding:32px 16px;color:var(--muted);font-size:15px;line-height:1.8;}
+.success-box{background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.4);border-radius:10px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:14px;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:flex-end;justify-content:center;z-index:1000;}
+.modal{background:var(--s2);border:1px solid var(--border);border-top-left-radius:20px;border-top-right-radius:20px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;margin-bottom:18px;color:var(--text);}
 .modal-actions{display:flex;gap:10px;margin-top:16px;}
-.modal-actions button{flex:1;padding:12px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:1px;border:none;cursor:pointer;}
+.modal-actions button{flex:1;padding:14px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;border:none;cursor:pointer;}
 .btn-cancel{background:var(--s3);color:var(--muted);}
 .btn-save{background:var(--lc);color:#fff;}
 
 /* SCHEDULE */
-.day-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;}
+.day-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
 .day-tabs::-webkit-scrollbar{display:none;}
-.day-tab{flex-shrink:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--s2);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s;text-align:center;min-width:52px;}
+.day-tab{flex-shrink:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--s2);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;cursor:pointer;text-align:center;min-width:52px;-webkit-appearance:none;}
 .day-tab.on{background:var(--lc);border-color:var(--lc);color:#fff;}
 .day-tab.has-open{border-color:var(--red);color:var(--red);}
 .shift-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
-.shift-card.open{border-color:rgba(255,68,85,.4);background:rgba(255,68,85,.04);}
-.shift-card.covered{border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.04);}
-.shift-card.mine{border-color:rgba(212,160,23,.4);background:rgba(212,160,23,.04);}
-.shift-time{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;}
-.shift-role{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
-.shift-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-top:8px;}
-.shift-badge.scheduled{background:rgba(68,136,255,.15);color:var(--blue);}
-.shift-badge.open{background:rgba(255,68,85,.15);color:var(--red);}
-.shift-badge.covered{background:rgba(0,232,122,.15);color:var(--green);}
-.shift-badge.mine{background:rgba(212,160,23,.15);color:var(--lcg);}
-.bid-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.shift-card.open{border-color:rgba(255,68,85,.5);background:rgba(255,68,85,.06);}
+.shift-card.covered{border-color:rgba(0,232,122,.4);background:rgba(0,232,122,.05);}
+.shift-card.mine{border-color:rgba(212,160,23,.5);background:rgba(212,160,23,.05);}
+.shift-time{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;color:var(--text);}
+.shift-role{font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:3px;}
+.shift-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:8px;}
+.shift-badge.scheduled{background:rgba(77,159,255,.2);color:var(--blue);}
+.shift-badge.open{background:rgba(255,68,85,.2);color:var(--red);}
+.shift-badge.covered{background:rgba(0,232,122,.2);color:var(--green);}
+.shift-badge.mine{background:rgba(212,160,23,.2);color:var(--lcg);}
+.bid-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
 .bid-row:last-child{border-bottom:none;}
-.open-banner{background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.25);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.open-banner{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
 .staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.staff-pick{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;}
-.staff-pick:hover,.staff-pick.on{background:rgba(200,16,46,.1);border-color:var(--lc);}
+.staff-pick{background:var(--s2);border:2px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;}
+.staff-pick.on{background:rgba(200,16,46,.12);border-color:var(--lc);}
 .clock-wrap{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;}
 .lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
 .lcd{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px;}
-.my-shift-highlight{background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.3);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;}
-.link-box{background:var(--s2);border:1px solid var(--lcg);border-radius:10px;padding:14px;margin-bottom:10px;}
+.my-shift-highlight{background:rgba(212,160,23,.1);border:2px solid rgba(212,160,23,.4);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;}
+.link-box{background:var(--s2);border:2px solid var(--lcg);border-radius:10px;padding:14px;margin-bottom:10px;}
 .link-url{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);word-break:break-all;margin-bottom:12px;line-height:1.6;}
+.install-banner{background:rgba(77,159,255,.1);border:1px solid rgba(77,159,255,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
 </style>
 </head>
 <body>
@@ -190,7 +196,8 @@ const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const COLORS=['#c8102e','#d4a017','#00e87a','#4488ff','#a855f7','#00d4aa','#ff8c42','#ff6eb4'];
+const COLORS=['#c8102e','#d4a017','#00e87a','#4d9fff','#b366ff','#00d4aa','#ff8c42','#ff6eb4'];
+const ROLES=['Bartender','Barback','Server','Host','Security','Manager','Busser','DJ','Cook','Other'];
 
 const CHECKLIST_DATA={
   '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms'],
@@ -229,16 +236,29 @@ let S={
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
   staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,
   showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
-  newStaff:{name:'',role:'',pin:''},newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
+  newStaff:{name:'',role:'Bartender',pin:''},
+  newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
   newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
-  newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:''},
+  newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:'Bartender'},
   dropShiftId:null,dropReason:'',
   clockedIn:[],selectedStaff:null,
   liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
   recipeSearch:'',recipeFilter:'All',
   schedDay:new Date().getDay(),
   urlBarId:null,
+  showInstallBanner:false,
+  deferredPrompt:null,
 };
+
+// PWA install prompt
+window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();S.deferredPrompt=e;S.showInstallBanner=true;render();});
+
+async function installApp(){
+  if(!S.deferredPrompt)return;
+  S.deferredPrompt.prompt();
+  const{outcome}=await S.deferredPrompt.userChoice;
+  S.deferredPrompt=null;S.showInstallBanner=false;render();
+}
 
 async function init(){
   setInterval(()=>{
@@ -304,6 +324,7 @@ function staffLogout(){
 async function handleAuth(){
   S.authError='';S.authLoading=true;render();
   const email=S.loginEmail.trim(),password=S.loginPassword.trim();
+  if(!email||!password){S.authError='Email and password are required';S.authLoading=false;render();return;}
   if(S.authMode==='login'){
     const{error}=await db.auth.signInWithPassword({email,password});
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
@@ -317,21 +338,37 @@ async function handleAuth(){
 }
 async function logout(){await db.auth.signOut();Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,staffUser:null});render();}
 
-async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'',pin:''};S.showStaffModal=false;await loadStaff();render();}
+async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'Bartender',pin:''};S.showStaffModal=false;await loadStaff();render();}
 async function deleteStaff(id){await db.from('staff').delete().eq('id',id);await loadStaff();render();}
 async function saveSale(){if(!S.bar)return;await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});S.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};S.showSaleModal=false;await loadSales();render();}
 async function saveInv(){if(!S.newInv.name||!S.bar)return;await db.from('inventory').insert({bar_id:S.bar.id,...S.newInv,stock:parseFloat(S.newInv.stock)||0,par_level:parseFloat(S.newInv.par_level)||0});S.newInv={name:'',category:'',unit:'',stock:'',par_level:''};S.showInvModal=false;await loadInventory();render();}
 async function deleteInv(id){await db.from('inventory').delete().eq('id',id);await loadInventory();render();}
 async function updateStock(id,v){await db.from('inventory').update({stock:v,updated_at:new Date()}).eq('id',id);await loadInventory();render();}
+
 async function saveShift(){
-  if(!S.newShift.start_time||!S.newShift.end_time||!S.bar)return;
+  if(!S.newShift.start_time||!S.newShift.end_time||!S.bar){
+    alert('Please fill in start time and end time!');return;
+  }
   const sm=S.staff.find(s=>s.id===S.newShift.staff_id);
-  await db.from('schedules').insert({bar_id:S.bar.id,staff_id:S.newShift.staff_id||null,staff_name:sm?sm.name:'OPEN',day_of_week:parseInt(S.newShift.day_of_week),start_time:S.newShift.start_time,end_time:S.newShift.end_time,role:S.newShift.role,status:S.newShift.staff_id?'scheduled':'open'});
-  S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:''};S.showShiftModal=false;await loadSchedules();render();
+  await db.from('schedules').insert({
+    bar_id:S.bar.id,
+    staff_id:S.newShift.staff_id||null,
+    staff_name:sm?sm.name:'OPEN',
+    day_of_week:parseInt(S.newShift.day_of_week),
+    start_time:S.newShift.start_time,
+    end_time:S.newShift.end_time,
+    role:S.newShift.role||'Staff',
+    status:S.newShift.staff_id?'scheduled':'open'
+  });
+  S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:'Bartender'};
+  S.showShiftModal=false;
+  await loadSchedules();
+  render();
 }
+
 async function deleteShift(id){await db.from('schedules').delete().eq('id',id);await loadSchedules();render();}
 async function dropShift(id){
-  if(!S.dropReason)return;
+  if(!S.dropReason){alert('Please enter a reason');return;}
   await db.from('schedules').update({status:'open',dropped_by:S.dropReason}).eq('id',id);
   S.showDropModal=false;S.dropShiftId=null;S.dropReason='';await loadSchedules();render();
 }
@@ -411,10 +448,11 @@ function renderAuth(){
           <button class="pw-eye" onclick="S.showPw=!S.showPw;render()" type="button">${S.showPw?'🙈':'👁️'}</button>
         </div>
       </div>
-      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'...':(isLogin?'LOG IN':'CREATE BAR')}</button>
-      <div style="font-size:13px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Click NEW BAR above':'Already registered? Click OWNER LOGIN'}</div>
+      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE BAR')}</button>
+      <div style="font-size:14px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
     </div>
-    <div style="margin-top:18px;font-size:13px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
+    <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
+    <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
   </div>`;
 }
 
@@ -427,13 +465,13 @@ function renderStaffViaLink(){
       <div class="auth-div"></div>
       <div class="auth-card">
         <div class="auth-title">WHO ARE YOU?</div>
-        ${S.staffLoginStaff.length===0?`<div class="empty-state">No staff found.<br/>Ask your manager to add you.</div>`:''}
+        ${S.staffLoginStaff.length===0?`<div class="empty-state">No staff found.<br/>Ask your manager to add you to the app.</div>`:''}
         <div class="staff-select-grid">
           ${S.staffLoginStaff.map((s,i)=>`
             <div class="staff-sel-card" onclick="selectStaffMember(${JSON.stringify(s).replace(/"/g,'&quot;')})">
-              <div class="av" style="background:${ac(i)}22;color:${ac(i)};margin:0 auto 10px;width:44px;height:44px;font-size:14px">${ai(s.name)}</div>
-              <div style="font-weight:700;font-size:15px">${s.name}</div>
-              <div style="font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:3px">${s.role}</div>
+              <div class="av" style="background:${ac(i)}22;color:${ac(i)};margin:0 auto 10px;width:46px;height:46px;font-size:15px">${ai(s.name)}</div>
+              <div style="font-weight:700;font-size:16px;color:var(--text)">${s.name}</div>
+              <div style="font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:3px">${s.role}</div>
             </div>
           `).join('')}
         </div>
@@ -448,9 +486,9 @@ function renderStaffViaLink(){
     <div class="auth-div"></div>
     <div class="auth-card">
       <div style="text-align:center;margin-bottom:18px">
-        <div class="av" style="background:${color}22;color:${color};width:56px;height:56px;font-size:18px;margin:0 auto 12px">${ai(S.staffLoginSelected?.name||'')}</div>
-        <div style="font-weight:700;font-size:18px">${S.staffLoginSelected?.name}</div>
-        <div style="font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:4px">${S.staffLoginSelected?.role}</div>
+        <div class="av" style="background:${color}22;color:${color};width:58px;height:58px;font-size:18px;margin:0 auto 12px">${ai(S.staffLoginSelected?.name||'')}</div>
+        <div style="font-weight:700;font-size:20px;color:var(--text)">${S.staffLoginSelected?.name}</div>
+        <div style="font-size:14px;color:var(--muted);text-transform:uppercase;margin-top:4px">${S.staffLoginSelected?.role}</div>
       </div>
       <div class="auth-title" style="text-align:center">ENTER YOUR PIN</div>
       ${S.staffPinError?`<div class="auth-err">${S.staffPinError}</div>`:''}
@@ -459,7 +497,7 @@ function renderStaffViaLink(){
         ${['1','2','3','4','5','6','7','8','9','','0','del'].map(k=>k===''?`<div></div>`:
           `<button class="pin-btn" onclick="pinPress('${k}')">${k==='del'?'⌫':k}</button>`).join('')}
       </div>
-      <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;margin-top:10px;width:100%;text-align:center">← Back</button>
+      <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;margin-top:10px;width:100%;text-align:center;padding:10px">← Back</button>
     </div>
   </div>`;
 }
@@ -478,6 +516,7 @@ function renderStaffApp(){
   const STAFF_TABS=[
     {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
     {key:'staff-shift',icon:'⏰',label:L?'Turno':'My Shift'},
+    {key:'staff-photos',icon:'📸',label:L?'Fotos':'Photos'},
     {key:'staff-recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
     {key:'staff-closeout',icon:'✅',label:L?'Cierre':'Closeout'},
   ];
@@ -499,11 +538,11 @@ function renderStaffApp(){
     ${S.tab==='my-schedule'?`
       <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
       ${myTodayShift?`<div class="my-shift-highlight">
-        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">YOUR SHIFT TODAY</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:3px">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
-        <div style="font-size:14px;color:var(--muted)">${myTodayShift.role||'Staff'}</div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ YOUR SHIFT TODAY</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
+        <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
       </div>`:''}
-      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:22px">🔴</div><div><div style="font-weight:700;font-size:16px">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
+      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:14px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
       <div class="day-tabs">
         ${DAYS.map((d,i)=>{
           const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
@@ -512,7 +551,7 @@ function renderStaffApp(){
           </button>`;
         }).join('')}
       </div>
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.</div>`:''}
+      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.</div>`:''}
       ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
         const isMyShift=shift.staff_id===S.staffUser.id;
         const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
@@ -527,12 +566,12 @@ function renderStaffApp(){
                 ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
                 <span class="shift-badge ${isMyShift?'mine':shift.status}">${isMyShift?'⭐ YOUR SHIFT':shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
               </div>
-              ${shift.dropped_by?`<div style="font-size:12px;color:var(--muted);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
+              ${shift.dropped_by?`<div style="font-size:13px;color:var(--muted);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-              ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:13px;padding:8px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:12px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
-                `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:8px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
+              ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
+              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:13px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
+                `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
             </div>
           </div>
         </div>`;
@@ -540,8 +579,8 @@ function renderStaffApp(){
       ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">DROP THIS SHIFT</div>
-          <div style="font-size:15px;color:var(--muted);margin-bottom:16px">Your shift will open for others to bid. Your manager will be notified.</div>
-          <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
+          <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your shift will open for others to bid. Your manager will be notified.</div>
+          <div class="field"><label>Reason for dropping</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
             <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP SHIFT</button>
@@ -555,18 +594,55 @@ function renderStaffApp(){
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
       ${myTodayShift?`<div class="my-shift-highlight">
         <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">TODAY'S SHIFT</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:3px">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
-        <div style="font-size:14px;color:var(--muted)">${myTodayShift.role||'Staff'}</div>
-      </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;color:var(--muted);font-size:15px">No shift scheduled for today.</div>`}
+        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
+        <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
+      </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;color:var(--muted);font-size:15px">No shift scheduled for today.<br/>Check Schedule tab for open shifts.</div>`}
       <div class="card">
         ${isClockedIn?`
-          <div style="text-align:center;margin-bottom:14px"><div style="font-size:13px;color:var(--muted);letter-spacing:1px">CLOCKED IN</div><div style="font-family:'Bebas Neue',cursive;font-size:36px;color:var(--green)">ACTIVE ●</div></div>
+          <div style="text-align:center;margin-bottom:14px">
+            <div style="font-size:14px;color:var(--muted);letter-spacing:1px">STATUS</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:38px;color:var(--green)">● ON CLOCK</div>
+          </div>
           <button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.staffUser.id}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>
         `:`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.staffUser.id}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`}
       </div>
       <div class="card">
         <div class="ct">SHIFT BRIEFING</div>
-        <div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.15);border-radius:8px;padding:12px;font-size:15px;line-height:1.8">${L?'Bienvenidos al turno. Revisen el inventario, atiendan a los clientes con reservación y reporten incidentes al manager.':'Welcome to your shift. Check inventory levels, take care of reservation guests, and report any incidents to the manager.'}</div>
+        <div style="background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:8px;padding:14px;font-size:15px;line-height:1.8;color:var(--text)">${L?'Bienvenidos al turno. Revisen el inventario, atiendan a los clientes con reservación y reporten incidentes al manager.':'Welcome to your shift. Check inventory levels, attend to reservation guests, and report any incidents to the manager.'}</div>
+      </div>
+    `:''}
+
+    ${S.tab==='staff-photos'?`
+      <div class="sec-title">📸 ${L?'FOTOS':'PHOTOS'}</div>
+      <div class="card">
+        <div class="ct">${L?'TOMAR FOTO / SUBIR':'TAKE OR UPLOAD PHOTO'}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Sube fotos de recibos, incidentes, o cualquier cosa que necesite atención del manager.':'Upload photos of liquor receipts, incidents, or anything that needs manager attention.'}</div>
+        <div class="field"><label>Tag / Category</label>
+          <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+            ${['Liquor Receipt','Beer Receipt','Food Receipt','Incident','Social Media','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>${L?'Descripción':'Description / Notes'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué es esta foto?':'What is this photo of?'}"/></div>
+        <label style="display:block;cursor:pointer">
+          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
+          <div class="upzone">
+            <div style="font-size:40px;margin-bottom:10px">📷</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR FOTO':'TAKE PHOTO'}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px">${L?'o toca para subir desde galería':'or tap to upload from gallery'}</div>
+          </div>
+        </label>
+      </div>
+      <div class="photo-grid">
+        ${S.photos.filter(p=>['Liquor Receipt','Beer Receipt','Food Receipt','Incident'].includes(p.tag)||S.photos.indexOf(p)<10).slice(0,10).map(p=>`
+          <div class="pcard">
+            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
+            <div class="photo-overlay">
+              <div class="photo-label">${p.label||p.tag}</div>
+              <div class="photo-time">${p.tag}</div>
+            </div>
+          </div>
+        `).join('')}
+        ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first photo above!</div>`:''}
       </div>
     `:''}
 
@@ -574,21 +650,32 @@ function renderStaffApp(){
       <div class="sec-title">🍹 ${L?'RECETAS':'RECIPE BOOK'}</div>
       <div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
         <span style="color:var(--muted);font-size:18px">🔍</span>
-        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
+        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="${L?'Buscar recetas...':'Search recipes...'}" value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-        ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.12)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;padding:7px 14px;border-radius:20px;cursor:pointer" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
+        ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;-webkit-appearance:none;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
       </div>
+      ${filteredRecipes.length===0?`<div class="empty-state">No recipes found.</div>`:''}
       ${filteredRecipes.map(r=>`
         <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="font-weight:700;font-size:16px">${r.emoji} ${r.name}</div><div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${margin(r)}% margin</div></div>
-          <div style="font-size:13px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji} ${r.name}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--green)">${margin(r)}% margin</div>
+          </div>
+          <div style="font-size:14px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
         </div>
-        <div style="display:none;background:var(--s1);border:1px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
+        <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
           <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
-          ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount}</div><div style="font-size:15px;font-weight:600;flex:1">${i.name}</div>${i.note?`<div style="font-size:12px;color:var(--muted);font-style:italic">${i.note}</div>`:''}</div>`).join('')}
+          ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount}</div>
+            <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name}</div>
+            ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
+          </div>`).join('')}
           <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
-          ${r.steps.map((s,i)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.15);border:1px solid rgba(200,16,46,.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div><div style="font-size:15px;line-height:1.7">${s}</div></div>`).join('')}
+          ${r.steps.map((s,i)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
+            <div style="font-size:15px;line-height:1.7;color:var(--text)">${s}</div>
+          </div>`).join('')}
         </div>
       `).join('')}
     `:''}
@@ -597,17 +684,18 @@ function renderStaffApp(){
       <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
       <div class="card">
         <div class="ct">CLOSING CHECKLIST</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
           ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
+            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
             <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
           </div>`).join('')}
         `).join('')}
         ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
         `}
       </div>
     `:''}
@@ -638,6 +726,7 @@ function renderOwnerApp(){
     {key:'shift',icon:'⏰',label:'Shift'},
     {key:'inventory',icon:'📦',label:'Stock',badge:lowItems},
     {key:'gallery',icon:'📸',label:'Gallery'},
+    {key:'recipes',icon:'🍹',label:'Recipes'},
     {key:'closeout',icon:'✅',label:'Close'},
   ];
 
@@ -655,16 +744,22 @@ function renderOwnerApp(){
     </header>
     <main class="main">
 
+    ${S.showInstallBanner?`<div class="install-banner">
+      <div style="font-size:22px">📱</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">Install CantinaPro</div><div style="font-size:13px;color:var(--muted)">Add to your home screen for quick access</div></div>
+      <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">INSTALL</button>
+    </div>`:''}
+
     ${S.tab==='dashboard'?`
       <div class="sec-title">TONIGHT'S OVERVIEW</div>
       <div class="kpi-grid">
-        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries</div></div>
+        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries logged</div></div>
         <div class="kpi g"><div class="kl">Weekly Revenue</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
         <div class="kpi b"><div class="kl">Staff</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
         <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
       </div>
-      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:8px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
-      ${pendingBids>0?`<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:8px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
+      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed — check Schedule</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
+      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
 
       <div class="card">
         <div class="ct">👤 STAFF PORTAL LINK</div>
@@ -673,13 +768,23 @@ function renderOwnerApp(){
           <div class="link-url">${getStaffLink()}</div>
           <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
         </div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center">💡 Staff can also add to home screen to install as an app</div>
       </div>
 
       <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">+ LOG SALES</button>
       <div class="card">
         <div class="ct">RECENT SALES</div>
-        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above to add your first entry.</div>`:
-          S.sales.slice(0,5).map(s=>`<div class="row"><div style="flex:1"><div style="font-weight:700;font-size:16px">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div><div style="font-size:13px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div></div><div style="font-size:13px;color:var(--muted);text-align:right"><div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div><div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div></div></div>`).join('')}
+        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
+          S.sales.slice(0,5).map(s=>`<div class="row">
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
+              <div style="font-size:13px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
+            </div>
+            <div style="font-size:13px;color:var(--muted);text-align:right">
+              <div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div>
+              <div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div>
+            </div>
+          </div>`).join('')}
       </div>
     `:''}
 
@@ -693,8 +798,8 @@ function renderOwnerApp(){
           </button>`;
         }).join('')}
       </div>
-      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">+ ADD SHIFT</button>
-      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap "+ Add Shift" above.</div>`:''}
+      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">+ ADD SHIFT FOR ${DAYS[S.schedDay].toUpperCase()}</button>
+      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap the button above to add one.</div>`:''}
       ${dayShifts.map(shift=>{
         const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
         const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
@@ -708,23 +813,23 @@ function renderOwnerApp(){
                 ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
                 <span class="shift-badge ${shift.status}">${shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
               </div>
-              ${shift.dropped_by?`<div style="font-size:12px;color:var(--red);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
+              ${shift.dropped_by?`<div style="font-size:13px;color:var(--red);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
             </div>
             <div style="display:flex;gap:8px">
-              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:13px;padding:8px 12px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              <button class="btn-sm" style="background:rgba(255,68,85,.1);color:var(--red);font-size:16px;padding:6px 10px" onclick="deleteShift('${shift.id}')">×</button>
+              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 12px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
+              <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:18px;padding:6px 12px" onclick="deleteShift('${shift.id}')">×</button>
             </div>
           </div>
           ${shift.status==='open'&&S.staff.length>0?`
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">AVAILABLE STAFF</div>
+              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">AVAILABLE STAFF TO COVER</div>
               ${S.staff.map((st,i)=>{
                 const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
-                return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+                return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
                   <div class="av" style="background:${ac(i)}22;color:${ac(i)};width:28px;height:28px;font-size:10px">${ai(st.name)}</div>
-                  <div style="flex:1;font-size:15px;font-weight:600">${st.name}</div>
-                  ${hasBid?`<span style="font-size:12px;color:var(--gold)">BID PLACED</span>`:
-                    `<button class="btn-sm" style="background:rgba(0,232,122,.15);color:var(--green);font-size:13px;padding:8px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">BID</button>`}
+                  <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${st.name}</div>
+                  ${hasBid?`<span style="font-size:13px;color:var(--gold)">BID PLACED ⏳</span>`:
+                    `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">ASSIGN</button>`}
                 </div>`;
               }).join('')}
             </div>
@@ -733,38 +838,44 @@ function renderOwnerApp(){
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
               <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">🙋 ${shiftBids.length} BID${shiftBids.length!==1?'S':''} — APPROVE ONE</div>
               ${shiftBids.map(bid=>`<div class="bid-row">
-                <div style="flex:1;font-size:15px;font-weight:600">${bid.staff_name}</div>
-                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:8px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
-                <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:13px;padding:8px 10px" onclick="declineBid('${bid.id}')">✗</button>
+                <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${bid.staff_name}</div>
+                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:9px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
+                <button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 10px" onclick="declineBid('${bid.id}')">✗</button>
               </div>`).join('')}
             </div>
           `:''}
         </div>`;
       }).join('')}
+
       ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay]}</div>
-          <div class="field"><label>Staff Member (optional)</label>
-            <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none">
-              <option value="">-- Open Shift (no one assigned) --</option>
+          <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay].toUpperCase()}</div>
+          <div class="field"><label>Staff Member (optional — leave blank for open shift)</label>
+            <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              <option value="">-- Open Shift (unassigned) --</option>
               ${S.staff.map(s=>`<option value="${s.id}" ${S.newShift.staff_id===s.id?'selected':''}>${s.name} · ${s.role}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>Role</label><input type="text" value="${S.newShift.role}" oninput="S.newShift.role=this.value" placeholder="Bartender, Server, Barback..."/></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="field"><label>Start Time</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value"/></div>
-            <div class="field"><label>End Time</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value"/></div>
+          <div class="field"><label>Role / Position</label>
+            <select oninput="S.newShift.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              ${ROLES.map(r=>`<option value="${r}" ${S.newShift.role===r?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>Start Time</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
+            <div class="field"><label>End Time</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
           </div>
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showShiftModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveShift()">Save Shift</button>
+            <button class="btn-save" onclick="saveShift()">SAVE SHIFT</button>
           </div>
         </div>
       </div>`:''}
+
       ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">DROP SHIFT</div>
-          <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
+          <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Emergency, sick, etc."/></div>
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
             <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP</button>
@@ -778,15 +889,15 @@ function renderOwnerApp(){
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
       <div class="card">
         <div class="ct">CLOCK IN / OUT</div>
-        ${S.staff.length===0?`<div class="empty-state">No staff yet.<br/>Tap "+ Add Staff" below.</div>`:''}
+        ${S.staff.length===0?`<div class="empty-state">No staff added yet.<br/>Tap "+ Add Staff" below.</div>`:''}
         <div class="staff-grid">
           ${S.staff.map((s,i)=>{
             const isIn=S.clockedIn.includes(s.id);
             return `<div class="staff-pick ${S.selectedStaff===s.id?'on':''}" onclick="S.selectedStaff='${s.id}';render()">
               <div class="av" style="background:${ac(i)}22;color:${ac(i)}">${ai(s.name)}</div>
-              <div style="font-weight:700;font-size:15px;margin-top:8px">${s.name}</div>
+              <div style="font-weight:700;font-size:15px;margin-top:8px;color:var(--text)">${s.name}</div>
               <div style="font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:2px">${s.role}</div>
-              <div style="font-size:11px;font-weight:700;margin-top:4px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
+              <div style="font-size:12px;font-weight:700;margin-top:6px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
             </div>`;
           }).join('')}
         </div>
@@ -795,15 +906,19 @@ function renderOwnerApp(){
           return isIn
             ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ CLOCK OUT</button>`
             :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ CLOCK IN</button>`;
-        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>SELECT YOUR NAME ABOVE</button>`}
+        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>TAP YOUR NAME ABOVE</button>`}
       </div>
-      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ADD STAFF</button>
+      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ADD STAFF MEMBER</button>
       ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">+ ADD STAFF MEMBER</div>
-          <div class="field"><label>Name</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria G."/></div>
-          <div class="field"><label>Role</label><input type="text" value="${S.newStaff.role}" oninput="S.newStaff.role=this.value" placeholder="Bartender"/></div>
-          <div class="field"><label>PIN (4 digits)</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234"/></div>
+          <div class="field"><label>Full Name</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria Garcia"/></div>
+          <div class="field"><label>Role / Position</label>
+            <select oninput="S.newStaff.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              ${ROLES.map(r=>`<option value="${r}" ${S.newStaff.role===r?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>PIN (4 digits — staff use this to log in)</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234" maxlength="4"/></div>
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showStaffModal=false;render()">Cancel</button>
             <button class="btn-save" onclick="saveStaff()">Save</button>
@@ -816,20 +931,20 @@ function renderOwnerApp(){
       <div class="sec-title">📦 INVENTORY</div>
       <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:14px">+ ADD ITEM</button>
       <div class="card" style="padding:0;overflow:hidden">
-        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory yet.<br/>Tap "+ Add Item" above.</div>`:`
-        <div style="overflow-x:auto">
+        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Tap "+ Add Item" above.</div>`:`
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
           <table class="inv-table">
             <thead><tr><th>Item</th><th>Unit</th><th>Stock</th><th>Par</th><th>Status</th><th></th></tr></thead>
             <tbody>
               ${S.inventory.map(item=>{
                 const st=item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
                 return `<tr>
-                  <td><div style="font-weight:700;font-size:15px">${item.name}</div><div style="font-size:12px;color:var(--muted)">${item.category||''}</div></td>
+                  <td><div style="font-weight:700;font-size:15px;color:var(--text)">${item.name}</div><div style="font-size:12px;color:var(--muted)">${item.category||''}</div></td>
                   <td style="font-size:13px;color:var(--muted)">${item.unit||''}</td>
-                  <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:14px;width:60px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
+                  <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:14px;width:62px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
                   <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted)">${item.par_level}</td>
                   <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
-                  <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:20px">×</button></td>
+                  <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:22px;padding:4px">×</button></td>
                 </tr>`;
               }).join('')}
             </tbody>
@@ -840,55 +955,99 @@ function renderOwnerApp(){
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">+ ADD INVENTORY ITEM</div>
           <div class="field"><label>Name</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
-          <div class="field"><label>Category</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila"/></div>
-          <div class="field"><label>Unit</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case..."/></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="field"><label>Current Stock</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value"/></div>
-            <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value"/></div>
+          <div class="field"><label>Category</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila, Beer, Wine..."/></div>
+          <div class="field"><label>Unit</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case, Bottle..."/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>Current Stock</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value" placeholder="0"/></div>
+            <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value" placeholder="0"/></div>
           </div>
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showInvModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveInv()">Save</button>
+            <button class="btn-save" onclick="saveInv()">Save Item</button>
           </div>
         </div>
       </div>`:''}
     `:''}
 
     ${S.tab==='gallery'?`
-      <div class="sec-title">📸 GALLERY</div>
+      <div class="sec-title">📸 GALLERY & RECEIPTS</div>
       ${S.selectedPhoto?`
-        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;cursor:pointer;margin-bottom:14px">← BACK</button>
+        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
         <div class="card">
-          <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:180px;display:flex;align-items:center;justify-content:center;position:relative">
-            ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:260px;object-fit:contain"/>`:''}
+          <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
+            ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:'<div style="font-size:48px">📷</div>'}
             <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
           </div>
           <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
           ${S.generatingCaption?'<div class="spinner"></div>':''}
-          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px">${S.photoCaption}<button onclick="navigator.clipboard?.writeText(this.parentElement.childNodes[0].textContent.trim());this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:6px 12px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
+          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText('${S.photoCaption.replace(/'/g,"\\'")}');this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
         </div>
       `:`
         <div class="card">
-          <div class="ct">ADD PHOTO</div>
-          <div class="field"><label>Tag</label>
-            <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none">
-              ${['Social Media','Gallery','Event','Promo','Behind the Scenes','Staff'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
+          <div class="ct">ADD PHOTO / RECEIPT</div>
+          <div class="field"><label>Category</label>
+            <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              ${['Liquor Receipt','Beer Receipt','Food Receipt','Social Media','Event','Promo','Staff','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>Description</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="What's happening?"/></div>
+          <div class="field"><label>Description</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="Describe this photo..."/></div>
           <label style="display:block;cursor:pointer">
             <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
-            <div class="upzone"><div style="font-size:32px;margin-bottom:8px">📷</div><div style="font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;color:var(--muted)">TAKE OR UPLOAD PHOTO</div></div>
+            <div class="upzone">
+              <div style="font-size:36px;margin-bottom:10px">📷</div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">TAKE OR UPLOAD PHOTO</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:6px">Receipts, events, social media content</div>
+            </div>
           </label>
         </div>
         <div class="photo-grid">
           ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
             ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
-            <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${new Date(p.created_at).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</div></div>
+            <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
           </div>`).join('')}
-          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first shot above!</div>`:''}
+          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Upload your first one above!</div>`:''}
         </div>
       `}
+    `:''}
+
+    ${S.tab==='recipes'?`
+      <div class="sec-title">🍹 RECIPE BOOK</div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+        <span style="color:var(--muted);font-size:18px">🔍</span>
+        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;-webkit-appearance:none;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
+      </div>
+      ${filteredRecipes.length===0?`<div class="empty-state">No recipes found.</div>`:''}
+      ${filteredRecipes.map(r=>`
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji} ${r.name}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--green)">${margin(r)}% margin</div>
+          </div>
+          <div style="font-size:14px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
+        </div>
+        <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--red)">$${r.cost}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cost</div></div>
+            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--lcg)">$${r.price}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Price</div></div>
+            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--green)">${margin(r)}%</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Margin</div></div>
+            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:16px;color:var(--blue)">${r.prepTime}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Time</div></div>
+          </div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
+          ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount}</div>
+            <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name}</div>
+            ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
+          </div>`).join('')}
+          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
+          ${r.steps.map((s,i)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
+            <div style="font-size:15px;line-height:1.7;color:var(--text)">${s}</div>
+          </div>`).join('')}
+        </div>
+      `).join('')}
     `:''}
 
     ${S.tab==='closeout'?`
@@ -897,11 +1056,11 @@ function renderOwnerApp(){
         <div class="ct">CLOSING CHECKLIST</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before submitting closeout</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} — ${pct}%</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
           ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2" fill="none"/></svg>':''}</div>
+            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
             <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
           </div>`).join('')}
         `).join('')}
@@ -909,7 +1068,7 @@ function renderOwnerApp(){
       <div class="card">
         <div class="ct">CLOSEOUT FORM</div>
         ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>`:`
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
             <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
             <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
@@ -918,7 +1077,7 @@ function renderOwnerApp(){
             <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
           </div>
           <div class="field"><label>Closing Staff</label>
-            <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none">
+            <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
               <option value="">Select staff member</option>
               ${S.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
             </select>
@@ -932,7 +1091,7 @@ function renderOwnerApp(){
     ${S.showSaleModal?`<div class="modal-bg" onclick="S.showSaleModal=false;render()">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-title">+ LOG SALES</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
           <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
           <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
@@ -943,7 +1102,7 @@ function renderOwnerApp(){
         <div class="field"><label>Notes</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="Shift notes..."/></div>
         <div class="modal-actions">
           <button class="btn-cancel" onclick="S.showSaleModal=false;render()">Cancel</button>
-          <button class="btn-save" onclick="saveSale()">Save</button>
+          <button class="btn-save" onclick="saveSale()">Save Sales</button>
         </div>
       </div>
     </div>`:''}
