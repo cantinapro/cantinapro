@@ -511,7 +511,6 @@ function renderStaffApp(){
   const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
   const allDone=checkedCount===ALL_ITEMS.length;
   const isClockedIn=S.clockedIn.includes(S.staffUser.id);
-  const filteredRecipes=RECIPES.filter(r=>r.name.toLowerCase().includes(S.recipeSearch.toLowerCase())&&(S.recipeFilter==='All'||r.tag===S.recipeFilter));
 
   const STAFF_TABS=[
     {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
@@ -648,36 +647,7 @@ function renderStaffApp(){
 
     ${S.tab==='staff-recipes'?`
       <div class="sec-title">🍹 ${L?'RECETAS':'RECIPE BOOK'}</div>
-      <div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
-        <span style="color:var(--muted);font-size:18px">🔍</span>
-        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="${L?'Buscar recetas...':'Search recipes...'}" value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-        ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;-webkit-appearance:none;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
-      </div>
-      ${filteredRecipes.length===0?`<div class="empty-state">No recipes found.</div>`:''}
-      ${filteredRecipes.map(r=>`
-        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji} ${r.name}</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--green)">${margin(r)}% margin</div>
-          </div>
-          <div style="font-size:14px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
-        </div>
-        <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
-          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
-          ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount}</div>
-            <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name}</div>
-            ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
-          </div>`).join('')}
-          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
-          ${r.steps.map((s,i)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
-            <div style="font-size:15px;line-height:1.7;color:var(--text)">${s}</div>
-          </div>`).join('')}
-        </div>
-      `).join('')}
+      ${renderRecipeBook(false)}
     `:''}
 
     ${S.tab==='staff-closeout'?`
@@ -718,7 +688,6 @@ function renderOwnerApp(){
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
   const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
-  const filteredRecipes=RECIPES.filter(r=>r.name.toLowerCase().includes(S.recipeSearch.toLowerCase())&&(S.recipeFilter==='All'||r.tag===S.recipeFilter));
 
   const TABS=[
     {key:'dashboard',icon:'📊',label:'Home'},
@@ -1012,42 +981,7 @@ function renderOwnerApp(){
 
     ${S.tab==='recipes'?`
       <div class="sec-title">🍹 RECIPE BOOK</div>
-      <div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
-        <span style="color:var(--muted);font-size:18px">🔍</span>
-        <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-        ${['All','Signature','Classic','Premium'].map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;-webkit-appearance:none;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
-      </div>
-      ${filteredRecipes.length===0?`<div class="empty-state">No recipes found.</div>`:''}
-      ${filteredRecipes.map(r=>`
-        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji} ${r.name}</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--green)">${margin(r)}% margin</div>
-          </div>
-          <div style="font-size:14px;color:var(--muted)">${r.tag} · ${r.glass} · ${r.prepTime} · $${r.price}</div>
-        </div>
-        <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
-            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--red)">$${r.cost}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cost</div></div>
-            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--lcg)">$${r.price}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Price</div></div>
-            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--green)">${margin(r)}%</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Margin</div></div>
-            <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:16px;color:var(--blue)">${r.prepTime}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Time</div></div>
-          </div>
-          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
-          ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount}</div>
-            <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name}</div>
-            ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
-          </div>`).join('')}
-          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
-          ${r.steps.map((s,i)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
-            <div style="font-size:15px;line-height:1.7;color:var(--text)">${s}</div>
-          </div>`).join('')}
-        </div>
-      `).join('')}
+      ${renderRecipeBook(true)}
     `:''}
 
     ${S.tab==='closeout'?`
@@ -1113,6 +1047,200 @@ function renderOwnerApp(){
     </nav>
   </div>`;
 }
+
+
+// ── RECIPE MANAGEMENT ─────────────────────────────────
+S.recipes = [];
+S.showRecipeModal = false;
+S.editingRecipe = null;
+S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
+
+async function loadRecipes(){
+  if(!S.bar) return;
+  const {data} = await db.from('recipes').select('*').eq('bar_id', S.bar.id).order('name');
+  S.recipes = data || [];
+}
+
+async function saveRecipe(){
+  if(!S.newRecipe.name || !S.bar) return;
+  const recipe = {
+    bar_id: S.bar.id,
+    name: S.newRecipe.name,
+    tag: S.newRecipe.tag,
+    glass: S.newRecipe.glass,
+    prep_time: S.newRecipe.prep_time,
+    cost: parseFloat(S.newRecipe.cost)||0,
+    price: parseFloat(S.newRecipe.price)||0,
+    emoji: S.newRecipe.emoji||'🍹',
+    ingredients: S.newRecipe.ingredients.filter(i=>i.name),
+    steps: S.newRecipe.steps.filter(s=>s),
+  };
+  if(S.editingRecipe){
+    await db.from('recipes').update(recipe).eq('id', S.editingRecipe);
+    S.editingRecipe = null;
+  } else {
+    await db.from('recipes').insert(recipe);
+  }
+  S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
+  S.showRecipeModal = false;
+  await loadRecipes();
+  render();
+}
+
+async function deleteRecipe(id){
+  if(!confirm('Delete this recipe?')) return;
+  await db.from('recipes').delete().eq('id', id);
+  await loadRecipes();
+  render();
+}
+
+function editRecipe(r){
+  S.editingRecipe = r.id;
+  S.newRecipe = {
+    name: r.name, tag: r.tag||'Signature', glass: r.glass||'', prep_time: r.prep_time||'',
+    cost: r.cost||'', price: r.price||'', emoji: r.emoji||'🍹',
+    ingredients: r.ingredients&&r.ingredients.length ? r.ingredients : [{amount:'',name:'',note:''}],
+    steps: r.steps&&r.steps.length ? r.steps : [''],
+  };
+  S.showRecipeModal = true;
+  render();
+}
+
+function addIngredientRow(){ S.newRecipe.ingredients.push({amount:'',name:'',note:''});render(); }
+function removeIngredientRow(i){ S.newRecipe.ingredients.splice(i,1);render(); }
+function addStepRow(){ S.newRecipe.steps.push('');render(); }
+function removeStepRow(i){ S.newRecipe.steps.splice(i,1);render(); }
+function recipeMargin(cost,price){ return price>0?Math.round(((price-cost)/price)*100):0; }
+
+function renderRecipeBook(isOwner){
+  const HARDCODED = [
+    {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',cost:2.80,price:14,emoji:'🍹',isDefault:true,
+      ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
+      steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
+    {id:'h2',name:'Michelada',tag:'Signature',glass:'Pint glass',prep_time:'1.5 min',cost:1.60,price:10,emoji:'🍺',isDefault:true,
+      ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
+      steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
+    {id:'h3',name:'Paloma',tag:'Classic',glass:'Highball',prep_time:'1.5 min',cost:1.90,price:12,emoji:'🍊',isDefault:true,
+      ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
+      steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
+    {id:'h4',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prep_time:'3 min',cost:3.20,price:16,emoji:'🥃',isDefault:true,
+      ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
+      steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
+  ];
+  const allRecipes = [...HARDCODED, ...S.recipes.map(r=>({...r,isDefault:false}))];
+  const tags = ['All','Signature','Classic','Premium','Custom'];
+  const filtered = allRecipes.filter(r=>{
+    const ms = r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
+    const mf = S.recipeFilter==='All' || r.tag===S.recipeFilter;
+    return ms && mf;
+  });
+
+  let html = '';
+  if(isOwner){
+    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+  }
+  html += `<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+    <span style="color:var(--muted);font-size:18px">🔍</span>
+    <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    ${tags.map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
+  </div>`;
+
+  if(filtered.length===0){
+    html += `<div class="empty-state">No recipes found.<br/>${isOwner?'Tap "+ Add Your Recipe" above to create your first one!':''}</div>`;
+  }
+
+  filtered.forEach(r => {
+    const mg = recipeMargin(parseFloat(r.cost)||0, parseFloat(r.price)||0);
+    const rJson = JSON.stringify(r).replace(/"/g,'&quot;').replace(/'/g,"\'");
+    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji||'🍹'} ${r.name}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${mg>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${mg}% margin</div>`:''}
+          ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
+          <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
+        </div>
+      </div>
+      <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}${r.prep_time?' · '+r.prep_time:''}${r.price?' · $'+r.price:''}</div>
+    </div>
+    <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
+      ${(r.cost&&r.price)?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--red)">$${r.cost}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cost</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--lcg)">$${r.price}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Price</div></div>
+        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--green)">${mg}%</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Margin</div></div>
+      </div>`:''}
+      ${r.ingredients&&r.ingredients.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
+      ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount||''}</div>
+        <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name||''}</div>
+        ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
+      </div>`).join('')}`:''}
+      ${r.steps&&r.steps.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
+      ${r.steps.map((step,idx)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${idx+1}</div>
+        <div style="font-size:15px;line-height:1.7;color:var(--text)">${step}</div>
+      </div>`).join('')}`:''}
+    </div>`;
+  });
+
+  if(S.showRecipeModal && isOwner){
+    html += `<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">${S.editingRecipe?'EDIT RECIPE':'+ ADD RECIPE'}</div>
+        <div style="display:grid;grid-template-columns:60px 1fr;gap:10px">
+          <div class="field"><label>Emoji</label><input type="text" value="${S.newRecipe.emoji}" oninput="S.newRecipe.emoji=this.value" maxlength="2" style="text-align:center;font-size:24px"/></div>
+          <div class="field"><label>Recipe Name *</label><input type="text" value="${S.newRecipe.name}" oninput="S.newRecipe.name=this.value" placeholder="Cantina Margarita"/></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field"><label>Category</label>
+            <select oninput="S.newRecipe.tag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              ${['Signature','Classic','Premium','Custom','Shot','Beer','Wine','Non-Alcoholic'].map(t=>`<option value="${t}" ${S.newRecipe.tag===t?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>Glass Type</label><input type="text" value="${S.newRecipe.glass}" oninput="S.newRecipe.glass=this.value" placeholder="Rocks, Highball..."/></div>
+          <div class="field"><label>Prep Time</label><input type="text" value="${S.newRecipe.prep_time}" oninput="S.newRecipe.prep_time=this.value" placeholder="2 min"/></div>
+          <div class="field"><label>Cost ($)</label><input type="number" value="${S.newRecipe.cost}" oninput="S.newRecipe.cost=this.value" placeholder="0.00" step="0.01"/></div>
+          <div class="field"><label>Sale Price ($)</label><input type="number" value="${S.newRecipe.price}" oninput="S.newRecipe.price=this.value" placeholder="0.00" step="0.01"/></div>
+          ${(S.newRecipe.cost&&S.newRecipe.price)?`<div style="background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--green)">${recipeMargin(parseFloat(S.newRecipe.cost)||0,parseFloat(S.newRecipe.price)||0)}%</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Margin</div></div>`:'<div></div>'}
+        </div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:10px 0 8px">INGREDIENTS</div>
+        ${S.newRecipe.ingredients.map((ing,i)=>`
+          <div style="display:grid;grid-template-columns:75px 1fr 30px;gap:6px;margin-bottom:8px;align-items:center">
+            <input type="text" value="${ing.amount}" oninput="S.newRecipe.ingredients[${i}].amount=this.value" placeholder="2 oz" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 8px;font-size:14px;outline:none;font-family:'Share Tech Mono',monospace;width:100%"/>
+            <input type="text" value="${ing.name}" oninput="S.newRecipe.ingredients[${i}].name=this.value" placeholder="Ingredient name" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
+            <button onclick="removeIngredientRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:6px;padding:10px;cursor:pointer;font-size:16px">×</button>
+          </div>
+        `).join('')}
+        <button onclick="addIngredientRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">+ ADD INGREDIENT</button>
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">STEPS</div>
+        ${S.newRecipe.steps.map((step,i)=>`
+          <div style="display:grid;grid-template-columns:28px 1fr 30px;gap:8px;margin-bottom:8px;align-items:center">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
+            <input type="text" value="${step}" oninput="S.newRecipe.steps[${i}]=this.value" placeholder="Step ${i+1}..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
+            <button onclick="removeStepRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:6px;padding:10px;cursor:pointer;font-size:16px">×</button>
+          </div>
+        `).join('')}
+        <button onclick="addStepRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:6px">+ ADD STEP</button>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showRecipeModal=false;S.editingRecipe=null;render()">Cancel</button>
+          <button class="btn-save" onclick="saveRecipe()">${S.editingRecipe?'SAVE CHANGES':'ADD RECIPE'}</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  return html;
+}
+
+// Patch loadBar to also load recipes
+const _origLoadBar = loadBar;
+loadBar = async function(){
+  await _origLoadBar();
+  await loadRecipes();
+};
+
 
 init();
 </script>
