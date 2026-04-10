@@ -233,6 +233,7 @@ let S={
   checklist:{},closeoutSubmitted:false,
   tab:'dashboard',lang:'en',authMode:'login',authLoading:false,authError:'',appLoading:true,
   showPw:false,
+  showForgotPw:false,forgotPwEmail:'',forgotPwSent:false,forgotPwLoading:false,
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
   staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,
   showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
@@ -336,6 +337,18 @@ async function handleAuth(){
   }
   S.authLoading=false;render();
 }
+async function forgotPassword(){
+  if(!S.forgotPwEmail.trim()){alert('Please enter your email address');return;}
+  S.forgotPwLoading=true;render();
+  const {error} = await db.auth.resetPasswordForEmail(S.forgotPwEmail.trim(), {
+    redirectTo: 'https://cantinapro.github.io/cantinapro'
+  });
+  S.forgotPwLoading=false;
+  if(error){alert('Error: '+error.message);}
+  else{S.forgotPwSent=true;}
+  render();
+}
+
 async function logout(){await db.auth.signOut();Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,staffUser:null});render();}
 
 async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'Bartender',pin:''};S.showStaffModal=false;await loadStaff();render();}
@@ -450,10 +463,29 @@ function renderAuth(){
       </div>
       <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE BAR')}</button>
       <div style="font-size:14px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
+      ${isLogin?`<button onclick="S.showForgotPw=true;S.forgotPwEmail=S.loginEmail;S.forgotPwSent=false;render()" style="background:none;border:none;color:var(--lcg);font-size:13px;cursor:pointer;margin-top:10px;width:100%;text-align:center;padding:6px;text-decoration:underline">Forgot your password?</button>`:''}
     </div>
     <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
     <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
-  </div>`;
+  </div>
+  ${S.showForgotPw?`<div class="modal-bg" onclick="S.showForgotPw=false;render()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">🔑 RESET PASSWORD</div>
+      ${S.forgotPwSent?`
+        <div class="success-box" style="font-size:15px;letter-spacing:1px;line-height:1.6">✓ CHECK YOUR EMAIL<br/><span style="font-size:13px;color:var(--muted)">We sent a password reset link to<br/>${S.forgotPwEmail}</span></div>
+        <div style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6">Tap the link in your email to set a new password. Check your spam folder if you don't see it.</div>
+        <button class="auth-btn" onclick="S.showForgotPw=false;render()">BACK TO LOGIN</button>
+      `:`
+        <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Enter your email and we'll send you a link to reset your password.</div>
+        <div class="field"><label>Email Address</label><input type="email" placeholder="owner@mybar.com" value="${S.forgotPwEmail}" oninput="S.forgotPwEmail=this.value" onkeydown="if(event.key==='Enter')forgotPassword()"/></div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showForgotPw=false;render()">Cancel</button>
+          <button class="btn-save" onclick="forgotPassword()" ${S.forgotPwLoading?'disabled':''}>${S.forgotPwLoading?'Sending...':'SEND RESET LINK'}</button>
+        </div>
+      `}
+    </div>
+  </div>`:''}
+  `;
 }
 
 function renderStaffViaLink(){
