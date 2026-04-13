@@ -635,7 +635,15 @@ async function logout(){
 
 // ─── STAFF ACTIONS ────────────────────────────────────────────────────────
 async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'Bartender',pin:''};S.showStaffModal=false;await loadStaff();render();}
-async function deleteStaff(id){await db.from('staff').delete().eq('id',id);await loadStaff();render();}
+async function deleteStaff(id){
+  // Delete related records first to avoid foreign key constraint errors
+  await db.from('shift_bids').delete().eq('staff_id',id);
+  await db.from('clock_entries').delete().eq('staff_id',id);
+  await db.from('schedules').delete().eq('staff_id',id);
+  await db.from('staff').delete().eq('id',id);
+  await loadStaff();
+  render();
+}
 async function saveSale(){if(!S.bar)return;await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});S.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};S.showSaleModal=false;await loadSales();render();}
 async function saveInv(){if(!S.newInv.name||!S.bar)return;await db.from('inventory').insert({bar_id:S.bar.id,...S.newInv,stock:parseFloat(S.newInv.stock)||0,par_level:parseFloat(S.newInv.par_level)||0});S.newInv={name:'',category:'',unit:'',stock:'',par_level:''};S.showInvModal=false;await loadInventory();render();}
 async function deleteInv(id){await db.from('inventory').delete().eq('id',id);await loadInventory();render();}
