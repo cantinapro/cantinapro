@@ -44,10 +44,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 
 /* PIN */
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
-.pin-btn{padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--s2);color:var(--text);font-family:'Bebas Neue',cursive;font-size:26px;cursor:pointer;text-align:center;-webkit-appearance:none;}
+.pin-btn{padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--s2);color:var(--text);font-family:'Bebas Neue',cursive;font-size:26px;cursor:pointer;text-align:center;-webkit-appearance:none;transition:background .1s,transform .1s;}
+.pin-btn:active{background:var(--s3);transform:scale(.96);}
 .pin-display{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:32px;letter-spacing:10px;margin-bottom:6px;min-height:62px;color:var(--lc);}
 .staff-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
-.staff-sel-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;}
+.staff-sel-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;transition:border-color .2s,background .2s;}
+.staff-sel-card:active{background:var(--s3);}
 
 /* HEADER */
 .hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;}
@@ -62,7 +64,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .staff-badge{background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.4);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--lcg);font-family:'Share Tech Mono',monospace;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* BOTTOM NAV - Fixed for Android */
+/* BOTTOM NAV */
 .bot-nav{background:var(--s1);border-top:2px solid var(--border);display:flex;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:480px;margin:0 auto;z-index:999;padding-bottom:env(safe-area-inset-bottom,0px);}
 .nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent;}
 .nb.on{color:var(--lc);border-top-color:var(--lc);}
@@ -177,13 +179,53 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .staff-pick{background:var(--s2);border:2px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;}
 .staff-pick.on{background:rgba(200,16,46,.12);border-color:var(--lc);}
-.clock-wrap{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;}
-.lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
-.lcd{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px;}
 .my-shift-highlight{background:rgba(212,160,23,.1);border:2px solid rgba(212,160,23,.4);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;}
 .link-box{background:var(--s2);border:2px solid var(--lcg);border-radius:10px;padding:14px;margin-bottom:10px;}
 .link-url{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);word-break:break-all;margin-bottom:12px;line-height:1.6;}
 .install-banner{background:rgba(77,159,255,.1);border:1px solid rgba(77,159,255,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+
+/* ─── PREMIUM TIME CLOCK ─── */
+.clock-hero{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px 16px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;}
+.clock-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--lc),var(--lcg),var(--lc));}
+.clock-hero-time{font-family:'Bebas Neue',cursive;font-size:58px;letter-spacing:5px;color:var(--lc);line-height:1;margin-bottom:4px;}
+.clock-hero-date{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;}
+.clock-hero-bar{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);margin-top:4px;}
+
+.clock-status-in{background:linear-gradient(135deg,rgba(0,232,122,.12),rgba(0,232,122,.04));border:2px solid rgba(0,232,122,.5);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;}
+.clock-status-out{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;}
+.clock-elapsed{font-family:'Bebas Neue',cursive;font-size:44px;letter-spacing:4px;color:var(--green);line-height:1;}
+.clock-elapsed-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.clock-in-time{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green);margin-top:8px;}
+
+.clock-btn-in{width:100%;padding:20px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--green),#00b055);color:#000;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;cursor:pointer;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 4px 24px rgba(0,232,122,.25);transition:transform .1s,box-shadow .1s;}
+.clock-btn-in:active{transform:scale(.98);box-shadow:0 2px 12px rgba(0,232,122,.15);}
+.clock-btn-out{width:100%;padding:20px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;cursor:pointer;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 4px 24px rgba(200,16,46,.3);transition:transform .1s,box-shadow .1s;}
+.clock-btn-out:active{transform:scale(.98);box-shadow:0 2px 12px rgba(200,16,46,.15);}
+
+/* Late alert */
+.late-alert{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.4);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.early-alert{background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+
+/* Staff clock cards (owner view) */
+.floor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.floor-card{background:var(--s2);border:2px solid var(--border);border-radius:12px;padding:14px;text-align:center;position:relative;}
+.floor-card.clocked-in{border-color:rgba(0,232,122,.5);background:rgba(0,232,122,.05);}
+.floor-card.late{border-color:rgba(255,68,85,.5);background:rgba(255,68,85,.05);}
+.floor-card-name{font-weight:700;font-size:15px;color:var(--text);margin-top:8px;}
+.floor-card-role{font-size:11px;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.floor-card-time{font-family:'Share Tech Mono',monospace;font-size:12px;margin-top:8px;}
+.floor-card-elapsed{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;margin-top:4px;}
+.floor-status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+
+/* Time History Table */
+.th-table{width:100%;border-collapse:collapse;}
+.th-table th{font-size:10px;letter-spacing:1px;color:var(--muted);padding:10px 8px;text-align:left;border-bottom:1px solid var(--border);text-transform:uppercase;}
+.th-table td{padding:11px 8px;border-bottom:1px solid var(--border);font-size:13px;}
+.th-table tr:last-child td{border-bottom:none;}
+.hours-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Share Tech Mono',monospace;}
+
+/* Edit clock modal */
+.edit-clock-reason{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:12px;font-size:14px;color:var(--gold);margin-bottom:14px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -207,53 +249,106 @@ const CHECKLIST_DATA={
 };
 const ALL_ITEMS=Object.values(CHECKLIST_DATA).flat();
 
-const RECIPES=[
-  {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',cost:2.80,price:14,
-    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
-    steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
-  {id:2,emoji:'🍺',name:'Michelada',tag:'Signature',glass:'Pint glass',prepTime:'1.5 min',cost:1.60,price:10,
-    ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
-    steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
-  {id:3,emoji:'🍊',name:'Paloma',tag:'Classic',glass:'Highball',prepTime:'1.5 min',cost:1.90,price:12,
-    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
-    steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
-  {id:4,emoji:'🥃',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prepTime:'3 min',cost:3.20,price:16,
-    ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
-    steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
-];
-
 function getBarIdFromURL(){return new URLSearchParams(window.location.search).get('bar');}
 function ac(i){return COLORS[i%COLORS.length];}
 function ai(n){return(n||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();}
-function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
 function getStaffLink(){return`${window.location.origin}${window.location.pathname}?bar=${S.bar?.id}`;}
+
+// ─── TIME CLOCK HELPERS ───────────────────────────────────────────────────
+function fmtElapsed(ms){
+  if(ms<0)ms=0;
+  const h=Math.floor(ms/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  const s=Math.floor((ms%60000)/1000);
+  if(h>0)return`${h}h ${String(m).padStart(2,'0')}m`;
+  return`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtHours(ms){
+  if(!ms||ms<0)return'0:00';
+  const h=Math.floor(ms/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  return`${h}:${String(m).padStart(2,'0')}`;
+}
+function fmtTime(ts){
+  if(!ts)return'--:--';
+  return new Date(ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtDate(ts){
+  if(!ts)return'';
+  return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function todayKey(){
+  const d=new Date();
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ─── REMEMBER ME (localStorage) ───────────────────────────────────────────
+// Stores: { barId, staffId, staffName, staffRole, staffPin, barName, barLocation }
+function rememberStaff(bar, staffMember){
+  try{
+    localStorage.setItem('cp_remembered', JSON.stringify({
+      barId: bar.id,
+      barName: bar.name,
+      barLocation: bar.location||'',
+      staffId: staffMember.id,
+      staffName: staffMember.name,
+      staffRole: staffMember.role,
+      staffPin: staffMember.pin,
+      savedAt: Date.now(),
+    }));
+  }catch(e){}
+}
+function getRemembered(){
+  try{
+    const raw=localStorage.getItem('cp_remembered');
+    if(!raw)return null;
+    const d=JSON.parse(raw);
+    // expire after 90 days
+    if(Date.now()-d.savedAt > 90*24*3600000){localStorage.removeItem('cp_remembered');return null;}
+    return d;
+  }catch(e){return null;}
+}
+function forgetStaff(){
+  try{localStorage.removeItem('cp_remembered');}catch(e){}
+}
 
 let S={
   user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
   checklist:{},closeoutSubmitted:false,
   tab:'dashboard',lang:'en',authMode:'login',authLoading:false,authError:'',appLoading:true,
   showPw:false,
-  showForgotPw:false,forgotPwEmail:'',forgotPwSent:false,forgotPwLoading:false,
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
-  staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,
+  staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,rememberMe:true,
   showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
   newStaff:{name:'',role:'Bartender',pin:''},
   newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
   newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
   newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:'Bartender'},
   dropShiftId:null,dropReason:'',
-  clockedIn:[],selectedStaff:null,
-  liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
+  // TIME CLOCK STATE
+  clockEntries:[],           // array of {id,bar_id,staff_id,staff_name,clock_in,clock_out,hours_ms,date_key,note}
+  clockedInStaff:{},         // staffId -> {entry_id, clock_in timestamp}
+  clockHistoryView:'today',  // 'today' | 'week' | 'all'
+  showEditClockModal:false,
+  editClockEntry:null,
+  editClockIn:'',editClockOut:'',editClockNote:'',
+  showConfirmClockOut:false,
+  confirmClockOutId:null,
+  // end time clock state
+  selectedStaff:null,
+  liveTime:'',liveMs:0,
+  photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
   recipeSearch:'',recipeFilter:'All',
   schedDay:new Date().getDay(),
   urlBarId:null,
   showInstallBanner:false,
   deferredPrompt:null,
+  recipes:[],showRecipeModal:false,editingRecipe:null,
+  newRecipe:{name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']},
 };
 
 // PWA install prompt
 window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();S.deferredPrompt=e;S.showInstallBanner=true;render();});
-
 async function installApp(){
   if(!S.deferredPrompt)return;
   S.deferredPrompt.prompt();
@@ -261,11 +356,31 @@ async function installApp(){
   S.deferredPrompt=null;S.showInstallBanner=false;render();
 }
 
+// ─── INIT ─────────────────────────────────────────────────────────────────
 async function init(){
   setInterval(()=>{
-    S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const now=new Date();
+    S.liveTime=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    S.liveMs=now.getTime();
+    // update live clock display without full re-render
     const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
+    // update elapsed timers in DOM
+    Object.entries(S.clockedInStaff).forEach(([sid,entry])=>{
+      const elapsed=now.getTime()-new Date(entry.clock_in).getTime();
+      const elEl=document.getElementById('elapsed-'+sid);
+      if(elEl)elEl.textContent=fmtElapsed(elapsed);
+    });
+    // staff self-view elapsed
+    if(S.staffUser){
+      const myEntry=S.clockedInStaff[S.staffUser.id];
+      if(myEntry){
+        const elapsed=now.getTime()-new Date(myEntry.clock_in).getTime();
+        const selfEl=document.getElementById('self-elapsed');
+        if(selfEl)selfEl.textContent=fmtElapsed(elapsed);
+      }
+    }
   },1000);
+
   const urlBarId=getBarIdFromURL();
   if(urlBarId){
     S.urlBarId=urlBarId;
@@ -274,6 +389,18 @@ async function init(){
       S.bar=bar;
       const{data:staff}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
       S.staffLoginStaff=staff||[];
+      // AUTO-LOGIN: check if this device remembers a staff member
+      const rem=getRemembered();
+      if(rem&&rem.barId===urlBarId){
+        const liveStaff=(staff||[]).find(s=>s.id===rem.staffId);
+        if(liveStaff){
+          S.staffUser=liveStaff;
+          S.myClockEntries=[];
+          await loadSchedules();await loadStaff();await loadMyClockEntries();
+          S.tab='staff-shift';
+          S.appLoading=false;render();return;
+        }
+      }
     }
     S.appLoading=false;render();return;
   }
@@ -287,9 +414,10 @@ async function init(){
   });
 }
 
+// ─── DATA LOADERS ─────────────────────────────────────────────────────────
 async function loadBar(){
   const{data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
-  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules()]);}
+  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadClockEntries(),loadRecipes()]);}
 }
 async function loadStaff(){if(!S.bar)return;const{data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
 async function loadSales(){if(!S.bar)return;const{data}=await db.from('sales').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(30);S.sales=data||[];}
@@ -302,6 +430,151 @@ async function loadSchedules(){
   S.schedules=sc||[];S.bids=bi||[];
 }
 
+// ─── CLOCK ENTRIES LOADER ─────────────────────────────────────────────────
+async function loadClockEntries(){
+  if(!S.bar)return;
+  // load last 30 days of entries
+  const since=new Date();since.setDate(since.getDate()-30);
+  const{data}=await db.from('clock_entries').select('*').eq('bar_id',S.bar.id)
+    .gte('clock_in',since.toISOString()).order('clock_in',{ascending:false});
+  S.clockEntries=data||[];
+  // rebuild clockedInStaff map from open entries (no clock_out)
+  S.clockedInStaff={};
+  S.clockEntries.forEach(e=>{
+    if(!e.clock_out){
+      S.clockedInStaff[e.staff_id]={entry_id:e.id,clock_in:e.clock_in};
+    }
+  });
+}
+
+// ─── STAFF CLOCK ENTRIES (for staff-view) ─────────────────────────────────
+async function loadMyClockEntries(){
+  if(!S.bar||!S.staffUser)return;
+  const since=new Date();since.setDate(since.getDate()-14);
+  const{data}=await db.from('clock_entries').select('*')
+    .eq('bar_id',S.bar.id).eq('staff_id',S.staffUser.id)
+    .gte('clock_in',since.toISOString()).order('clock_in',{ascending:false});
+  S.myClockEntries=data||[];
+  // sync open entry
+  const open=S.myClockEntries.find(e=>!e.clock_out);
+  if(open){S.clockedInStaff[S.staffUser.id]={entry_id:open.id,clock_in:open.clock_in};}
+  else{delete S.clockedInStaff[S.staffUser.id];}
+}
+
+// ─── CLOCK IN / OUT ACTIONS ───────────────────────────────────────────────
+async function clockIn(staffId,staffName,barId){
+  // prevent double clock-in
+  if(S.clockedInStaff[staffId])return;
+  const entry={
+    bar_id:barId||S.bar.id,
+    staff_id:staffId,
+    staff_name:staffName,
+    clock_in:new Date().toISOString(),
+    clock_out:null,
+    hours_ms:null,
+    date_key:todayKey(),
+  };
+  const{data}=await db.from('clock_entries').insert(entry).select().single();
+  if(data){
+    S.clockedInStaff[staffId]={entry_id:data.id,clock_in:data.clock_in};
+    S.clockEntries.unshift(data);
+    if(S.staffUser&&S.staffUser.id===staffId)S.myClockEntries=[data,...(S.myClockEntries||[])];
+  }
+  render();
+}
+
+async function clockOut(staffId){
+  const session=S.clockedInStaff[staffId];
+  if(!session)return;
+  const now=new Date().toISOString();
+  const elapsed=new Date(now).getTime()-new Date(session.clock_in).getTime();
+  await db.from('clock_entries').update({clock_out:now,hours_ms:elapsed}).eq('id',session.entry_id);
+  delete S.clockedInStaff[staffId];
+  // update local state
+  const idx=S.clockEntries.findIndex(e=>e.id===session.entry_id);
+  if(idx>=0){S.clockEntries[idx].clock_out=now;S.clockEntries[idx].hours_ms=elapsed;}
+  if(S.myClockEntries){
+    const mi=S.myClockEntries.findIndex(e=>e.id===session.entry_id);
+    if(mi>=0){S.myClockEntries[mi].clock_out=now;S.myClockEntries[mi].hours_ms=elapsed;}
+  }
+  S.showConfirmClockOut=false;S.confirmClockOutId=null;
+  render();
+}
+
+async function saveClockEdit(){
+  if(!S.editClockEntry)return;
+  const cin=new Date(S.editClockIn).getTime();
+  const cout=S.editClockOut?new Date(S.editClockOut).getTime():null;
+  const hrs=cout?cout-cin:null;
+  await db.from('clock_entries').update({
+    clock_in:new Date(S.editClockIn).toISOString(),
+    clock_out:cout?new Date(S.editClockOut).toISOString():null,
+    hours_ms:hrs,
+    edit_note:S.editClockNote,
+    edited:true,
+  }).eq('id',S.editClockEntry.id);
+  S.showEditClockModal=false;S.editClockEntry=null;S.editClockIn='';S.editClockOut='';S.editClockNote='';
+  await loadClockEntries();render();
+}
+
+async function deleteClockEntry(id){
+  if(!confirm('Delete this time entry?'))return;
+  await db.from('clock_entries').delete().eq('id',id);
+  await loadClockEntries();render();
+}
+
+function openEditClock(entry){
+  S.editClockEntry=entry;
+  // format for datetime-local input: YYYY-MM-DDTHH:MM
+  const fmtForInput=(ts)=>{
+    if(!ts)return'';
+    const d=new Date(ts);
+    return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
+  S.editClockIn=fmtForInput(entry.clock_in);
+  S.editClockOut=fmtForInput(entry.clock_out);
+  S.editClockNote=entry.edit_note||'';
+  S.showEditClockModal=true;
+  render();
+}
+
+// ─── CLOCK STATS HELPERS ──────────────────────────────────────────────────
+function getTodayEntries(staffId){
+  const key=todayKey();
+  return S.clockEntries.filter(e=>e.staff_id===staffId&&e.date_key===key);
+}
+function getWeekEntries(staffId){
+  const now=new Date();
+  const weekAgo=new Date(now.getTime()-7*24*3600000);
+  return S.clockEntries.filter(e=>e.staff_id===staffId&&new Date(e.clock_in)>=weekAgo);
+}
+function sumHours(entries){
+  return entries.reduce((a,e)=>{
+    if(e.hours_ms)return a+e.hours_ms;
+    if(!e.clock_out)return a+(Date.now()-new Date(e.clock_in).getTime());
+    return a;
+  },0);
+}
+function getShiftLateMinutes(staffId){
+  // compare today's scheduled start vs actual clock-in
+  const todayShift=S.schedules.find(s=>s.staff_id===staffId&&s.day_of_week===new Date().getDay());
+  if(!todayShift)return null;
+  const todayEntry=getTodayEntries(staffId)[0];
+  if(!todayEntry)return null;
+  const scheduled=parseScheduleTime(todayShift.start_time);
+  const actual=new Date(todayEntry.clock_in).getTime();
+  const diffMin=Math.round((actual-scheduled)/60000);
+  return diffMin; // positive = late, negative = early
+}
+function parseScheduleTime(timeStr){
+  // timeStr like "18:00" or "6:00 PM"
+  const d=new Date();
+  const[h,m]=(timeStr||'').split(':').map(Number);
+  if(!isNaN(h)){d.setHours(h,m||0,0,0);}
+  return d.getTime();
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────
 async function selectStaffMember(m){S.staffLoginSelected=m;S.staffLoginStep='pin';S.staffPinInput='';S.staffPinError='';render();}
 function pinPress(v){
   if(v==='del')S.staffPinInput=S.staffPinInput.slice(0,-1);
@@ -311,17 +584,32 @@ function pinPress(v){
 async function verifyPin(){
   const m=S.staffLoginSelected;
   if(!m.pin||m.pin.toString()===S.staffPinInput.toString()){
-    S.staffUser=m;await loadSchedules();await loadStaff();S.tab='my-schedule';S.staffPinError='';
+    S.staffUser=m;
+    S.myClockEntries=[];
+    await loadSchedules();await loadStaff();
+    await loadMyClockEntries();
+    S.tab='staff-shift';S.staffPinError='';
+    // Save to localStorage so next visit is instant (if checkbox checked)
+    if(S.rememberMe) rememberStaff(S.bar, m);
   }else{S.staffPinError='Wrong PIN. Try again.';S.staffPinInput='';}
   render();
 }
 function staffLogout(){
+  // Full logout: forget this device
+  forgetStaff();
   S.staffUser=null;
-  if(S.urlBarId){S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.checklist={};S.closeoutSubmitted=false;S.clockedIn=[];}
-  else{S.bar=null;S.staffLoginStaff=[];S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.staff=[];S.checklist={};S.closeoutSubmitted=false;}
+  if(S.urlBarId){S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.checklist={};S.closeoutSubmitted=false;S.myClockEntries=[];}
+  else{S.bar=null;S.staffLoginStaff=[];S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.staff=[];S.checklist={};S.closeoutSubmitted=false;S.myClockEntries=[];}
   render();
 }
-
+function switchUser(){
+  // Switch without forgetting bar — just clears staff session, keeps bar loaded
+  // Does NOT call forgetStaff() so the remembered user stays for next visit
+  S.staffUser=null;
+  S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';
+  S.schedules=[];S.bids=[];S.checklist={};S.closeoutSubmitted=false;S.myClockEntries=[];
+  render();
+}
 async function handleAuth(){
   S.authError='';S.authLoading=true;render();
   const email=S.loginEmail.trim(),password=S.loginPassword.trim();
@@ -337,48 +625,26 @@ async function handleAuth(){
   }
   S.authLoading=false;render();
 }
-async function forgotPassword(){
-  if(!S.forgotPwEmail.trim()){alert('Please enter your email address');return;}
-  S.forgotPwLoading=true;render();
-  const {error} = await db.auth.resetPasswordForEmail(S.forgotPwEmail.trim(), {
-    redirectTo: 'https://cantinapro.github.io/cantinapro'
-  });
-  S.forgotPwLoading=false;
-  if(error){alert('Error: '+error.message);}
-  else{S.forgotPwSent=true;}
+async function logout(){
+  await db.auth.signOut();
+  Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedInStaff:{},clockEntries:[],selectedStaff:null,staffUser:null,myClockEntries:[]});
   render();
 }
 
-async function logout(){await db.auth.signOut();Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,staffUser:null});render();}
-
+// ─── STAFF ACTIONS ────────────────────────────────────────────────────────
 async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'Bartender',pin:''};S.showStaffModal=false;await loadStaff();render();}
 async function deleteStaff(id){await db.from('staff').delete().eq('id',id);await loadStaff();render();}
 async function saveSale(){if(!S.bar)return;await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});S.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};S.showSaleModal=false;await loadSales();render();}
 async function saveInv(){if(!S.newInv.name||!S.bar)return;await db.from('inventory').insert({bar_id:S.bar.id,...S.newInv,stock:parseFloat(S.newInv.stock)||0,par_level:parseFloat(S.newInv.par_level)||0});S.newInv={name:'',category:'',unit:'',stock:'',par_level:''};S.showInvModal=false;await loadInventory();render();}
 async function deleteInv(id){await db.from('inventory').delete().eq('id',id);await loadInventory();render();}
 async function updateStock(id,v){await db.from('inventory').update({stock:v,updated_at:new Date()}).eq('id',id);await loadInventory();render();}
-
 async function saveShift(){
-  if(!S.newShift.start_time||!S.newShift.end_time||!S.bar){
-    alert('Please fill in start time and end time!');return;
-  }
+  if(!S.newShift.start_time||!S.newShift.end_time||!S.bar){alert('Please fill in start time and end time!');return;}
   const sm=S.staff.find(s=>s.id===S.newShift.staff_id);
-  await db.from('schedules').insert({
-    bar_id:S.bar.id,
-    staff_id:S.newShift.staff_id||null,
-    staff_name:sm?sm.name:'OPEN',
-    day_of_week:parseInt(S.newShift.day_of_week),
-    start_time:S.newShift.start_time,
-    end_time:S.newShift.end_time,
-    role:S.newShift.role||'Staff',
-    status:S.newShift.staff_id?'scheduled':'open'
-  });
+  await db.from('schedules').insert({bar_id:S.bar.id,staff_id:S.newShift.staff_id||null,staff_name:sm?sm.name:'OPEN',day_of_week:parseInt(S.newShift.day_of_week),start_time:S.newShift.start_time,end_time:S.newShift.end_time,role:S.newShift.role||'Staff',status:S.newShift.staff_id?'scheduled':'open'});
   S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:'Bartender'};
-  S.showShiftModal=false;
-  await loadSchedules();
-  render();
+  S.showShiftModal=false;await loadSchedules();render();
 }
-
 async function deleteShift(id){await db.from('schedules').delete().eq('id',id);await loadSchedules();render();}
 async function dropShift(id){
   if(!S.dropReason){alert('Please enter a reason');return;}
@@ -428,6 +694,33 @@ function copyStaffLink(){
   });
 }
 
+// ─── RECIPE ACTIONS ───────────────────────────────────────────────────────
+async function loadRecipes(){
+  if(!S.bar)return;
+  const{data}=await db.from('recipes').select('*').eq('bar_id',S.bar.id).order('name');
+  S.recipes=data||[];
+}
+async function saveRecipe(){
+  if(!S.newRecipe.name||!S.bar)return;
+  const recipe={bar_id:S.bar.id,name:S.newRecipe.name,tag:S.newRecipe.tag,glass:S.newRecipe.glass,prep_time:S.newRecipe.prep_time,cost:parseFloat(S.newRecipe.cost)||0,price:parseFloat(S.newRecipe.price)||0,emoji:S.newRecipe.emoji||'🍹',ingredients:S.newRecipe.ingredients.filter(i=>i.name),steps:S.newRecipe.steps.filter(s=>s)};
+  if(S.editingRecipe){await db.from('recipes').update(recipe).eq('id',S.editingRecipe);S.editingRecipe=null;}
+  else{await db.from('recipes').insert(recipe);}
+  S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
+  S.showRecipeModal=false;await loadRecipes();render();
+}
+async function deleteRecipe(id){if(!confirm('Delete this recipe?'))return;await db.from('recipes').delete().eq('id',id);await loadRecipes();render();}
+function editRecipe(r){
+  S.editingRecipe=r.id;
+  S.newRecipe={name:r.name,tag:r.tag||'Signature',glass:r.glass||'',prep_time:r.prep_time||'',cost:r.cost||'',price:r.price||'',emoji:r.emoji||'🍹',ingredients:r.ingredients&&r.ingredients.length?r.ingredients:[{amount:'',name:'',note:''}],steps:r.steps&&r.steps.length?r.steps:['']};
+  S.showRecipeModal=true;render();
+}
+function addIngredientRow(){S.newRecipe.ingredients.push({amount:'',name:'',note:''});render();}
+function removeIngredientRow(i){S.newRecipe.ingredients.splice(i,1);render();}
+function addStepRow(){S.newRecipe.steps.push('');render();}
+function removeStepRow(i){S.newRecipe.steps.splice(i,1);render();}
+function recipeMargin(cost,price){return price>0?Math.round(((price-cost)/price)*100):0;}
+
+// ─── RENDER ROUTER ────────────────────────────────────────────────────────
 function render(){
   const root=document.getElementById('root');
   if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
@@ -437,6 +730,7 @@ function render(){
   root.innerHTML=renderAuth();
 }
 
+// ─── AUTH SCREENS ─────────────────────────────────────────────────────────
 function renderAuth(){
   const isLogin=S.authMode==='login';
   return `<div class="auth-wrap">
@@ -463,29 +757,10 @@ function renderAuth(){
       </div>
       <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE BAR')}</button>
       <div style="font-size:14px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
-      ${isLogin?`<button onclick="S.showForgotPw=true;S.forgotPwEmail=S.loginEmail;S.forgotPwSent=false;render()" style="background:none;border:none;color:var(--lcg);font-size:13px;cursor:pointer;margin-top:10px;width:100%;text-align:center;padding:6px;text-decoration:underline">Forgot your password?</button>`:''}
     </div>
     <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
     <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
-  </div>
-  ${S.showForgotPw?`<div class="modal-bg" onclick="S.showForgotPw=false;render()">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-title">🔑 RESET PASSWORD</div>
-      ${S.forgotPwSent?`
-        <div class="success-box" style="font-size:15px;letter-spacing:1px;line-height:1.6">✓ CHECK YOUR EMAIL<br/><span style="font-size:13px;color:var(--muted)">We sent a password reset link to<br/>${S.forgotPwEmail}</span></div>
-        <div style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:14px;line-height:1.6">Tap the link in your email to set a new password. Check your spam folder if you don't see it.</div>
-        <button class="auth-btn" onclick="S.showForgotPw=false;render()">BACK TO LOGIN</button>
-      `:`
-        <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Enter your email and we'll send you a link to reset your password.</div>
-        <div class="field"><label>Email Address</label><input type="email" placeholder="owner@mybar.com" value="${S.forgotPwEmail}" oninput="S.forgotPwEmail=this.value" onkeydown="if(event.key==='Enter')forgotPassword()"/></div>
-        <div class="modal-actions">
-          <button class="btn-cancel" onclick="S.showForgotPw=false;render()">Cancel</button>
-          <button class="btn-save" onclick="forgotPassword()" ${S.forgotPwLoading?'disabled':''}>${S.forgotPwLoading?'Sending...':'SEND RESET LINK'}</button>
-        </div>
-      `}
-    </div>
-  </div>`:''}
-  `;
+  </div>`;
 }
 
 function renderStaffViaLink(){
@@ -529,11 +804,18 @@ function renderStaffViaLink(){
         ${['1','2','3','4','5','6','7','8','9','','0','del'].map(k=>k===''?`<div></div>`:
           `<button class="pin-btn" onclick="pinPress('${k}')">${k==='del'?'⌫':k}</button>`).join('')}
       </div>
-      <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;margin-top:10px;width:100%;text-align:center;padding:10px">← Back</button>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;cursor:pointer" onclick="S.rememberMe=!S.rememberMe;render()">
+        <div style="width:22px;height:22px;border-radius:5px;border:2px solid ${S.rememberMe?'var(--green)':'var(--border)'};background:${S.rememberMe?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0">
+          ${S.rememberMe?'<svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}
+        </div>
+        <div style="font-size:14px;color:var(--muted)">Remember me on this device</div>
+      </div>
+      <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;margin-top:14px;width:100%;text-align:center;padding:10px">← Back</button>
     </div>
   </div>`;
 }
 
+// ─── STAFF APP ────────────────────────────────────────────────────────────
 function renderStaffApp(){
   const L=S.lang==='es';
   const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
@@ -542,11 +824,15 @@ function renderStaffApp(){
   const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
   const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
   const allDone=checkedCount===ALL_ITEMS.length;
-  const isClockedIn=S.clockedIn.includes(S.staffUser.id);
+  const mySession=S.clockedInStaff[S.staffUser.id];
+  const isClockedIn=!!mySession;
+  const myEntries=S.myClockEntries||[];
+  const todayMs=sumHours(myEntries.filter(e=>e.date_key===todayKey()));
+  const weekMs=sumHours(getWeekEntries(S.staffUser.id));
 
   const STAFF_TABS=[
-    {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
     {key:'staff-shift',icon:'⏰',label:L?'Turno':'My Shift'},
+    {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
     {key:'staff-photos',icon:'📸',label:L?'Fotos':'Photos'},
     {key:'staff-recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
     {key:'staff-closeout',icon:'✅',label:L?'Cierre':'Closeout'},
@@ -561,146 +847,17 @@ function renderStaffApp(){
           <button class="lb ${L?'on':''}" onclick="S.lang='es';render()">ES</button>
         </div>
         <span class="staff-badge">${S.staffUser.name}</span>
-        <button class="logout-btn" onclick="staffLogout()">OUT</button>
+        <button class="logout-btn" onclick="switchUser()" title="Switch to a different staff member">SWITCH</button>
+        <button class="logout-btn" style="color:var(--red);border-color:rgba(255,68,85,.4)" onclick="if(confirm('Log out and forget this device?'))staffLogout()" title="Log out completely">OUT</button>
       </div>
     </header>
     <main class="main">
 
-    ${S.tab==='my-schedule'?`
-      <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
-      ${myTodayShift?`<div class="my-shift-highlight">
-        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ YOUR SHIFT TODAY</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
-        <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
-      </div>`:''}
-      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:14px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>{
-          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
-          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
-          </button>`;
-        }).join('')}
-      </div>
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.</div>`:''}
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
-        const isMyShift=shift.staff_id===S.staffUser.id;
-        const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
-        const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
-        const color=staffIdx>=0?ac(staffIdx):'var(--muted)';
-        return `<div class="shift-card ${isMyShift?'mine':shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between">
-            <div>
-              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
-              <div class="shift-role">${shift.role||'Staff'}</div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
-                <span class="shift-badge ${isMyShift?'mine':shift.status}">${isMyShift?'⭐ YOUR SHIFT':shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
-              </div>
-              ${shift.dropped_by?`<div style="font-size:13px;color:var(--muted);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-              ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:13px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
-                `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-      ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">DROP THIS SHIFT</div>
-          <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your shift will open for others to bid. Your manager will be notified.</div>
-          <div class="field"><label>Reason for dropping</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
-            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP SHIFT</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
-
-    ${S.tab==='staff-shift'?`
-      <div class="sec-title">⏰ ${L?'MI TURNO':'MY SHIFT'}</div>
-      <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
-      ${myTodayShift?`<div class="my-shift-highlight">
-        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">TODAY'S SHIFT</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
-        <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
-      </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;color:var(--muted);font-size:15px">No shift scheduled for today.<br/>Check Schedule tab for open shifts.</div>`}
-      <div class="card">
-        ${isClockedIn?`
-          <div style="text-align:center;margin-bottom:14px">
-            <div style="font-size:14px;color:var(--muted);letter-spacing:1px">STATUS</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:38px;color:var(--green)">● ON CLOCK</div>
-          </div>
-          <button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.staffUser.id}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>
-        `:`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.staffUser.id}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`}
-      </div>
-      <div class="card">
-        <div class="ct">SHIFT BRIEFING</div>
-        <div style="background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:8px;padding:14px;font-size:15px;line-height:1.8;color:var(--text)">${L?'Bienvenidos al turno. Revisen el inventario, atiendan a los clientes con reservación y reporten incidentes al manager.':'Welcome to your shift. Check inventory levels, attend to reservation guests, and report any incidents to the manager.'}</div>
-      </div>
-    `:''}
-
-    ${S.tab==='staff-photos'?`
-      <div class="sec-title">📸 ${L?'FOTOS':'PHOTOS'}</div>
-      <div class="card">
-        <div class="ct">${L?'TOMAR FOTO / SUBIR':'TAKE OR UPLOAD PHOTO'}</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Sube fotos de recibos, incidentes, o cualquier cosa que necesite atención del manager.':'Upload photos of liquor receipts, incidents, or anything that needs manager attention.'}</div>
-        <div class="field"><label>Tag / Category</label>
-          <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-            ${['Liquor Receipt','Beer Receipt','Food Receipt','Incident','Social Media','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field"><label>${L?'Descripción':'Description / Notes'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué es esta foto?':'What is this photo of?'}"/></div>
-        <label style="display:block;cursor:pointer">
-          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
-          <div class="upzone">
-            <div style="font-size:40px;margin-bottom:10px">📷</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR FOTO':'TAKE PHOTO'}</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:6px">${L?'o toca para subir desde galería':'or tap to upload from gallery'}</div>
-          </div>
-        </label>
-      </div>
-      <div class="photo-grid">
-        ${S.photos.filter(p=>['Liquor Receipt','Beer Receipt','Food Receipt','Incident'].includes(p.tag)||S.photos.indexOf(p)<10).slice(0,10).map(p=>`
-          <div class="pcard">
-            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
-            <div class="photo-overlay">
-              <div class="photo-label">${p.label||p.tag}</div>
-              <div class="photo-time">${p.tag}</div>
-            </div>
-          </div>
-        `).join('')}
-        ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first photo above!</div>`:''}
-      </div>
-    `:''}
-
-    ${S.tab==='staff-recipes'?`
-      <div class="sec-title">🍹 ${L?'RECETAS':'RECIPE BOOK'}</div>
-      ${renderRecipeBook(false)}
-    `:''}
-
-    ${S.tab==='staff-closeout'?`
-      <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
-      <div class="card">
-        <div class="ct">CLOSING CHECKLIST</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
-        <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
-        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-          <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>`).join('')}
-        `).join('')}
-        ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
-        `}
-      </div>
-    `:''}
+    ${S.tab==='staff-shift'?renderStaffShiftTab(L,myTodayShift,isClockedIn,mySession,myEntries,todayMs,weekMs):''}
+    ${S.tab==='my-schedule'?renderStaffScheduleTab(L,myTodayShift,openShifts):''}
+    ${S.tab==='staff-photos'?renderStaffPhotosTab(L):''}
+    ${S.tab==='staff-recipes'?`<div class="sec-title">🍹 ${L?'RECETAS':'RECIPE BOOK'}</div>${renderRecipeBook(false)}`:''}
+    ${S.tab==='staff-closeout'?renderStaffCloseoutTab(L,checkedCount,pct,allDone):''}
 
     </main>
     <nav class="bot-nav">
@@ -709,6 +866,235 @@ function renderStaffApp(){
   </div>`;
 }
 
+function renderStaffShiftTab(L,myTodayShift,isClockedIn,mySession,myEntries,todayMs,weekMs){
+  const now=Date.now();
+  const elapsed=mySession?now-new Date(mySession.clock_in).getTime():0;
+
+  // Late/early alert
+  let alertHtml='';
+  if(myTodayShift&&!isClockedIn&&myEntries.filter(e=>e.date_key===todayKey()).length===0){
+    const scheduled=parseScheduleTime(myTodayShift.start_time);
+    const minsLate=Math.round((now-scheduled)/60000);
+    if(minsLate>10){
+      alertHtml=`<div class="late-alert"><div style="font-size:20px">⚠️</div><div><div style="font-weight:700;color:var(--red)">CLOCKING IN LATE</div><div style="font-size:13px;color:var(--muted)">Your shift started at ${myTodayShift.start_time} — ${minsLate} min ago</div></div></div>`;
+    } else if(minsLate<-10){
+      alertHtml=`<div class="early-alert"><div style="font-size:20px">👍</div><div><div style="font-weight:700;color:var(--green)">EARLY ARRIVAL!</div><div style="font-size:13px;color:var(--muted)">Shift starts at ${myTodayShift.start_time} — you're ${Math.abs(minsLate)} min early</div></div></div>`;
+    }
+  }
+
+  const completedToday=myEntries.filter(e=>e.date_key===todayKey()&&e.clock_out);
+  const todayHistory=myEntries.filter(e=>e.date_key===todayKey());
+
+  return `
+    <div class="sec-title">⏰ ${L?'MI TURNO':'MY SHIFT'}</div>
+
+    <!-- Welcome back banner if auto-logged in -->
+    ${getRemembered()&&getRemembered().staffId===S.staffUser.id?`
+    <div style="background:linear-gradient(135deg,rgba(212,160,23,.12),rgba(200,16,46,.08));border:1px solid rgba(212,160,23,.3);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:26px">👋</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:16px;color:var(--text)">Welcome back, ${S.staffUser.name.split(' ')[0]}!</div>
+        <div style="font-size:13px;color:var(--muted)">This device remembers you. <button onclick="switchUser()" style="background:none;border:none;color:var(--lcg);cursor:pointer;font-size:13px;font-family:'Rajdhani',sans-serif;text-decoration:underline;padding:0">Not you?</button></div>
+      </div>
+    </div>`:''}
+
+    <!-- Live Clock -->
+    <div class="clock-hero">
+      <div class="clock-hero-time" id="clock-el">${S.liveTime||'--:--:--'}</div>
+      <div class="clock-hero-date">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>
+      <div class="clock-hero-bar">${S.bar.name}</div>
+    </div>
+
+    ${alertHtml}
+
+    <!-- Today's Shift Badge -->
+    ${myTodayShift?`<div class="my-shift-highlight">
+      <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ ${L?'TURNO DE HOY':'TODAY\'S SHIFT'}</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
+      <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
+    </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center;color:var(--muted);font-size:15px">No shift scheduled today.<br/>Check Schedule for open shifts.</div>`}
+
+    <!-- CLOCK IN / OUT CARD -->
+    ${isClockedIn?`
+      <div class="clock-status-in">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px">● ON THE CLOCK</div>
+        <div class="clock-elapsed" id="self-elapsed">${fmtElapsed(elapsed)}</div>
+        <div class="clock-elapsed-label">${L?'Tiempo trabajado':'Time Worked This Session'}</div>
+        <div class="clock-in-time">Clocked in at ${fmtTime(mySession.clock_in)}</div>
+      </div>
+      <button class="clock-btn-out" onclick="S.showConfirmClockOut=true;S.confirmClockOutId='${S.staffUser.id}';render()">
+        <span style="font-size:22px">⏹</span> ${L?'FINALIZAR TURNO':'CLOCK OUT'}
+      </button>
+    `:`
+      <div class="clock-status-out">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">○ OFF THE CLOCK</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:2px;color:var(--muted)">${fmtElapsed(todayMs)} today</div>
+        <div class="clock-elapsed-label">${L?'Horas registradas hoy':'Hours Logged Today'}</div>
+      </div>
+      <button class="clock-btn-in" onclick="clockIn('${S.staffUser.id}','${S.staffUser.name.replace(/'/g,"\\'")}','${S.bar.id}')">
+        <span style="font-size:22px">▶</span> ${L?'INICIAR TURNO':'CLOCK IN'}
+      </button>
+    `}
+
+    <!-- THIS WEEK STATS -->
+    <div class="card" style="margin-top:14px">
+      <div class="ct">${L?'MIS HORAS':'MY HOURS'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--s2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-family:'Bebas Neue',cursive;font-size:28px;color:var(--green)">${fmtHours(todayMs)}</div>
+          <div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:1px">${L?'Hoy':'Today'}</div>
+        </div>
+        <div style="background:var(--s2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-family:'Bebas Neue',cursive;font-size:28px;color:var(--blue)">${fmtHours(weekMs)}</div>
+          <div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:1px">${L?'Esta semana':'This Week'}</div>
+        </div>
+      </div>
+
+      <!-- Today's punches -->
+      ${todayHistory.length>0?`
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${L?'REGISTROS DE HOY':'TODAY\'S PUNCHES'}</div>
+        ${todayHistory.map(e=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:8px;height:8px;border-radius:50%;background:${e.clock_out?'var(--muted)':'var(--green)'};flex-shrink:0"></div>
+            <div style="flex:1">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text)">IN ${fmtTime(e.clock_in)} ${e.clock_out?'→ OUT '+fmtTime(e.clock_out):''}</div>
+              ${e.clock_out?`<div style="font-size:12px;color:var(--muted)">${fmtHours(e.hours_ms)} hrs</div>`:`<div style="font-size:12px;color:var(--green)">Still clocked in</div>`}
+            </div>
+            ${e.edited?`<span style="font-size:10px;color:var(--gold);font-family:'Share Tech Mono',monospace">EDITED</span>`:''}
+          </div>
+        `).join('')}
+      `:'<div style="color:var(--muted);font-size:14px">No punches recorded today yet.</div>'}
+    </div>
+
+    <!-- Confirm Clock Out Modal -->
+    ${S.showConfirmClockOut?`<div class="modal-bg" onclick="S.showConfirmClockOut=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">CLOCK OUT?</div>
+        <div style="font-size:15px;color:var(--muted);margin-bottom:20px;line-height:1.7">
+          You've been on the clock for <strong style="color:var(--green)">${fmtElapsed(Date.now()-new Date(mySession?.clock_in).getTime())}</strong>.<br/>
+          ${myTodayShift?`Shift ends at <strong style="color:var(--text)">${myTodayShift.end_time}</strong>.`:''}
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showConfirmClockOut=false;render()">Stay On</button>
+          <button class="btn-save" style="background:var(--lc)" onclick="clockOut('${S.staffUser.id}')">Clock Out</button>
+        </div>
+      </div>
+    </div>`:''}
+  `;
+}
+
+function renderStaffScheduleTab(L,myTodayShift,openShifts){
+  return `
+    <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
+    ${myTodayShift?`<div class="my-shift-highlight">
+      <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ YOUR SHIFT TODAY</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
+      <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
+    </div>`:''}
+    ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:14px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
+    <div class="day-tabs">
+      ${DAYS.map((d,i)=>{
+        const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
+        return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
+          <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
+        </button>`;
+      }).join('')}
+    </div>
+    ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.</div>`:''}
+    ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
+      const isMyShift=shift.staff_id===S.staffUser.id;
+      const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
+      const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
+      const color=staffIdx>=0?ac(staffIdx):'var(--muted)';
+      return `<div class="shift-card ${isMyShift?'mine':shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
+            <div class="shift-role">${shift.role||'Staff'}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+              ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
+              <span class="shift-badge ${isMyShift?'mine':shift.status}">${isMyShift?'⭐ YOUR SHIFT':shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
+            </div>
+            ${shift.dropped_by?`<div style="font-size:13px;color:var(--muted);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
+            ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:13px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
+              `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+    ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">DROP THIS SHIFT</div>
+        <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your shift will open for others to bid. Your manager will be notified.</div>
+        <div class="field"><label>Reason for dropping</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
+          <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP SHIFT</button>
+        </div>
+      </div>
+    </div>`:''}
+  `;
+}
+
+function renderStaffPhotosTab(L){
+  return `
+    <div class="sec-title">📸 ${L?'FOTOS':'PHOTOS'}</div>
+    <div class="card">
+      <div class="ct">${L?'TOMAR FOTO / SUBIR':'TAKE OR UPLOAD PHOTO'}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Sube fotos de recibos, incidentes, o cualquier cosa que necesite atención.':'Upload photos of receipts, incidents, or anything needing manager attention.'}</div>
+      <div class="field"><label>Tag / Category</label>
+        <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+          ${['Liquor Receipt','Beer Receipt','Food Receipt','Incident','Social Media','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>${L?'Descripción':'Description / Notes'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué es esta foto?':'What is this photo of?'}"/></div>
+      <label style="display:block;cursor:pointer">
+        <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
+        <div class="upzone">
+          <div style="font-size:40px;margin-bottom:10px">📷</div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR FOTO':'TAKE PHOTO'}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">${L?'o toca para subir desde galería':'or tap to upload from gallery'}</div>
+        </div>
+      </label>
+    </div>
+    <div class="photo-grid">
+      ${S.photos.slice(0,10).map(p=>`
+        <div class="pcard">
+          ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
+          <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
+        </div>
+      `).join('')}
+      ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.</div>`:''}
+    </div>
+  `;
+}
+
+function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
+  return `
+    <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
+    <div class="card">
+      <div class="ct">CLOSING CHECKLIST</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
+      <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+      ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
+        <div class="cgroup-t">${group}</div>
+        ${items.map(item=>`<div class="citem" onclick="toggleCheck(${JSON.stringify(item)})">
+          <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+          <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+        </div>`).join('')}
+      `).join('')}
+      ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
+        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
+      `}
+    </div>
+  `;
+}
+
+// ─── OWNER APP ────────────────────────────────────────────────────────────
 function renderOwnerApp(){
   const L=S.lang==='es';
   const todaySales=S.sales[0]?(parseFloat(S.sales[0].bar_sales||0)+parseFloat(S.sales[0].food_sales||0)):0;
@@ -720,11 +1106,12 @@ function renderOwnerApp(){
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
   const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
+  const onFloorCount=Object.keys(S.clockedInStaff).length;
 
   const TABS=[
     {key:'dashboard',icon:'📊',label:'Home'},
+    {key:'timeclock',icon:'⏱',label:'Clock',badge:onFloorCount>0?onFloorCount:0},
     {key:'schedule',icon:'📅',label:'Schedule',badge:openShifts+pendingBids},
-    {key:'shift',icon:'⏰',label:'Shift'},
     {key:'inventory',icon:'📦',label:'Stock',badge:lowItems},
     {key:'gallery',icon:'📸',label:'Gallery'},
     {key:'recipes',icon:'🍹',label:'Recipes'},
@@ -747,331 +1134,19 @@ function renderOwnerApp(){
 
     ${S.showInstallBanner?`<div class="install-banner">
       <div style="font-size:22px">📱</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">Install CantinaPro</div><div style="font-size:13px;color:var(--muted)">Add to your home screen for quick access</div></div>
+      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">Install CantinaPro</div><div style="font-size:13px;color:var(--muted)">Add to home screen for quick access</div></div>
       <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">INSTALL</button>
     </div>`:''}
 
-    ${S.tab==='dashboard'?`
-      <div class="sec-title">TONIGHT'S OVERVIEW</div>
-      <div class="kpi-grid">
-        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries logged</div></div>
-        <div class="kpi g"><div class="kl">Weekly Revenue</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
-        <div class="kpi b"><div class="kl">Staff</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
-        <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
-      </div>
-      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed — check Schedule</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
-      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
+    ${S.tab==='dashboard'?renderOwnerDashboard(todaySales,weekSales,onFloorCount,lowItems,openShifts,pendingBids):''}
+    ${S.tab==='timeclock'?renderOwnerTimeClock():''}
+    ${S.tab==='schedule'?renderOwnerSchedule(dayShifts):''}
+    ${S.tab==='inventory'?renderOwnerInventory():''}
+    ${S.tab==='gallery'?renderOwnerGallery():''}
+    ${S.tab==='recipes'?`<div class="sec-title">🍹 RECIPE BOOK</div>${renderRecipeBook(true)}`:''}
+    ${S.tab==='closeout'?renderOwnerCloseout(checkedCount,pct,allDone):''}
 
-      <div class="card">
-        <div class="ct">👤 STAFF PORTAL LINK</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">Share this link with your staff. They tap it, pick their name, enter their PIN and they're in.</div>
-        <div class="link-box">
-          <div class="link-url">${getStaffLink()}</div>
-          <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
-        </div>
-        <div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center">💡 Staff can also add to home screen to install as an app</div>
-      </div>
-
-      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">+ LOG SALES</button>
-      <div class="card">
-        <div class="ct">RECENT SALES</div>
-        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
-          S.sales.slice(0,5).map(s=>`<div class="row">
-            <div style="flex:1">
-              <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
-              <div style="font-size:13px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
-            </div>
-            <div style="font-size:13px;color:var(--muted);text-align:right">
-              <div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div>
-              <div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    `:''}
-
-    ${S.tab==='schedule'?`
-      <div class="sec-title">📅 SCHEDULE</div>
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>{
-          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
-          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
-          </button>`;
-        }).join('')}
-      </div>
-      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">+ ADD SHIFT FOR ${DAYS[S.schedDay].toUpperCase()}</button>
-      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap the button above to add one.</div>`:''}
-      ${dayShifts.map(shift=>{
-        const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
-        const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
-        const color=staffIdx>=0?ac(staffIdx):'var(--muted)';
-        return `<div class="shift-card ${shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between">
-            <div>
-              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
-              <div class="shift-role">${shift.role||'Staff'}</div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
-                <span class="shift-badge ${shift.status}">${shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
-              </div>
-              ${shift.dropped_by?`<div style="font-size:13px;color:var(--red);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
-            </div>
-            <div style="display:flex;gap:8px">
-              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 12px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:18px;padding:6px 12px" onclick="deleteShift('${shift.id}')">×</button>
-            </div>
-          </div>
-          ${shift.status==='open'&&S.staff.length>0?`
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">AVAILABLE STAFF TO COVER</div>
-              ${S.staff.map((st,i)=>{
-                const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
-                return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-                  <div class="av" style="background:${ac(i)}22;color:${ac(i)};width:28px;height:28px;font-size:10px">${ai(st.name)}</div>
-                  <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${st.name}</div>
-                  ${hasBid?`<span style="font-size:13px;color:var(--gold)">BID PLACED ⏳</span>`:
-                    `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">ASSIGN</button>`}
-                </div>`;
-              }).join('')}
-            </div>
-          `:''}
-          ${shiftBids.length>0?`
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">🙋 ${shiftBids.length} BID${shiftBids.length!==1?'S':''} — APPROVE ONE</div>
-              ${shiftBids.map(bid=>`<div class="bid-row">
-                <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${bid.staff_name}</div>
-                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:9px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
-                <button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 10px" onclick="declineBid('${bid.id}')">✗</button>
-              </div>`).join('')}
-            </div>
-          `:''}
-        </div>`;
-      }).join('')}
-
-      ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay].toUpperCase()}</div>
-          <div class="field"><label>Staff Member (optional — leave blank for open shift)</label>
-            <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              <option value="">-- Open Shift (unassigned) --</option>
-              ${S.staff.map(s=>`<option value="${s.id}" ${S.newShift.staff_id===s.id?'selected':''}>${s.name} · ${s.role}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Role / Position</label>
-            <select oninput="S.newShift.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${ROLES.map(r=>`<option value="${r}" ${S.newShift.role===r?'selected':''}>${r}</option>`).join('')}
-            </select>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Start Time</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
-            <div class="field"><label>End Time</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
-          </div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showShiftModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveShift()">SAVE SHIFT</button>
-          </div>
-        </div>
-      </div>`:''}
-
-      ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">DROP SHIFT</div>
-          <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Emergency, sick, etc."/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
-            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
-
-    ${S.tab==='shift'?`
-      <div class="sec-title">⏰ SHIFT</div>
-      <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
-      <div class="card">
-        <div class="ct">CLOCK IN / OUT</div>
-        ${S.staff.length===0?`<div class="empty-state">No staff added yet.<br/>Tap "+ Add Staff" below.</div>`:''}
-        <div class="staff-grid">
-          ${S.staff.map((s,i)=>{
-            const isIn=S.clockedIn.includes(s.id);
-            return `<div class="staff-pick ${S.selectedStaff===s.id?'on':''}" onclick="S.selectedStaff='${s.id}';render()">
-              <div class="av" style="background:${ac(i)}22;color:${ac(i)}">${ai(s.name)}</div>
-              <div style="font-weight:700;font-size:15px;margin-top:8px;color:var(--text)">${s.name}</div>
-              <div style="font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:2px">${s.role}</div>
-              <div style="font-size:12px;font-weight:700;margin-top:6px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
-            </div>`;
-          }).join('')}
-        </div>
-        ${S.selectedStaff?(()=>{
-          const isIn=S.clockedIn.includes(S.selectedStaff);
-          return isIn
-            ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ CLOCK OUT</button>`
-            :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ CLOCK IN</button>`;
-        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>TAP YOUR NAME ABOVE</button>`}
-      </div>
-      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ADD STAFF MEMBER</button>
-      ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD STAFF MEMBER</div>
-          <div class="field"><label>Full Name</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria Garcia"/></div>
-          <div class="field"><label>Role / Position</label>
-            <select oninput="S.newStaff.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${ROLES.map(r=>`<option value="${r}" ${S.newStaff.role===r?'selected':''}>${r}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>PIN (4 digits — staff use this to log in)</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234" maxlength="4"/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showStaffModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveStaff()">Save</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
-
-    ${S.tab==='inventory'?`
-      <div class="sec-title">📦 INVENTORY</div>
-      <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:14px">+ ADD ITEM</button>
-      <div class="card" style="padding:0;overflow:hidden">
-        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Tap "+ Add Item" above.</div>`:`
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <table class="inv-table">
-            <thead><tr><th>Item</th><th>Unit</th><th>Stock</th><th>Par</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-              ${S.inventory.map(item=>{
-                const st=item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
-                return `<tr>
-                  <td><div style="font-weight:700;font-size:15px;color:var(--text)">${item.name}</div><div style="font-size:12px;color:var(--muted)">${item.category||''}</div></td>
-                  <td style="font-size:13px;color:var(--muted)">${item.unit||''}</td>
-                  <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:14px;width:62px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
-                  <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted)">${item.par_level}</td>
-                  <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
-                  <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:22px;padding:4px">×</button></td>
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>`}
-      </div>
-      ${S.showInvModal?`<div class="modal-bg" onclick="S.showInvModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD INVENTORY ITEM</div>
-          <div class="field"><label>Name</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
-          <div class="field"><label>Category</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila, Beer, Wine..."/></div>
-          <div class="field"><label>Unit</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case, Bottle..."/></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Current Stock</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value" placeholder="0"/></div>
-            <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value" placeholder="0"/></div>
-          </div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showInvModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveInv()">Save Item</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
-
-    ${S.tab==='gallery'?`
-      <div class="sec-title">📸 GALLERY & RECEIPTS</div>
-      ${S.selectedPhoto?`
-        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
-        <div class="card">
-          <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
-            ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:'<div style="font-size:48px">📷</div>'}
-            <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
-          </div>
-          <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
-          ${S.generatingCaption?'<div class="spinner"></div>':''}
-          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText('${S.photoCaption.replace(/'/g,"\\'")}');this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
-        </div>
-      `:`
-        <div class="card">
-          <div class="ct">ADD PHOTO / RECEIPT</div>
-          <div class="field"><label>Category</label>
-            <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${['Liquor Receipt','Beer Receipt','Food Receipt','Social Media','Event','Promo','Staff','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Description</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="Describe this photo..."/></div>
-          <label style="display:block;cursor:pointer">
-            <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
-            <div class="upzone">
-              <div style="font-size:36px;margin-bottom:10px">📷</div>
-              <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">TAKE OR UPLOAD PHOTO</div>
-              <div style="font-size:13px;color:var(--muted);margin-top:6px">Receipts, events, social media content</div>
-            </div>
-          </label>
-        </div>
-        <div class="photo-grid">
-          ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
-            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
-            <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
-          </div>`).join('')}
-          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Upload your first one above!</div>`:''}
-        </div>
-      `}
-    `:''}
-
-    ${S.tab==='recipes'?`
-      <div class="sec-title">🍹 RECIPE BOOK</div>
-      ${renderRecipeBook(true)}
-    `:''}
-
-    ${S.tab==='closeout'?`
-      <div class="sec-title">✅ END OF NIGHT</div>
-      <div class="card">
-        <div class="ct">CLOSING CHECKLIST</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before submitting closeout</div>
-        <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
-        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-          <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>`).join('')}
-        `).join('')}
-      </div>
-      <div class="card">
-        <div class="ct">CLOSEOUT FORM</div>
-        ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>`:`
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-            <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
-            <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
-            <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
-            <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-            <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
-          </div>
-          <div class="field"><label>Closing Staff</label>
-            <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              <option value="">Select staff member</option>
-              ${S.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Notes / Incidents</label><textarea placeholder="Any issues or notes for the owner..." oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`}</button>
-        `}
-      </div>
-    `:''}
-
-    ${S.showSaleModal?`<div class="modal-bg" onclick="S.showSaleModal=false;render()">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-title">+ LOG SALES</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-          <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
-          <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
-          <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
-          <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-          <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
-        </div>
-        <div class="field"><label>Notes</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="Shift notes..."/></div>
-        <div class="modal-actions">
-          <button class="btn-cancel" onclick="S.showSaleModal=false;render()">Cancel</button>
-          <button class="btn-save" onclick="saveSale()">Save Sales</button>
-        </div>
-      </div>
-    </div>`:''}
+    ${S.showSaleModal?renderSaleModal():''}
 
     </main>
     <nav class="bot-nav">
@@ -1080,98 +1155,521 @@ function renderOwnerApp(){
   </div>`;
 }
 
-
-// ── RECIPE MANAGEMENT ─────────────────────────────────
-S.recipes = [];
-S.showRecipeModal = false;
-S.editingRecipe = null;
-S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
-
-async function loadRecipes(){
-  if(!S.bar) return;
-  const {data} = await db.from('recipes').select('*').eq('bar_id', S.bar.id).order('name');
-  S.recipes = data || [];
+function renderOwnerDashboard(todaySales,weekSales,onFloorCount,lowItems,openShifts,pendingBids){
+  return `
+    <div class="sec-title">TONIGHT'S OVERVIEW</div>
+    <div class="kpi-grid">
+      <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries</div></div>
+      <div class="kpi g"><div class="kl">Weekly Revenue</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
+      <div class="kpi b"><div class="kl">On The Floor</div><div class="kv">${onFloorCount}</div><div class="kd">${S.staff.length} total staff</div></div>
+      <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
+    </div>
+    ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
+    ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
+    <div class="card">
+      <div class="ct">👤 STAFF PORTAL LINK</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">Share with staff — they tap it, pick their name, enter PIN, and they're in.</div>
+      <div class="link-box">
+        <div class="link-url">${getStaffLink()}</div>
+        <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
+      </div>
+    </div>
+    <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">+ LOG SALES</button>
+    <div class="card">
+      <div class="ct">RECENT SALES</div>
+      ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
+        S.sales.slice(0,5).map(s=>`<div class="row">
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
+            <div style="font-size:13px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
+          </div>
+          <div style="font-size:13px;color:var(--muted);text-align:right">
+            <div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div>
+            <div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
 }
 
-async function saveRecipe(){
-  if(!S.newRecipe.name || !S.bar) return;
-  const recipe = {
-    bar_id: S.bar.id,
-    name: S.newRecipe.name,
-    tag: S.newRecipe.tag,
-    glass: S.newRecipe.glass,
-    prep_time: S.newRecipe.prep_time,
-    cost: parseFloat(S.newRecipe.cost)||0,
-    price: parseFloat(S.newRecipe.price)||0,
-    emoji: S.newRecipe.emoji||'🍹',
-    ingredients: S.newRecipe.ingredients.filter(i=>i.name),
-    steps: S.newRecipe.steps.filter(s=>s),
-  };
-  if(S.editingRecipe){
-    await db.from('recipes').update(recipe).eq('id', S.editingRecipe);
-    S.editingRecipe = null;
-  } else {
-    await db.from('recipes').insert(recipe);
+// ─── OWNER TIME CLOCK VIEW ────────────────────────────────────────────────
+function renderOwnerTimeClock(){
+  const now=Date.now();
+  const onFloor=S.staff.filter(s=>S.clockedInStaff[s.id]);
+  const offFloor=S.staff.filter(s=>!S.clockedInStaff[s.id]);
+
+  // Filter clock entries for history view
+  let historyEntries=[];
+  if(S.clockHistoryView==='today'){
+    const k=todayKey();
+    historyEntries=S.clockEntries.filter(e=>e.date_key===k);
+  }else if(S.clockHistoryView==='week'){
+    const weekAgo=new Date(now-7*24*3600000);
+    historyEntries=S.clockEntries.filter(e=>new Date(e.clock_in)>=weekAgo);
+  }else{
+    historyEntries=S.clockEntries;
   }
-  S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
-  S.showRecipeModal = false;
-  await loadRecipes();
-  render();
-}
 
-async function deleteRecipe(id){
-  if(!confirm('Delete this recipe?')) return;
-  await db.from('recipes').delete().eq('id', id);
-  await loadRecipes();
-  render();
-}
-
-function editRecipe(r){
-  S.editingRecipe = r.id;
-  S.newRecipe = {
-    name: r.name, tag: r.tag||'Signature', glass: r.glass||'', prep_time: r.prep_time||'',
-    cost: r.cost||'', price: r.price||'', emoji: r.emoji||'🍹',
-    ingredients: r.ingredients&&r.ingredients.length ? r.ingredients : [{amount:'',name:'',note:''}],
-    steps: r.steps&&r.steps.length ? r.steps : [''],
-  };
-  S.showRecipeModal = true;
-  render();
-}
-
-function addIngredientRow(){ S.newRecipe.ingredients.push({amount:'',name:'',note:''});render(); }
-function removeIngredientRow(i){ S.newRecipe.ingredients.splice(i,1);render(); }
-function addStepRow(){ S.newRecipe.steps.push('');render(); }
-function removeStepRow(i){ S.newRecipe.steps.splice(i,1);render(); }
-function recipeMargin(cost,price){ return price>0?Math.round(((price-cost)/price)*100):0; }
-
-function renderRecipeBook(isOwner){
-  const HARDCODED = [
-    {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',cost:2.80,price:14,emoji:'🍹',isDefault:true,
-      ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
-      steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
-    {id:'h2',name:'Michelada',tag:'Signature',glass:'Pint glass',prep_time:'1.5 min',cost:1.60,price:10,emoji:'🍺',isDefault:true,
-      ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
-      steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
-    {id:'h3',name:'Paloma',tag:'Classic',glass:'Highball',prep_time:'1.5 min',cost:1.90,price:12,emoji:'🍊',isDefault:true,
-      ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
-      steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
-    {id:'h4',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prep_time:'3 min',cost:3.20,price:16,emoji:'🥃',isDefault:true,
-      ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
-      steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
-  ];
-  const allRecipes = [...HARDCODED, ...S.recipes.map(r=>({...r,isDefault:false}))];
-  const tags = ['All','Signature','Classic','Premium','Custom'];
-  const filtered = allRecipes.filter(r=>{
-    const ms = r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
-    const mf = S.recipeFilter==='All' || r.tag===S.recipeFilter;
-    return ms && mf;
+  // Per-staff weekly hours
+  const staffWeekHours={};
+  S.staff.forEach(st=>{
+    const entries=getWeekEntries(st.id);
+    staffWeekHours[st.id]=sumHours(entries);
   });
 
-  let html = '';
-  if(isOwner){
-    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+  return `
+    <div class="sec-title">⏱ TIME CLOCK</div>
+
+    <!-- Live Clock -->
+    <div class="clock-hero">
+      <div class="clock-hero-time" id="clock-el">${S.liveTime||'--:--:--'}</div>
+      <div class="clock-hero-date">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div>
+      <div class="clock-hero-bar">${S.bar.name}</div>
+    </div>
+
+    <!-- WHO'S ON THE FLOOR -->
+    <div class="card">
+      <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+        <span>🟢 ON THE FLOOR (${onFloor.length})</span>
+        ${onFloor.length>0?`<span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green)">LIVE</span>`:''}
+      </div>
+      ${onFloor.length===0?`<div style="color:var(--muted);font-size:15px;text-align:center;padding:12px">No staff clocked in yet.</div>`:''}
+      <div class="floor-grid">
+        ${onFloor.map((s,i)=>{
+          const session=S.clockedInStaff[s.id];
+          const elapsed=now-new Date(session.clock_in).getTime();
+          const late=getShiftLateMinutes(s.id);
+          const isLate=late!==null&&late>10;
+          const staffIdx=S.staff.findIndex(st=>st.id===s.id);
+          const color=ac(staffIdx>=0?staffIdx:i);
+          return `<div class="floor-card clocked-in ${isLate?'late':''}">
+            <div class="av" style="background:${color}22;color:${color};margin:0 auto">${ai(s.name)}</div>
+            <div class="floor-card-name">${s.name}</div>
+            <div class="floor-card-role">${s.role}</div>
+            <div class="floor-card-elapsed" style="color:var(--green)" id="elapsed-${s.id}">${fmtElapsed(elapsed)}</div>
+            <div class="floor-card-time" style="color:var(--muted)">IN ${fmtTime(session.clock_in)}</div>
+            ${isLate?`<div style="font-size:10px;color:var(--red);margin-top:4px;font-weight:700">⚠ ${late}min LATE</div>`:''}
+            <button onclick="S.showConfirmClockOut=true;S.confirmClockOutId='${s.id}';render()" style="background:rgba(255,68,85,.2);border:1px solid rgba(255,68,85,.4);color:var(--red);border-radius:6px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;margin-top:8px;width:100%">CLOCK OUT</button>
+          </div>`;
+        }).join('')}
+      </div>
+
+      ${offFloor.length>0?`
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 10px">○ OFF THE CLOCK (${offFloor.length})</div>
+        ${offFloor.map((s,i)=>{
+          const todayHrs=sumHours(getTodayEntries(s.id));
+          const weekHrs=staffWeekHours[s.id]||0;
+          const staffIdx=S.staff.findIndex(st=>st.id===s.id);
+          const color=ac(staffIdx>=0?staffIdx:i);
+          return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div class="av" style="background:${color}22;color:${color};opacity:.6">${ai(s.name)}</div>
+            <div style="flex:1">
+              <div style="font-weight:700;color:var(--muted)">${s.name}</div>
+              <div style="font-size:12px;color:var(--muted);text-transform:uppercase">${s.role}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted)">${fmtHours(todayHrs)} today</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--s3)">${fmtHours(weekHrs)} wk</div>
+            </div>
+            <button onclick="clockIn('${s.id}','${s.name.replace(/'/g,"\\'")}','${S.bar.id}')" style="background:rgba(0,232,122,.15);border:1px solid rgba(0,232,122,.3);color:var(--green);border-radius:6px;padding:8px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px">CLOCK IN</button>
+          </div>`;
+        }).join('')}
+      `:''}
+    </div>
+
+    <!-- THIS WEEK SUMMARY -->
+    <div class="card">
+      <div class="ct">📊 THIS WEEK — ALL STAFF</div>
+      ${S.staff.map((s,i)=>{
+        const weekMs=staffWeekHours[s.id]||0;
+        const todayMs=sumHours(getTodayEntries(s.id));
+        const isIn=!!S.clockedInStaff[s.id];
+        const color=ac(i);
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="av" style="background:${color}22;color:${color}">${ai(s.name)}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:15px;color:var(--text)">${s.name}</div>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase">${s.role}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'Bebas Neue',cursive;font-size:18px;color:${isIn?'var(--green)':'var(--text)'}">${fmtHours(weekMs)}</div>
+            <div style="font-size:11px;color:var(--muted)">hrs this week</div>
+          </div>
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:8px;height:8px;border-radius:50%;background:${isIn?'var(--green)':'var(--border)'};${isIn?'box-shadow:0 0 6px var(--green)':''}"></span>
+        </div>`;
+      }).join('')}
+      ${S.staff.length===0?`<div class="empty-state">No staff added yet.</div>`:''}
+    </div>
+
+    <!-- ADD STAFF BUTTON -->
+    <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ADD STAFF MEMBER</button>
+
+    <!-- TIME HISTORY -->
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="ct" style="margin-bottom:0">🕐 TIME HISTORY</div>
+        <div style="display:flex;gap:6px">
+          ${['today','week','all'].map(v=>`<button onclick="S.clockHistoryView='${v}';render()" style="background:${S.clockHistoryView===v?'var(--lc)':'var(--s2)'};border:1px solid ${S.clockHistoryView===v?'var(--lc)':'var(--border)'};color:${S.clockHistoryView===v?'#fff':'var(--muted)'};border-radius:6px;padding:5px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px">${v.toUpperCase()}</button>`).join('')}
+        </div>
+      </div>
+      ${historyEntries.length===0?`<div class="empty-state" style="padding:20px">No time entries yet.</div>`:`
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="th-table">
+            <thead><tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Hrs</th><th></th></tr></thead>
+            <tbody>
+              ${historyEntries.map(e=>{
+                const hrs=e.hours_ms?fmtHours(e.hours_ms):(e.clock_out?'--':fmtHours(Date.now()-new Date(e.clock_in).getTime()));
+                const isOpen=!e.clock_out;
+                return `<tr>
+                  <td style="font-weight:700;color:var(--text);white-space:nowrap">${e.staff_name||'--'}</td>
+                  <td style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px">${fmtDate(e.clock_in)}</td>
+                  <td style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text)">${fmtTime(e.clock_in)}</td>
+                  <td style="font-family:'Share Tech Mono',monospace;font-size:12px;color:${isOpen?'var(--green)':'var(--muted)'}">${isOpen?'NOW':fmtTime(e.clock_out)}</td>
+                  <td><span class="hours-pill" style="background:${isOpen?'rgba(0,232,122,.15)':'var(--s2)'};color:${isOpen?'var(--green)':'var(--muted)'}">${hrs}</span></td>
+                  <td style="display:flex;gap:4px">
+                    <button onclick="openEditClock(${JSON.stringify(e).replace(/"/g,'&quot;')})" style="background:rgba(77,159,255,.15);border:none;color:var(--blue);border-radius:4px;padding:5px 7px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive">EDIT</button>
+                    <button onclick="deleteClockEntry('${e.id}')" style="background:rgba(255,68,85,.15);border:none;color:var(--red);border-radius:4px;padding:5px 7px;cursor:pointer;font-size:14px">×</button>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+
+    <!-- Confirm Clock Out Modal (owner) -->
+    ${S.showConfirmClockOut&&S.confirmClockOutId?(()=>{
+      const s=S.staff.find(st=>st.id===S.confirmClockOutId);
+      const session=S.clockedInStaff[S.confirmClockOutId];
+      const elapsed=session?Date.now()-new Date(session.clock_in).getTime():0;
+      return `<div class="modal-bg" onclick="S.showConfirmClockOut=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">CLOCK OUT ${s?s.name.toUpperCase():'STAFF'}?</div>
+          <div style="font-size:15px;color:var(--muted);margin-bottom:20px;line-height:1.7">
+            Clocked in at <strong style="color:var(--text)">${fmtTime(session?.clock_in)}</strong><br/>
+            Time on clock: <strong style="color:var(--green)">${fmtElapsed(elapsed)}</strong>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="S.showConfirmClockOut=false;S.confirmClockOutId=null;render()">Cancel</button>
+            <button class="btn-save" style="background:var(--lc)" onclick="clockOut('${S.confirmClockOutId}')">Clock Out</button>
+          </div>
+        </div>
+      </div>`;
+    })():''}
+
+    <!-- Edit Clock Modal -->
+    ${S.showEditClockModal&&S.editClockEntry?`
+      <div class="modal-bg" onclick="S.showEditClockModal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">EDIT TIME ENTRY</div>
+          <div class="edit-clock-reason">⚠️ Edits are logged for payroll accuracy. Add a reason below.</div>
+          <div style="font-weight:700;color:var(--text);margin-bottom:14px">${S.editClockEntry.staff_name}</div>
+          <div class="field"><label>Clock In Time</label><input type="datetime-local" value="${S.editClockIn}" oninput="S.editClockIn=this.value" style="font-size:15px"/></div>
+          <div class="field"><label>Clock Out Time (leave blank if still in)</label><input type="datetime-local" value="${S.editClockOut}" oninput="S.editClockOut=this.value" style="font-size:15px"/></div>
+          <div class="field"><label>Reason for Edit *</label><input type="text" value="${S.editClockNote}" oninput="S.editClockNote=this.value" placeholder="Forgot to clock in, system issue, etc."/></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" onclick="S.showEditClockModal=false;S.editClockEntry=null;render()">Cancel</button>
+            <button class="btn-save" onclick="saveClockEdit()">SAVE EDIT</button>
+          </div>
+        </div>
+      </div>
+    `:''}
+
+    <!-- Add Staff Modal -->
+    ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">+ ADD STAFF MEMBER</div>
+        <div class="field"><label>Full Name</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria Garcia"/></div>
+        <div class="field"><label>Role / Position</label>
+          <select oninput="S.newStaff.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+            ${ROLES.map(r=>`<option value="${r}" ${S.newStaff.role===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>PIN (4 digits — staff use this to log in)</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234" maxlength="4"/></div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showStaffModal=false;render()">Cancel</button>
+          <button class="btn-save" onclick="saveStaff()">Save</button>
+        </div>
+      </div>
+    </div>`:''}
+  `;
+}
+
+// ─── OWNER SCHEDULE ───────────────────────────────────────────────────────
+function renderOwnerSchedule(dayShifts){
+  return `
+    <div class="sec-title">📅 SCHEDULE</div>
+    <div class="day-tabs">
+      ${DAYS.map((d,i)=>{
+        const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
+        return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
+          <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
+        </button>`;
+      }).join('')}
+    </div>
+    <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">+ ADD SHIFT FOR ${DAYS[S.schedDay].toUpperCase()}</button>
+    ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap above to add one.</div>`:''}
+    ${dayShifts.map(shift=>{
+      const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
+      const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
+      const color=staffIdx>=0?ac(staffIdx):'var(--muted)';
+      const isClocked=!!S.clockedInStaff[shift.staff_id];
+      return `<div class="shift-card ${shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
+            <div class="shift-role">${shift.role||'Staff'}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+              ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
+              <span class="shift-badge ${shift.status}">${shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
+              ${isClocked&&shift.staff_id?`<span style="font-size:10px;font-weight:700;color:var(--green);padding:2px 8px;background:rgba(0,232,122,.15);border-radius:10px">● ON CLOCK</span>`:''}
+            </div>
+            ${shift.dropped_by?`<div style="font-size:13px;color:var(--red);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:18px;padding:6px 12px" onclick="deleteShift('${shift.id}')">×</button>
+          </div>
+        </div>
+        ${shift.status==='open'&&S.staff.length>0?`
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">ASSIGN STAFF TO COVER</div>
+            ${S.staff.map((st,i)=>{
+              const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
+              return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+                <div class="av" style="background:${ac(i)}22;color:${ac(i)};width:28px;height:28px;font-size:10px">${ai(st.name)}</div>
+                <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${st.name}</div>
+                ${hasBid?`<span style="font-size:13px;color:var(--gold)">BID PLACED ⏳</span>`:
+                  `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">ASSIGN</button>`}
+              </div>`;
+            }).join('')}
+          </div>
+        `:''}
+        ${shiftBids.length>0?`
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">🙋 ${shiftBids.length} BID${shiftBids.length!==1?'S':''} — APPROVE ONE</div>
+            ${shiftBids.map(bid=>`<div class="bid-row">
+              <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${bid.staff_name}</div>
+              <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:9px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
+              <button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 10px" onclick="declineBid('${bid.id}')">✗</button>
+            </div>`).join('')}
+          </div>
+        `:''}
+      </div>`;
+    }).join('')}
+
+    ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay].toUpperCase()}</div>
+        <div class="field"><label>Staff Member (leave blank for open shift)</label>
+          <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+            <option value="">-- Open Shift --</option>
+            ${S.staff.map(s=>`<option value="${s.id}" ${S.newShift.staff_id===s.id?'selected':''}>${s.name} · ${s.role}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Role</label>
+          <select oninput="S.newShift.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+            ${ROLES.map(r=>`<option value="${r}" ${S.newShift.role===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Start</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px"/></div>
+          <div class="field"><label>End</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px"/></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showShiftModal=false;render()">Cancel</button>
+          <button class="btn-save" onclick="saveShift()">SAVE SHIFT</button>
+        </div>
+      </div>
+    </div>`:''}
+
+    ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">DROP SHIFT</div>
+        <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Emergency, sick, etc."/></div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
+          <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP</button>
+        </div>
+      </div>
+    </div>`:''}
+  `;
+}
+
+// ─── OWNER INVENTORY ──────────────────────────────────────────────────────
+function renderOwnerInventory(){
+  return `
+    <div class="sec-title">📦 INVENTORY</div>
+    <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:14px">+ ADD ITEM</button>
+    <div class="card" style="padding:0;overflow:hidden">
+      ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Tap "+ Add Item" above.</div>`:`
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="inv-table">
+          <thead><tr><th>Item</th><th>Unit</th><th>Stock</th><th>Par</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            ${S.inventory.map(item=>{
+              const st=item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
+              return `<tr>
+                <td><div style="font-weight:700;font-size:15px;color:var(--text)">${item.name}</div><div style="font-size:12px;color:var(--muted)">${item.category||''}</div></td>
+                <td style="font-size:13px;color:var(--muted)">${item.unit||''}</td>
+                <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:14px;width:62px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
+                <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted)">${item.par_level}</td>
+                <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
+                <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:22px;padding:4px">×</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`}
+    </div>
+    ${S.showInvModal?`<div class="modal-bg" onclick="S.showInvModal=false;render()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">+ ADD INVENTORY ITEM</div>
+        <div class="field"><label>Name</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
+        <div class="field"><label>Category</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila, Beer, Wine..."/></div>
+        <div class="field"><label>Unit</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case, Bottle..."/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Current Stock</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value" placeholder="0"/></div>
+          <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value" placeholder="0"/></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="S.showInvModal=false;render()">Cancel</button>
+          <button class="btn-save" onclick="saveInv()">Save Item</button>
+        </div>
+      </div>
+    </div>`:''}
+  `;
+}
+
+// ─── OWNER GALLERY ────────────────────────────────────────────────────────
+function renderOwnerGallery(){
+  if(S.selectedPhoto){
+    return `
+      <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
+      <div class="card">
+        <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
+          ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:' <div style="font-size:48px">📷</div>'}
+          <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
+        </div>
+        <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
+        ${S.generatingCaption?'<div class="spinner"></div>':''}
+        ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText(this.parentElement.childNodes[0].textContent.trim());this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
+      </div>
+    `;
   }
-  html += `<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+  return `
+    <div class="sec-title">📸 GALLERY & RECEIPTS</div>
+    <div class="card">
+      <div class="ct">ADD PHOTO / RECEIPT</div>
+      <div class="field"><label>Category</label>
+        <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+          ${['Liquor Receipt','Beer Receipt','Food Receipt','Social Media','Event','Promo','Staff','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Description</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="Describe this photo..."/></div>
+      <label style="display:block;cursor:pointer">
+        <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
+        <div class="upzone">
+          <div style="font-size:36px;margin-bottom:10px">📷</div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">TAKE OR UPLOAD PHOTO</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">Receipts, events, social media content</div>
+        </div>
+      </label>
+    </div>
+    <div class="photo-grid">
+      ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
+        ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
+        <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
+      </div>`).join('')}
+      ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Upload your first one above!</div>`:''}
+    </div>
+  `;
+}
+
+// ─── OWNER CLOSEOUT ───────────────────────────────────────────────────────
+function renderOwnerCloseout(checkedCount,pct,allDone){
+  return `
+    <div class="sec-title">✅ END OF NIGHT</div>
+    <div class="card">
+      <div class="ct">CLOSING CHECKLIST</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before submitting closeout</div>
+      <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+      ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
+        <div class="cgroup-t">${group}</div>
+        ${items.map(item=>`<div class="citem" onclick="toggleCheck(${JSON.stringify(item)})">
+          <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+          <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+        </div>`).join('')}
+      `).join('')}
+    </div>
+    <div class="card">
+      <div class="ct">CLOSEOUT FORM</div>
+      ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>`:`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+          <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
+          <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+          <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+          <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+          <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
+        </div>
+        <div class="field"><label>Closing Staff</label>
+          <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+            <option value="">Select staff member</option>
+            ${S.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Notes / Incidents</label><textarea placeholder="Any issues or notes for the owner..." oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
+        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`}</button>
+      `}
+    </div>
+  `;
+}
+
+// ─── SALE MODAL ───────────────────────────────────────────────────────────
+function renderSaleModal(){
+  return `<div class="modal-bg" onclick="S.showSaleModal=false;render()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title">+ LOG SALES</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+        <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
+        <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+        <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+        <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+        <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
+      </div>
+      <div class="field"><label>Notes</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="Shift notes..."/></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="S.showSaleModal=false;render()">Cancel</button>
+        <button class="btn-save" onclick="saveSale()">Save Sales</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── RECIPE BOOK (shared) ─────────────────────────────────────────────────
+function renderRecipeBook(isOwner){
+  const HARDCODED=[
+    {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',cost:2.80,price:14,emoji:'🍹',isDefault:true,ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
+    {id:'h2',name:'Michelada',tag:'Signature',glass:'Pint glass',prep_time:'1.5 min',cost:1.60,price:10,emoji:'🍺',isDefault:true,ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
+    {id:'h3',name:'Paloma',tag:'Classic',glass:'Highball',prep_time:'1.5 min',cost:1.90,price:12,emoji:'🍊',isDefault:true,ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
+    {id:'h4',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prep_time:'3 min',cost:3.20,price:16,emoji:'🥃',isDefault:true,ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
+  ];
+  const allRecipes=[...HARDCODED,...S.recipes.map(r=>({...r,isDefault:false}))];
+  const tags=['All','Signature','Classic','Premium','Custom'];
+  const filtered=allRecipes.filter(r=>{
+    const ms=r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
+    const mf=S.recipeFilter==='All'||r.tag===S.recipeFilter;
+    return ms&&mf;
+  });
+
+  let html='';
+  if(isOwner){
+    html+=`<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+  }
+  html+=`<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
     <span style="color:var(--muted);font-size:18px">🔍</span>
     <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
   </div>
@@ -1180,18 +1678,17 @@ function renderRecipeBook(isOwner){
   </div>`;
 
   if(filtered.length===0){
-    html += `<div class="empty-state">No recipes found.<br/>${isOwner?'Tap "+ Add Your Recipe" above to create your first one!':''}</div>`;
+    html+=`<div class="empty-state">No recipes found.${isOwner?'<br/>Tap "+ Add Your Recipe" above.':''}</div>`;
   }
 
-  filtered.forEach(r => {
-    const mg = recipeMargin(parseFloat(r.cost)||0, parseFloat(r.price)||0);
-    const rJson = JSON.stringify(r).replace(/"/g,'&quot;').replace(/'/g,"\'");
-    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+  filtered.forEach(r=>{
+    const mg=recipeMargin(parseFloat(r.cost)||0,parseFloat(r.price)||0);
+    html+=`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji||'🍹'} ${r.name}</div>
         <div style="display:flex;align-items:center;gap:8px">
           ${mg>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${mg}% margin</div>`:''}
-          ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
+          ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(${JSON.stringify(r).replace(/"/g,'&quot;')})" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
           <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
         </div>
       </div>
@@ -1217,8 +1714,8 @@ function renderRecipeBook(isOwner){
     </div>`;
   });
 
-  if(S.showRecipeModal && isOwner){
-    html += `<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
+  if(S.showRecipeModal&&isOwner){
+    html+=`<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
       <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-title">${S.editingRecipe?'EDIT RECIPE':'+ ADD RECIPE'}</div>
         <div style="display:grid;grid-template-columns:60px 1fr;gap:10px">
@@ -1262,17 +1759,8 @@ function renderRecipeBook(isOwner){
       </div>
     </div>`;
   }
-
   return html;
 }
-
-// Patch loadBar to also load recipes
-const _origLoadBar = loadBar;
-loadBar = async function(){
-  await _origLoadBar();
-  await loadRecipes();
-};
-
 
 init();
 </script>
