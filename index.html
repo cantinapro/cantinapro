@@ -241,13 +241,25 @@ const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const COLORS=['#c8102e','#d4a017','#00e87a','#4d9fff','#b366ff','#00d4aa','#ff8c42','#ff6eb4'];
 const ROLES=['Bartender','Barback','Server','Host','Security','Manager','Busser','DJ','Cook','Other'];
 
-const CHECKLIST_DATA={
+const DEFAULT_CHECKLIST={
   '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms'],
   '🍺 Bar':['Count remaining liquor bottles','Log any breakage or spillage','Restock for next shift','Lock liquor storage'],
   '💰 Cash':['Count cash drawer','Separate tips','Prepare bank deposit','Reconcile card totals'],
   '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm'],
 };
-const ALL_ITEMS=Object.values(CHECKLIST_DATA).flat();
+// Dynamic checklist — loaded from localStorage, falls back to defaults
+function loadChecklistData(){
+  try{
+    const saved=localStorage.getItem('cp_checklist_data');
+    if(saved)return JSON.parse(saved);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_CHECKLIST));
+}
+function saveChecklistData(data){
+  try{localStorage.setItem('cp_checklist_data',JSON.stringify(data));}catch(e){}
+}
+let CHECKLIST_DATA=loadChecklistData();
+function getAllItems(){return Object.values(CHECKLIST_DATA).flat();}
 
 function getBarIdFromURL(){return new URLSearchParams(window.location.search).get('bar');}
 function ac(i){return COLORS[i%COLORS.length];}
@@ -319,7 +331,7 @@ let S={
   showPw:false,
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
   staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,rememberMe:true,
-  showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,showEditStaffModal:false,editingStaff:null,editStaffData:{name:'',role:'Bartender',pin:''},
+  showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,showEditStaffModal:false,editingStaff:null,editStaffData:{name:'',role:'Bartender',pin:''},showChecklistEditor:false,editChecklistData:null,
   newStaff:{name:'',role:'Bartender',pin:''},
   newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
   newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
@@ -686,9 +698,66 @@ async function approveBid(bidId,shiftId,staffId,staffName){
   await loadSchedules();render();
 }
 async function declineBid(bidId){await db.from('shift_bids').update({status:'declined'}).eq('id',bidId);await loadSchedules();render();}
+// ─── CHECKLIST EDITOR ────────────────────────────────────────────────────
+function openChecklistEditor(){
+  S.editChecklistData=JSON.parse(JSON.stringify(CHECKLIST_DATA));
+  S.showChecklistEditor=true;
+  render();
+}
+function addChecklistGroup(){
+  const name=prompt('Enter group name (include an emoji!):');
+  if(!name||!name.trim())return;
+  S.editChecklistData[name.trim()]=[];
+  render();
+}
+function removeChecklistGroup(group){
+  if(!confirm('Remove entire group "'+group+'" and all its items?'))return;
+  delete S.editChecklistData[group];
+  render();
+}
+function addChecklistItem(group){
+  const item=prompt('New item for "'+group+'":');
+  if(!item||!item.trim())return;
+  S.editChecklistData[group].push(item.trim());
+  render();
+}
+function removeChecklistItem(group,idx){
+  S.editChecklistData[group].splice(idx,1);
+  render();
+}
+function editChecklistItem(group,idx){
+  const current=S.editChecklistData[group][idx];
+  const updated=prompt('Edit item:',current);
+  if(updated===null)return;
+  if(!updated.trim()){S.editChecklistData[group].splice(idx,1);}
+  else{S.editChecklistData[group][idx]=updated.trim();}
+  render();
+}
+function saveChecklistEdits(){
+  // Remove empty groups
+  Object.keys(S.editChecklistData).forEach(g=>{
+    if(S.editChecklistData[g].length===0)delete S.editChecklistData[g];
+  });
+  CHECKLIST_DATA=S.editChecklistData;
+  saveChecklistData(CHECKLIST_DATA);
+  // Reset checked state since items may have changed
+  S.checklist={};
+  S.showChecklistEditor=false;
+  S.editChecklistData=null;
+  render();
+}
+function resetChecklistToDefault(){
+  if(!confirm('Reset checklist to default items? This cannot be undone.'))return;
+  CHECKLIST_DATA=JSON.parse(JSON.stringify(DEFAULT_CHECKLIST));
+  saveChecklistData(CHECKLIST_DATA);
+  S.checklist={};
+  S.showChecklistEditor=false;
+  render();
+}
 function toggleCheck(item){S.checklist[item]=!S.checklist[item];render();}
 async function submitCloseout(){
-  if(ALL_ITEMS.filter(i=>S.checklist[i]).length<ALL_ITEMS.length)return;
+  const allItems=getAllItems();
+  if(allItems.filter(i=>S.checklist[i]).length<allItems.length)return;
   await db.from('checklist_logs').insert({bar_id:S.bar.id,completed_by:S.staffUser?S.staffUser.name:(S.newSale.submitted_by||'Manager'),items_completed:S.checklist});
   if(Object.values(S.newSale).some(v=>v&&v!==''))await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});
   S.closeoutSubmitted=true;render();
@@ -863,8 +932,8 @@ function renderStaffApp(){
   const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
   const myTodayShift=myShifts.find(s=>s.day_of_week===new Date().getDay());
   const openShifts=S.schedules.filter(s=>s.status==='open');
-  const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
-  const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
+  const checkedCount=getAllItems().filter(i=>S.checklist[i]).length;
+  const pct=Math.round((checkedCount/getAllItems().length)*100);
   const allDone=checkedCount===ALL_ITEMS.length;
   const mySession=S.clockedInStaff[S.staffUser.id];
   const isClockedIn=!!mySession;
@@ -1121,7 +1190,7 @@ function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
       <div class="ct">CLOSING CHECKLIST</div>
       <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
       <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allItems.length} complete — ${pct}%</div>
       ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
         <div class="cgroup-t">${group}</div>
         ${items.map(item=>`<div class="citem" onclick="toggleCheck(${JSON.stringify(item)})">
@@ -1130,7 +1199,7 @@ function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
         </div>`).join('')}
       `).join('')}
       ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
-        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
+        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${getAllItems().length-checkedCount} items remaining`}</button>
       `}
     </div>
   `;
@@ -1142,8 +1211,8 @@ function renderOwnerApp(){
   const todaySales=S.sales[0]?(parseFloat(S.sales[0].bar_sales||0)+parseFloat(S.sales[0].food_sales||0)):0;
   const weekSales=S.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
   const lowItems=S.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
-  const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
-  const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
+  const checkedCount=getAllItems().filter(i=>S.checklist[i]).length;
+  const pct=Math.round((checkedCount/getAllItems().length)*100);
   const allDone=checkedCount===ALL_ITEMS.length;
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
@@ -1191,6 +1260,7 @@ function renderOwnerApp(){
     ${S.tab==='closeout'?renderOwnerCloseout(checkedCount,pct,allDone):''}
 
     ${S.showSaleModal?renderSaleModal():''}
+    ${S.showChecklistEditor?renderChecklistEditorModal():''}
 
     </main>
     <nav class="bot-nav">
@@ -1925,13 +1995,17 @@ function renderOwnerGallery(){
 
 // ─── OWNER CLOSEOUT ───────────────────────────────────────────────────────
 function renderOwnerCloseout(checkedCount,pct,allDone){
+  const allItems=getAllItems();
   return `
     <div class="sec-title">✅ END OF NIGHT</div>
     <div class="card">
-      <div class="ct">CLOSING CHECKLIST</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="ct" style="margin-bottom:0">CLOSING CHECKLIST</div>
+        <button onclick="openChecklistEditor()" style="background:rgba(77,159,255,.15);border:1px solid rgba(77,159,255,.3);color:var(--blue);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px">✏ EDIT LIST</button>
+      </div>
       <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before submitting closeout</div>
       <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${getAllItems().length} complete — ${pct}%</div>
       ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
         <div class="cgroup-t">${group}</div>
         ${items.map(item=>`<div class="citem" onclick="toggleCheck(${JSON.stringify(item)})">
@@ -1958,10 +2032,102 @@ function renderOwnerCloseout(checkedCount,pct,allDone){
           </select>
         </div>
         <div class="field"><label>Notes / Incidents</label><textarea placeholder="Any issues or notes for the owner..." oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
-        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`}</button>
+        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${allItems.length-checkedCount} remaining)`}</button>
       `}
     </div>
   `;
+}
+
+// ─── CHECKLIST EDITOR MODAL ──────────────────────────────────────────────
+// All possible default items per group — owners toggle on/off + add custom ones
+const ALL_DEFAULT_ITEMS={
+  '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms','Clean ice machine','Wipe down tables & chairs','Clean windows & mirrors','Sanitize blender & tools'],
+  '🍺 Bar':['Count remaining liquor bottles','Log any breakage or spillage','Restock for next shift','Lock liquor storage','Check keg levels','Drain speed rails','Cover fruit & garnishes','Label & date open bottles'],
+  '💰 Cash':['Count cash drawer','Separate tips','Prepare bank deposit','Reconcile card totals','Count safe','Log voids & comps','Print end-of-night report'],
+  '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm','Check bathrooms are clear','Check patio & smoking area','Turn off signs & exterior lights','Verify cameras are recording'],
+};
+
+function renderChecklistEditorModal(){
+  if(!S.showChecklistEditor||!S.editChecklistData)return'';
+  // Track which group is expanded in editor
+  if(S.editorOpenGroup===undefined)S.editorOpenGroup=Object.keys(S.editChecklistData)[0]||'';
+
+  return`<div class="modal-bg" onclick="S.showChecklistEditor=false;render()">
+    <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;padding:18px">
+      <div class="modal-title">✏ CUSTOMIZE CHECKLIST</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Toggle items on or off, or add your own custom items to each category.</div>
+
+      ${Object.entries(ALL_DEFAULT_ITEMS).map(([group,defaultItems])=>{
+        const activeItems=S.editChecklistData[group]||[];
+        const customItems=activeItems.filter(i=>!defaultItems.includes(i));
+        const isOpen=S.editorOpenGroup===group;
+        const activeCount=activeItems.length;
+        return`<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">
+          <!-- Group header / accordion toggle -->
+          <div onclick="S.editorOpenGroup=S.editorOpenGroup===${JSON.stringify(group)}?'':${JSON.stringify(group)};render()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer">
+            <div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--lcg)">${group}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">${activeCount} item${activeCount!==1?'s':''} active</div>
+            </div>
+            <div style="font-size:18px;color:var(--muted);transition:transform .2s;transform:rotate(${isOpen?'180':'0'}deg)">▾</div>
+          </div>
+
+          ${isOpen?`<div style="border-top:1px solid var(--border);padding:10px 14px">
+            <!-- Default items as toggles -->
+            ${defaultItems.map(item=>{
+              const isOn=activeItems.includes(item);
+              return`<div onclick="
+                const g=${JSON.stringify(group)};
+                const itm=${JSON.stringify(item)};
+                if(!S.editChecklistData[g])S.editChecklistData[g]=[];
+                const idx=S.editChecklistData[g].indexOf(itm);
+                if(idx>=0)S.editChecklistData[g].splice(idx,1);
+                else S.editChecklistData[g].push(itm);
+                render();
+              " style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isOn?'var(--green)':'var(--border)'};background:${isOn?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
+                  ${isOn?'<svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}
+                </div>
+                <div style="font-size:14px;color:${isOn?'var(--text)':'var(--muted)'};flex:1">${item}</div>
+              </div>`;
+            }).join('')}
+
+            <!-- Custom items added by owner -->
+            ${customItems.map((item,ci)=>`
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+                <div style="width:24px;height:24px;border-radius:6px;border:2px solid var(--green);background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>
+                </div>
+                <div style="font-size:14px;color:var(--text);flex:1">${item} <span style="font-size:10px;color:var(--lcg);font-family:'Share Tech Mono',monospace">CUSTOM</span></div>
+                <button onclick="removeChecklistItem(${JSON.stringify(group)},S.editChecklistData[${JSON.stringify(group)}].indexOf(${JSON.stringify(item)}))" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 6px">×</button>
+              </div>
+            `).join('')}
+
+            <!-- Add custom item input -->
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <input type="text" id="custom-item-${group.replace(/\s+/g,'')}" placeholder="Add custom item..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;outline:none;flex:1;font-family:'Rajdhani',sans-serif"/>
+              <button onclick="
+                const inp=document.getElementById('custom-item-${group.replace(/\s+/g,'')}');
+                const val=inp.value.trim();
+                if(!val)return;
+                if(!S.editChecklistData[${JSON.stringify(group)}])S.editChecklistData[${JSON.stringify(group)}]=[];
+                S.editChecklistData[${JSON.stringify(group)}].push(val);
+                inp.value='';
+                render();
+              " style="background:var(--lc);border:none;color:#fff;border-radius:6px;padding:10px 14px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;flex-shrink:0">ADD</button>
+            </div>
+          </div>`:''}
+        </div>`;
+      }).join('')}
+
+      <button onclick="resetChecklistToDefault()" style="width:100%;padding:10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;margin:10px 0 14px">↩ RESET TO DEFAULTS</button>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="S.showChecklistEditor=false;render()">Cancel</button>
+        <button class="btn-save" onclick="saveChecklistEdits()">SAVE CHECKLIST</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ─── SALE MODAL ───────────────────────────────────────────────────────────
