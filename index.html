@@ -1201,7 +1201,7 @@ function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
         </div>`).join('')}
       `).join('')}
       ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
-        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${getAllItems().length-checkedCount} items remaining`}</button>
+        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):''+(!allDone?(getAllItems().length-checkedCount)+' items remaining':'')}</button>
       `}
     </div>
   `;
@@ -2034,7 +2034,7 @@ function renderOwnerCloseout(checkedCount,pct,allDone){
           </select>
         </div>
         <div class="field"><label>Notes / Incidents</label><textarea placeholder="Any issues or notes for the owner..." oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
-        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${allItems.length-checkedCount} remaining)`}</button>
+        <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':'COMPLETE CHECKLIST FIRST ('+(allItems.length-checkedCount)+' remaining)'}</button>
       `}
     </div>
   `;
