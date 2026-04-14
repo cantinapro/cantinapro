@@ -337,7 +337,7 @@ let S={
   // end time clock state
   selectedStaff:null,
   liveTime:'',liveMs:0,
-  photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
+  photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',barLogo:null,logoPosition:'br',logoOpacity:0.85,downloadingPhoto:false,
   recipeSearch:'',recipeFilter:'All',
   schedDay:new Date().getDay(),
   urlBarId:null,
@@ -612,6 +612,14 @@ function switchUser(){
   S.schedules=[];S.bids=[];S.checklist={};S.closeoutSubmitted=false;S.myClockEntries=[];
   render();
 }
+async function resetPassword(){
+  const email=S.loginEmail.trim();
+  if(!email){S.authError='Enter your email address first then tap Forgot Password';render();return;}
+  const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  if(error){S.authError=error.message;}
+  else{S.authError='';alert('Password reset email sent to '+email+'. Check your inbox!');}
+  render();
+}
 async function handleAuth(){
   S.authError='';S.authLoading=true;render();
   const email=S.loginEmail.trim(),password=S.loginPassword.trim();
@@ -789,7 +797,8 @@ function renderAuth(){
         </div>
       </div>
       <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE BAR')}</button>
-      <div style="font-size:14px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
+      ${isLogin?`<button onclick="resetPassword()" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;margin-top:14px;width:100%;text-align:center;text-decoration:underline;padding:6px;font-family:'Rajdhani',sans-serif">Forgot Password?</button>`:''}
+      <div style="font-size:14px;color:var(--muted);margin-top:8px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
     </div>
     <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
     <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
@@ -1147,6 +1156,7 @@ function renderOwnerApp(){
     {key:'staff-mgmt',icon:'👥',label:'Staff'},
     {key:'schedule',icon:'📅',label:'Schedule',badge:openShifts+pendingBids},
     {key:'inventory',icon:'📦',label:'Stock',badge:lowItems},
+    {key:'gallery',icon:'📸',label:'Gallery'},
     {key:'recipes',icon:'🍹',label:'Recipes'},
     {key:'closeout',icon:'✅',label:'Close'},
   ];
@@ -1718,23 +1728,170 @@ function renderOwnerInventory(){
 }
 
 // ─── OWNER GALLERY ────────────────────────────────────────────────────────
+// ─── LOGO & WATERMARK ─────────────────────────────────────────────────────
+function handleLogoUpload(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    S.barLogo=ev.target.result;
+    // save to localStorage so it persists
+    try{localStorage.setItem('cp_bar_logo_'+S.bar.id, ev.target.result);}catch(err){}
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function loadSavedLogo(){
+  if(!S.bar)return;
+  try{
+    const saved=localStorage.getItem('cp_bar_logo_'+S.bar.id);
+    if(saved)S.barLogo=saved;
+  }catch(e){}
+}
+function removeLogo(){
+  S.barLogo=null;
+  try{localStorage.removeItem('cp_bar_logo_'+S.bar.id);}catch(e){}
+  render();
+}
+
+async function downloadWithLogo(photo){
+  if(!photo.url){alert('No image to download.');return;}
+  S.downloadingPhoto=true;render();
+  try{
+    const canvas=document.createElement('canvas');
+    const ctx=canvas.getContext('2d');
+    // Load main photo
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=photo.url;});
+    canvas.width=img.width;
+    canvas.height=img.height;
+    ctx.drawImage(img,0,0);
+
+    // Draw logo if set
+    if(S.barLogo){
+      const logo=new Image();
+      await new Promise((res,rej)=>{logo.onload=res;logo.onerror=rej;logo.src=S.barLogo;});
+      const maxW=canvas.width*0.25; // logo max 25% of image width
+      const scale=Math.min(maxW/logo.width, 1);
+      const lw=logo.width*scale;
+      const lh=logo.height*scale;
+      const pad=canvas.width*0.03;
+      let lx,ly;
+      const pos=S.logoPosition||'br';
+      if(pos==='br'){lx=canvas.width-lw-pad;ly=canvas.height-lh-pad;}
+      else if(pos==='bl'){lx=pad;ly=canvas.height-lh-pad;}
+      else if(pos==='tr'){lx=canvas.width-lw-pad;ly=pad;}
+      else{lx=pad;ly=pad;} // tl
+      ctx.globalAlpha=S.logoOpacity||0.85;
+      ctx.drawImage(logo,lx,ly,lw,lh);
+      ctx.globalAlpha=1;
+    } else {
+      // No logo — stamp bar name as text watermark
+      const fontSize=Math.max(canvas.width*0.03,18);
+      ctx.font=`bold ${fontSize}px 'Arial'`;
+      ctx.globalAlpha=0.75;
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      const pad=canvas.width*0.02;
+      const txt=S.bar.name;
+      const tw=ctx.measureText(txt).width;
+      ctx.fillRect(canvas.width-tw-pad*2-pad, canvas.height-fontSize-pad*2-pad, tw+pad*2, fontSize+pad*2);
+      ctx.fillStyle='#ffffff';
+      ctx.fillText(txt, canvas.width-tw-pad*2, canvas.height-pad*2);
+      ctx.globalAlpha=1;
+    }
+
+    // Download
+    const link=document.createElement('a');
+    const name=(photo.label||photo.tag||'photo').replace(/[^a-z0-9]/gi,'_');
+    link.download=`${S.bar.name.replace(/[^a-z0-9]/gi,'_')}_${name}.jpg`;
+    link.href=canvas.toDataURL('image/jpeg',0.92);
+    link.click();
+  }catch(err){
+    console.error('Download error:',err);
+    alert('Could not process image. Try downloading directly.');
+  }
+  S.downloadingPhoto=false;render();
+}
+
 function renderOwnerGallery(){
+  // Load saved logo on every render
+  loadSavedLogo();
+
   if(S.selectedPhoto){
     return `
       <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
       <div class="card">
+        <!-- Photo preview -->
         <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
-          ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:' <div style="font-size:48px">📷</div>'}
-          <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
+          ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:300px;object-fit:contain"/>`:'<div style="font-size:48px">📷</div>'}
+          ${S.barLogo?`<img src="${S.barLogo}" style="position:absolute;bottom:10px;right:10px;max-width:22%;max-height:22%;object-fit:contain;opacity:${S.logoOpacity||0.85}"/>`:`<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">${S.bar.name}</div></div>`}
         </div>
+
+        <!-- Logo position selector (only if logo set) -->
+        ${S.barLogo?`
+          <div style="margin-bottom:14px">
+            <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">LOGO POSITION</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              ${[['tl','↖ Top Left'],['tr','↗ Top Right'],['bl','↙ Bottom Left'],['br','↘ Bottom Right']].map(([pos,label])=>`
+                <button onclick="S.logoPosition='${pos}';render()" style="padding:8px;border-radius:6px;border:1px solid ${S.logoPosition===pos?'var(--lc)':'var(--border)'};background:${S.logoPosition===pos?'rgba(200,16,46,.15)':'var(--s2)'};color:${S.logoPosition===pos?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer">${label}</button>
+              `).join('')}
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">OPACITY</div>
+              <input type="range" min="0.3" max="1" step="0.05" value="${S.logoOpacity||0.85}" oninput="S.logoOpacity=parseFloat(this.value);render()" style="width:100%;accent-color:var(--lc)"/>
+            </div>
+          </div>
+        `:''}
+
+        <!-- Action buttons -->
+        <button class="action-btn green" onclick="downloadWithLogo(S.selectedPhoto)" ${S.downloadingPhoto?'disabled':''} style="margin-top:0">
+          ${S.downloadingPhoto?'⏳ PROCESSING...':'⬇ DOWNLOAD WITH LOGO'}
+        </button>
         <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
         ${S.generatingCaption?'<div class="spinner"></div>':''}
         ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText(this.parentElement.childNodes[0].textContent.trim());this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
       </div>
     `;
   }
+
   return `
     <div class="sec-title">📸 GALLERY & RECEIPTS</div>
+
+    <!-- LOGO SETUP CARD -->
+    <div class="card">
+      <div class="ct">🏷 YOUR BAR LOGO</div>
+      ${S.barLogo?`
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:center;width:80px;height:80px;flex-shrink:0">
+            <img src="${S.barLogo}" style="max-width:100%;max-height:100%;object-fit:contain"/>
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:15px;color:var(--green);margin-bottom:4px">✓ Logo saved</div>
+            <div style="font-size:13px;color:var(--muted);line-height:1.6">Your logo will be stamped on downloaded photos. Tap a photo to download with logo.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <label style="flex:1;cursor:pointer">
+            <input type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(event)"/>
+            <div style="background:rgba(77,159,255,.15);border:1px solid rgba(77,159,255,.3);color:var(--blue);border-radius:8px;padding:10px;text-align:center;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px">CHANGE LOGO</div>
+          </label>
+          <button onclick="removeLogo()" style="background:rgba(255,68,85,.12);border:1px solid rgba(255,68,85,.3);color:var(--red);border-radius:8px;padding:10px 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px">REMOVE</button>
+        </div>
+      `:`
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Upload your bar's logo once and it gets stamped on every photo you download — ready to post on Instagram.</div>
+        <label style="display:block;cursor:pointer">
+          <input type="file" accept="image/*" style="display:none" onchange="handleLogoUpload(event)"/>
+          <div class="upzone" style="margin-bottom:0">
+            <div style="font-size:36px;margin-bottom:8px">🏷</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;color:var(--muted)">UPLOAD YOUR LOGO</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px">PNG with transparent background works best</div>
+          </div>
+        </label>
+      `}
+    </div>
+
+    <!-- UPLOAD PHOTOS CARD -->
     <div class="card">
       <div class="ct">ADD PHOTO / RECEIPT</div>
       <div class="field"><label>Category</label>
@@ -1752,10 +1909,14 @@ function renderOwnerGallery(){
         </div>
       </label>
     </div>
+
+    <!-- PHOTO GRID -->
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center">Tap any photo to download with your logo</div>
     <div class="photo-grid">
       ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
         ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
         <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
+        ${S.barLogo?`<div style="position:absolute;top:6px;right:6px;background:rgba(0,232,122,.2);border:1px solid rgba(0,232,122,.4);border-radius:4px;padding:2px 6px;font-size:9px;color:var(--green);font-family:'Bebas Neue',cursive;letter-spacing:1px">LOGO</div>`:''}
       </div>`).join('')}
       ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Upload your first one above!</div>`:''}
     </div>
@@ -1863,7 +2024,7 @@ function renderRecipeBook(isOwner){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji||'🍹'} ${r.name}</div>
         <div style="display:flex;align-items:center;gap:8px">
-          ${mg>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${mg}% margin</div>`:''}
+          ${isOwner&&mg>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${mg}% margin</div>`:''}
           ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(${JSON.stringify(r).replace(/"/g,'&quot;')})" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
           <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
         </div>
@@ -1871,7 +2032,7 @@ function renderRecipeBook(isOwner){
       <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}${r.prep_time?' · '+r.prep_time:''}${r.price?' · $'+r.price:''}</div>
     </div>
     <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
-      ${(r.cost&&r.price)?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      ${isOwner&&(r.cost&&r.price)?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
         <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--red)">$${r.cost}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cost</div></div>
         <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--lcg)">$${r.price}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Price</div></div>
         <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--green)">${mg}%</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Margin</div></div>
