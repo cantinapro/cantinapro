@@ -1192,7 +1192,7 @@ function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
       <div class="ct">CLOSING CHECKLIST</div>
       <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
       <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allItems.length} complete — ${pct}%</div>pct}%</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allItems.length} complete — ${pct}%</div>
       ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
         <div class="cgroup-t">${group}</div>
         ${items.map(item=>`<div class="citem" onclick="toggleCheck(${JSON.stringify(item)})">
