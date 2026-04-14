@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="CantinaPro"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;CantinaPro&quot;,&quot;short_name&quot;:&quot;CantinaPro&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23080810&quot;,&quot;theme_color&quot;:&quot;%23c8102e&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cantinapro.github.io/cantinapro/icon.png&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;}]}"/>
-<title>CantinaPro — Bar Management App</title>
+<title>CantinaPro — Bar Management App v20260414190524</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1192,7 +1192,7 @@ function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
       <div class="ct">CLOSING CHECKLIST</div>
       <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
       <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allItems.length} complete — ${pct}%</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allItems.length} complete — ${pct}%</div>pct}%</div>
       ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
         <div class="cgroup-t">${group}</div>
         ${items.map(item=>`<div class="citem" onclick="toggleCheck(${JSON.stringify(item)})">
