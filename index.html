@@ -2039,7 +2039,6 @@ function renderOwnerCloseout(checkedCount,pct,allDone){
 }
 
 // ─── CHECKLIST EDITOR MODAL ──────────────────────────────────────────────
-// All possible default items per group — owners toggle on/off + add custom ones
 const ALL_DEFAULT_ITEMS={
   '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms','Clean ice machine','Wipe down tables & chairs','Clean windows & mirrors','Sanitize blender & tools'],
   '🍺 Bar':['Count remaining liquor bottles','Log any breakage or spillage','Restock for next shift','Lock liquor storage','Check keg levels','Drain speed rails','Cover fruit & garnishes','Label & date open bottles'],
@@ -2047,88 +2046,107 @@ const ALL_DEFAULT_ITEMS={
   '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm','Check bathrooms are clear','Check patio & smoking area','Turn off signs & exterior lights','Verify cameras are recording'],
 };
 
+// Clean action functions for checklist editor — no inline code in templates
+function clEditorToggleGroup(group){
+  S.editorOpenGroup=S.editorOpenGroup===group?'':group;render();
+}
+function clEditorToggleItem(group,item){
+  if(!S.editChecklistData[group])S.editChecklistData[group]=[];
+  const idx=S.editChecklistData[group].indexOf(item);
+  if(idx>=0)S.editChecklistData[group].splice(idx,1);
+  else S.editChecklistData[group].push(item);
+  render();
+}
+function clEditorRemoveCustom(group,item){
+  if(!S.editChecklistData[group])return;
+  const idx=S.editChecklistData[group].indexOf(item);
+  if(idx>=0)S.editChecklistData[group].splice(idx,1);
+  render();
+}
+function clEditorAddCustom(groupIdx){
+  const inp=document.getElementById('cl-custom-'+groupIdx);
+  if(!inp)return;
+  const val=inp.value.trim();
+  if(!val)return;
+  const group=Object.keys(ALL_DEFAULT_ITEMS)[groupIdx];
+  if(!S.editChecklistData[group])S.editChecklistData[group]=[];
+  S.editChecklistData[group].push(val);
+  inp.value='';
+  render();
+}
+
 function renderChecklistEditorModal(){
   if(!S.showChecklistEditor||!S.editChecklistData)return'';
-  // Track which group is expanded in editor
-  if(S.editorOpenGroup===undefined)S.editorOpenGroup=Object.keys(S.editChecklistData)[0]||'';
+  if(S.editorOpenGroup===undefined)S.editorOpenGroup='';
+  const groups=Object.keys(ALL_DEFAULT_ITEMS);
 
-  return`<div class="modal-bg" onclick="S.showChecklistEditor=false;render()">
+  let html=`<div class="modal-bg" onclick="S.showChecklistEditor=false;render()">
     <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;padding:18px">
       <div class="modal-title">✏ CUSTOMIZE CHECKLIST</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Toggle items on or off, or add your own custom items to each category.</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Toggle items on or off, or add your own to each category.</div>`;
 
-      ${Object.entries(ALL_DEFAULT_ITEMS).map(([group,defaultItems])=>{
-        const activeItems=S.editChecklistData[group]||[];
-        const customItems=activeItems.filter(i=>!defaultItems.includes(i));
-        const isOpen=S.editorOpenGroup===group;
-        const activeCount=activeItems.length;
-        return`<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">
-          <!-- Group header / accordion toggle -->
-          <div onclick="S.editorOpenGroup=S.editorOpenGroup===${JSON.stringify(group)}?'':${JSON.stringify(group)};render()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer">
-            <div>
-              <div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--lcg)">${group}</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:2px">${activeCount} item${activeCount!==1?'s':''} active</div>
-            </div>
-            <div style="font-size:18px;color:var(--muted);transition:transform .2s;transform:rotate(${isOpen?'180':'0'}deg)">▾</div>
+  groups.forEach((group,gIdx)=>{
+    const defaultItems=ALL_DEFAULT_ITEMS[group];
+    const activeItems=S.editChecklistData[group]||[];
+    const customItems=activeItems.filter(i=>!defaultItems.includes(i));
+    const isOpen=S.editorOpenGroup===group;
+    const activeCount=activeItems.length;
+
+    html+=`<div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">
+      <div onclick="clEditorToggleGroup(${JSON.stringify(group)})" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent">
+        <div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--lcg)">${group}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${activeCount} item${activeCount!==1?'s':''} active</div>
+        </div>
+        <div style="font-size:20px;color:var(--muted)">${isOpen?'▴':'▾'}</div>
+      </div>`;
+
+    if(isOpen){
+      html+=`<div style="border-top:1px solid var(--border);padding:10px 14px">`;
+
+      // Default items as toggles
+      defaultItems.forEach(item=>{
+        const isOn=activeItems.includes(item);
+        html+=`<div onclick="clEditorToggleItem(${JSON.stringify(group)},${JSON.stringify(item)})" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">
+          <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isOn?'var(--green)':'var(--border)'};background:${isOn?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${isOn?'<svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}
           </div>
-
-          ${isOpen?`<div style="border-top:1px solid var(--border);padding:10px 14px">
-            <!-- Default items as toggles -->
-            ${defaultItems.map(item=>{
-              const isOn=activeItems.includes(item);
-              return`<div onclick="
-                const g=${JSON.stringify(group)};
-                const itm=${JSON.stringify(item)};
-                if(!S.editChecklistData[g])S.editChecklistData[g]=[];
-                const idx=S.editChecklistData[g].indexOf(itm);
-                if(idx>=0)S.editChecklistData[g].splice(idx,1);
-                else S.editChecklistData[g].push(itm);
-                render();
-              " style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
-                <div style="width:24px;height:24px;border-radius:6px;border:2px solid ${isOn?'var(--green)':'var(--border)'};background:${isOn?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
-                  ${isOn?'<svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}
-                </div>
-                <div style="font-size:14px;color:${isOn?'var(--text)':'var(--muted)'};flex:1">${item}</div>
-              </div>`;
-            }).join('')}
-
-            <!-- Custom items added by owner -->
-            ${customItems.map((item,ci)=>`
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-                <div style="width:24px;height:24px;border-radius:6px;border:2px solid var(--green);background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>
-                </div>
-                <div style="font-size:14px;color:var(--text);flex:1">${item} <span style="font-size:10px;color:var(--lcg);font-family:'Share Tech Mono',monospace">CUSTOM</span></div>
-                <button onclick="removeChecklistItem(${JSON.stringify(group)},S.editChecklistData[${JSON.stringify(group)}].indexOf(${JSON.stringify(item)}))" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:2px 6px">×</button>
-              </div>
-            `).join('')}
-
-            <!-- Add custom item input -->
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <input type="text" id="custom-item-${Object.keys(ALL_DEFAULT_ITEMS).indexOf(group)}" placeholder="Add custom item..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;outline:none;flex:1;font-family:'Rajdhani',sans-serif"/>
-              <button onclick="
-                const inp=document.getElementById('custom-item-${Object.keys(ALL_DEFAULT_ITEMS).indexOf(group)}');
-                const val=inp.value.trim();
-                if(!val)return;
-                if(!S.editChecklistData[${JSON.stringify(group)}])S.editChecklistData[${JSON.stringify(group)}]=[];
-                S.editChecklistData[${JSON.stringify(group)}].push(val);
-                inp.value='';
-                render();
-              " style="background:var(--lc);border:none;color:#fff;border-radius:6px;padding:10px 14px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1px;flex-shrink:0">ADD</button>
-            </div>
-          </div>`:''}
+          <div style="font-size:14px;color:${isOn?'var(--text)':'var(--muted)'};flex:1">${item}</div>
         </div>`;
-      }).join('')}
+      });
 
-      <button onclick="resetChecklistToDefault()" style="width:100%;padding:10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;margin:10px 0 14px">↩ RESET TO DEFAULTS</button>
+      // Custom items
+      customItems.forEach(item=>{
+        html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="width:24px;height:24px;border-radius:6px;border:2px solid var(--green);background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="13" height="13" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>
+          </div>
+          <div style="font-size:14px;color:var(--text);flex:1">${item} <span style="font-size:10px;color:var(--lcg);font-family:'Share Tech Mono',monospace">CUSTOM</span></div>
+          <button onclick="clEditorRemoveCustom(${JSON.stringify(group)},${JSON.stringify(item)})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:20px;padding:2px 8px;line-height:1">×</button>
+        </div>`;
+      });
 
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="S.showChecklistEditor=false;render()">Cancel</button>
-        <button class="btn-save" onclick="saveChecklistEdits()">SAVE CHECKLIST</button>
-      </div>
+      // Add custom input
+      html+=`<div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="cl-custom-${gIdx}" placeholder="Add your own item..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;outline:none;flex:1;font-family:'Rajdhani',sans-serif"/>
+        <button onclick="clEditorAddCustom(${gIdx})" style="background:var(--lc);border:none;color:#fff;border-radius:6px;padding:10px 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;flex-shrink:0">ADD</button>
+      </div>`;
+
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+
+  html+=`<button onclick="resetChecklistToDefault()" style="width:100%;padding:10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;margin:10px 0 14px">↩ RESET TO DEFAULTS</button>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="S.showChecklistEditor=false;render()">Cancel</button>
+      <button class="btn-save" onclick="saveChecklistEdits()">SAVE CHECKLIST</button>
+    </div>
     </div>
   </div>`;
+  return html;
 }
+
 
 // ─── SALE MODAL ───────────────────────────────────────────────────────────
 function renderSaleModal(){
