@@ -2105,9 +2105,9 @@ function renderChecklistEditorModal(){
 
             <!-- Add custom item input -->
             <div style="display:flex;gap:8px;margin-top:10px">
-              <input type="text" id="custom-item-${group.replace(/\s+/g,'')}" placeholder="Add custom item..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;outline:none;flex:1;font-family:'Rajdhani',sans-serif"/>
+              <input type="text" id="custom-item-${Object.keys(ALL_DEFAULT_ITEMS).indexOf(group)}" placeholder="Add custom item..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;outline:none;flex:1;font-family:'Rajdhani',sans-serif"/>
               <button onclick="
-                const inp=document.getElementById('custom-item-${group.replace(/\s+/g,'')}');
+                const inp=document.getElementById('custom-item-${Object.keys(ALL_DEFAULT_ITEMS).indexOf(group)}');
                 const val=inp.value.trim();
                 if(!val)return;
                 if(!S.editChecklistData[${JSON.stringify(group)}])S.editChecklistData[${JSON.stringify(group)}]=[];
