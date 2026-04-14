@@ -932,9 +932,10 @@ function renderStaffApp(){
   const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
   const myTodayShift=myShifts.find(s=>s.day_of_week===new Date().getDay());
   const openShifts=S.schedules.filter(s=>s.status==='open');
-  const checkedCount=getAllItems().filter(i=>S.checklist[i]).length;
-  const pct=Math.round((checkedCount/getAllItems().length)*100);
-  const allDone=checkedCount===getAllItems().length;
+  const _allItems=getAllItems();
+  const checkedCount=_allItems.filter(i=>S.checklist[i]).length;
+  const pct=Math.round((checkedCount/_allItems.length)*100);
+  const allDone=checkedCount===_allItems.length;
   const mySession=S.clockedInStaff[S.staffUser.id];
   const isClockedIn=!!mySession;
   const myEntries=S.myClockEntries||[];
@@ -1184,6 +1185,7 @@ function renderStaffPhotosTab(L){
 }
 
 function renderStaffCloseoutTab(L,checkedCount,pct,allDone){
+  const allItems=getAllItems();
   return `
     <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
     <div class="card">
