@@ -934,7 +934,7 @@ function renderStaffApp(){
   const openShifts=S.schedules.filter(s=>s.status==='open');
   const checkedCount=getAllItems().filter(i=>S.checklist[i]).length;
   const pct=Math.round((checkedCount/getAllItems().length)*100);
-  const allDone=checkedCount===ALL_ITEMS.length;
+  const allDone=checkedCount===getAllItems().length;
   const mySession=S.clockedInStaff[S.staffUser.id];
   const isClockedIn=!!mySession;
   const myEntries=S.myClockEntries||[];
@@ -1213,7 +1213,7 @@ function renderOwnerApp(){
   const lowItems=S.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
   const checkedCount=getAllItems().filter(i=>S.checklist[i]).length;
   const pct=Math.round((checkedCount/getAllItems().length)*100);
-  const allDone=checkedCount===ALL_ITEMS.length;
+  const allDone=checkedCount===getAllItems().length;
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
   const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
