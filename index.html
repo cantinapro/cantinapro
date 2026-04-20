@@ -1118,29 +1118,43 @@ async function loadRecipes(){
 }
 
 async function saveRecipe(){
-  if(!S.newRecipe.name || !S.bar) return;
-  const recipe = {
-    bar_id: S.bar.id,
-    name: S.newRecipe.name,
-    tag: S.newRecipe.tag,
-    glass: S.newRecipe.glass,
-    prep_time: S.newRecipe.prep_time,
-    cost: parseFloat(S.newRecipe.cost)||0,
-    price: parseFloat(S.newRecipe.price)||0,
-    emoji: S.newRecipe.emoji||'🍹',
-    ingredients: S.newRecipe.ingredients.filter(i=>i.name),
-    steps: S.newRecipe.steps.filter(s=>s),
+  if(!S.bar){alert('No bar loaded. Please log in again.');return;}
+  if(!S.newRecipe.name||!S.newRecipe.name.trim()){alert('Recipe name is required.');return;}
+  const validIngredients=S.newRecipe.ingredients.filter(i=>i.name&&i.name.trim());
+  const validSteps=S.newRecipe.steps.filter(s=>s&&s.trim());
+  const recipe={
+    bar_id:S.bar.id,
+    name:S.newRecipe.name.trim(),
+    tag:S.newRecipe.tag||'Custom',
+    glass:S.newRecipe.glass||'',
+    prep_time:S.newRecipe.prep_time||'',
+    cost:parseFloat(S.newRecipe.cost)||0,
+    price:parseFloat(S.newRecipe.price)||0,
+    emoji:S.newRecipe.emoji||'🍹',
+    ingredients:validIngredients,
+    steps:validSteps,
   };
-  if(S.editingRecipe){
-    await db.from('recipes').update(recipe).eq('id', S.editingRecipe);
-    S.editingRecipe = null;
-  } else {
-    await db.from('recipes').insert(recipe);
+  try{
+    let result;
+    if(S.editingRecipe){
+      result=await db.from('recipes').update(recipe).eq('id',S.editingRecipe);
+      S.editingRecipe=null;
+    }else{
+      result=await db.from('recipes').insert(recipe);
+    }
+    if(result.error){
+      console.error('Recipe save error:',result.error);
+      alert('Could not save recipe: '+(result.error.message||'unknown error')+'\n\nIf this is the first time, your database may be missing the "recipes" table. Check Supabase.');
+      return;
+    }
+    S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
+    S.showRecipeModal=false;
+    await loadRecipes();
+    render();
+  }catch(err){
+    console.error('Recipe save exception:',err);
+    alert('Could not save recipe: '+(err.message||err));
   }
-  S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
-  S.showRecipeModal = false;
-  await loadRecipes();
-  render();
 }
 
 async function deleteRecipe(id){
