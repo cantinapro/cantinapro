@@ -1,1318 +1,613 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<meta name="theme-color" content="#080810"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="CantinaPro"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;CantinaPro&quot;,&quot;short_name&quot;:&quot;CantinaPro&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23080810&quot;,&quot;theme_color&quot;:&quot;%23c8102e&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cantinapro.github.io/cantinapro/icon.png&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;}]}"/>
-<title>CantinaPro — Bar Management App</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#080810;--s1:#12121e;--s2:#1c1c2e;--s3:#26263a;--border:#3a3a55;--gold:#f5a623;--amber:#e8820c;--red:#ff4455;--green:#00e87a;--blue:#4d9fff;--purple:#b366ff;--teal:#00d4aa;--text:#f0f0ff;--muted:#9999bb;--lc:#c8102e;--lcg:#d4a017;}
-html,body{height:100%;width:100%;}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;font-size:16px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;}
-#root{min-height:100vh;}
-.app{display:flex;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;position:relative;}
+/* ============================================================
+   CantinaPro × Clover Integration Module  (v1 — manual sync)
+   ------------------------------------------------------------
+   HOW TO USE:
+     1. Add this file to your project next to index.html
+     2. In index.html, right before the closing </script> tag
+        at the bottom of the file (the line that says `init();`),
+        add this line:
+           <script src="cantinapro-clover.js"></script>
+        OR paste the contents of this file directly above init().
+     3. Run the Supabase SQL in CLOVER_SCHEMA.sql (bottom of this
+        file, in comments) to create the two new tables.
+     4. In the owner app, a new "Clover" tab will appear.
+     5. Enter the merchant's API token + merchantId and tap
+        "Test Connection", then "Sync Now".
 
-/* AUTH */
-.auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
-.auth-logo{font-family:'Bebas Neue',cursive;font-size:56px;letter-spacing:8px;color:var(--lc);line-height:1;}
-.auth-sub{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:3px;color:var(--lcg);margin-top:6px;}
-.auth-div{width:60px;height:2px;background:linear-gradient(90deg,var(--lc),var(--lcg));margin:20px auto;}
-.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:400px;}
-.auth-title{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:3px;margin-bottom:20px;color:var(--text);}
-.auth-tabs{display:flex;background:var(--s2);border-radius:8px;overflow:hidden;margin-bottom:20px;}
-.auth-tab{flex:1;padding:12px;border:none;background:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .2s;}
-.auth-tab.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.field label{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:600;}
-.field input,.field select,.field textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;font-family:'Rajdhani',sans-serif;outline:none;width:100%;-webkit-appearance:none;}
-.field input:focus,.field select:focus{border-color:var(--lc);}
-.field textarea{resize:vertical;min-height:70px;}
-.pw-wrap{position:relative;}
-.pw-wrap input{padding-right:52px;}
-.pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px;line-height:1;}
-.auth-btn{width:100%;padding:16px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:3px;cursor:pointer;margin-top:6px;-webkit-appearance:none;}
-.auth-btn:disabled{opacity:.6;}
-.auth-err{background:rgba(255,68,85,.12);border:1px solid rgba(255,68,85,.4);border-radius:8px;padding:12px;font-size:15px;color:var(--red);margin-bottom:14px;}
+   WHAT IT DOES:
+     - Adds a "Clover" owner tab with connect + sync UI
+     - Pulls today's orders → inserts one row in `sales`
+     - Pulls inventory items → upserts into `inventory`
+     - Pulls employees → upserts into `staff` (with 4-digit PIN
+       auto-generated from their Clover ID)
+     - Logs every sync to `clover_sync_log` for auditability
 
-/* PIN */
-.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
-.pin-btn{padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--s2);color:var(--text);font-family:'Bebas Neue',cursive;font-size:26px;cursor:pointer;text-align:center;-webkit-appearance:none;}
-.pin-display{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:32px;letter-spacing:10px;margin-bottom:6px;min-height:62px;color:var(--lc);}
-.staff-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
-.staff-sel-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;}
+   IT DOES NOT:
+     - Write anything back to Clover (read-only)
+     - Handle OAuth — uses merchant-issued API token only
+     - Auto-sync — you tap the button when you want data
+   ============================================================ */
 
-/* HEADER */
-.hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;}
-.hdr-logo{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;color:var(--lc);}
-.hdr-bar{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--lcg);letter-spacing:1px;}
-.hdr-r{display:flex;align-items:center;gap:8px;}
-.lang-wrap{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-.lb{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:13px;padding:5px 9px;cursor:pointer;}
-.lb.on{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:11px;padding:5px 8px;border-radius:4px;cursor:pointer;}
-.sdot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
-.staff-badge{background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.4);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--lcg);font-family:'Share Tech Mono',monospace;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+(function () {
+  'use strict';
 
-/* BOTTOM NAV - Fixed for Android */
-.bot-nav{background:var(--s1);border-top:2px solid var(--border);display:flex;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:480px;margin:0 auto;z-index:999;padding-bottom:env(safe-area-inset-bottom,0px);}
-.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent;}
-.nb.on{color:var(--lc);border-top-color:var(--lc);}
-.ni{font-size:18px;line-height:1;}
-.nl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:inherit;}
-.nbadge{position:absolute;top:5px;right:6%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;}
+  // ---- Config & helpers -----------------------------------
+  const CLOVER_REGIONS = {
+    US: 'https://api.clover.com',
+    CA: 'https://api.clover.com', // Canada uses same production host
+    EU: 'https://api.eu.clover.com',
+    LA: 'https://api.la.clover.com',
+    SANDBOX: 'https://sandbox.dev.clover.com',
+  };
 
-/* MAIN */
-.main{flex:1;padding:16px;padding-bottom:90px;overflow-y:auto;}
-.sec-title{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
-.ct{font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--muted);margin-bottom:14px;}
-
-/* KPIs */
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden;}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-.kpi.lc::before{background:linear-gradient(90deg,var(--lc),var(--lcg));}
-.kpi.g::before{background:var(--green);}
-.kpi.r::before{background:var(--red);}
-.kpi.b::before{background:var(--blue);}
-.kl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-.kv{font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:2px;line-height:1;}
-.kpi.lc .kv{color:var(--lc);}
-.kpi.g .kv{color:var(--green);}
-.kpi.r .kv{color:var(--red);}
-.kpi.b .kv{color:var(--blue);}
-.kd{font-size:12px;color:var(--muted);margin-top:2px;}
-
-/* BUTTONS */
-.action-btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:2px;cursor:pointer;margin-top:8px;display:block;text-align:center;-webkit-appearance:none;}
-.action-btn.red{background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;}
-.action-btn.green{background:linear-gradient(135deg,var(--green),#00a050);color:#000;}
-.action-btn.blue{background:linear-gradient(135deg,var(--blue),#2266cc);color:#fff;}
-.action-btn.purple{background:linear-gradient(135deg,var(--purple),#7722cc);color:#fff;}
-.action-btn.gold{background:linear-gradient(135deg,var(--gold),var(--amber));color:#000;}
-.action-btn:disabled{opacity:.5;}
-.btn-sm{padding:8px 14px;border:none;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1px;cursor:pointer;-webkit-appearance:none;}
-
-/* ROWS */
-.row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
-.row:last-child{border-bottom:none;}
-.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;}
-
-/* INVENTORY */
-.inv-table{width:100%;border-collapse:collapse;}
-.inv-table th{font-size:10px;letter-spacing:1px;color:var(--muted);padding:10px 8px;text-align:left;border-bottom:1px solid var(--border);text-transform:uppercase;}
-.inv-table td{padding:11px 8px;border-bottom:1px solid var(--border);font-size:14px;}
-.inv-table tr:last-child td{border-bottom:none;}
-.stock-pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;}
-.stock-ok{background:#0d3320;color:var(--green);}
-.stock-low{background:#3d1800;color:#ff9040;}
-.stock-out{background:#2d0008;color:var(--red);}
-
-/* CHECKLIST */
-.cprog{background:var(--s2);border-radius:4px;overflow:hidden;height:7px;margin-bottom:12px;}
-.cbar{height:100%;background:var(--green);border-radius:4px;transition:width .3s;}
-.cgroup-t{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:14px;font-weight:700;}
-.citem{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
-.citem:last-child{border-bottom:none;}
-.cbox{width:26px;height:26px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.cbox.done{background:var(--green);border-color:var(--green);}
-.ctxt{font-size:15px;font-weight:500;}
-.ctxt.done{color:var(--muted);text-decoration:line-through;}
-.subbtn{width:100%;padding:16px;border-radius:8px;border:none;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;margin-top:14px;-webkit-appearance:none;}
-.subbtn.ready{background:var(--gold);color:#000;}
-.subbtn.locked{background:var(--s2);color:var(--muted);border:1px solid var(--border);}
-
-/* GALLERY */
-.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.pcard{border-radius:10px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--s2);}
-.pcard img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-.photo-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:10px;}
-.photo-label{font-size:11px;color:#fff;font-weight:700;}
-.photo-time{font-size:10px;color:rgba(255,255,255,.7);font-family:'Share Tech Mono',monospace;}
-.upzone{border:2px dashed var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;margin-bottom:14px;}
-
-/* MISC */
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--lc);border-radius:50%;animation:spin 1s linear infinite;margin:14px auto;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-state{text-align:center;padding:32px 16px;color:var(--muted);font-size:15px;line-height:1.8;}
-.success-box{background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.4);border-radius:10px;padding:16px;text-align:center;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--green);margin-bottom:14px;}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:flex-end;justify-content:center;z-index:1000;}
-.modal{background:var(--s2);border:1px solid var(--border);border-top-left-radius:20px;border-top-right-radius:20px;padding:22px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;}
-.modal-title{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:2px;margin-bottom:18px;color:var(--text);}
-.modal-actions{display:flex;gap:10px;margin-top:16px;}
-.modal-actions button{flex:1;padding:14px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;border:none;cursor:pointer;}
-.btn-cancel{background:var(--s3);color:var(--muted);}
-.btn-save{background:var(--lc);color:#fff;}
-
-/* SCHEDULE */
-.day-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
-.day-tabs::-webkit-scrollbar{display:none;}
-.day-tab{flex-shrink:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--s2);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:12px;cursor:pointer;text-align:center;min-width:52px;-webkit-appearance:none;}
-.day-tab.on{background:var(--lc);border-color:var(--lc);color:#fff;}
-.day-tab.has-open{border-color:var(--red);color:var(--red);}
-.shift-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
-.shift-card.open{border-color:rgba(255,68,85,.5);background:rgba(255,68,85,.06);}
-.shift-card.covered{border-color:rgba(0,232,122,.4);background:rgba(0,232,122,.05);}
-.shift-card.mine{border-color:rgba(212,160,23,.5);background:rgba(212,160,23,.05);}
-.shift-time{font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;color:var(--text);}
-.shift-role{font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:3px;}
-.shift-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:8px;}
-.shift-badge.scheduled{background:rgba(77,159,255,.2);color:var(--blue);}
-.shift-badge.open{background:rgba(255,68,85,.2);color:var(--red);}
-.shift-badge.covered{background:rgba(0,232,122,.2);color:var(--green);}
-.shift-badge.mine{background:rgba(212,160,23,.2);color:var(--lcg);}
-.bid-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
-.bid-row:last-child{border-bottom:none;}
-.open-banner{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
-.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.staff-pick{background:var(--s2);border:2px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;}
-.staff-pick.on{background:rgba(200,16,46,.12);border-color:var(--lc);}
-.clock-wrap{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;}
-.lct{font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:4px;color:var(--lc);line-height:1;}
-.lcd{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px;}
-.my-shift-highlight{background:rgba(212,160,23,.1);border:2px solid rgba(212,160,23,.4);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;}
-.link-box{background:var(--s2);border:2px solid var(--lcg);border-radius:10px;padding:14px;margin-bottom:10px;}
-.link-url{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);word-break:break-all;margin-bottom:12px;line-height:1.6;}
-.install-banner{background:rgba(77,159,255,.1);border:1px solid rgba(77,159,255,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script>
-const SUPABASE_URL='https://hfndlrfqijwuxhwydhns.supabase.co';
-const SUPABASE_KEY='sb_publishable_IB2dOie5ji9zbXl-JZPu6w_CCrDW2kT';
-const STRIPE_LINK='https://buy.stripe.com/3cI5kDeBLgjJ90b8ujbV601';
-const {createClient}=supabase;
-const db=createClient(SUPABASE_URL,SUPABASE_KEY);
-
-const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const COLORS=['#c8102e','#d4a017','#00e87a','#4d9fff','#b366ff','#00d4aa','#ff8c42','#ff6eb4'];
-const ROLES=['Bartender','Barback','Server','Host','Security','Manager','Busser','DJ','Cook','Other'];
-
-const CHECKLIST_DATA={
-  '🧹 Cleaning':['Wipe down all bar surfaces','Clean beer taps & lines','Mop floors','Empty trash & replace bags','Clean bathrooms'],
-  '🍺 Bar':['Count remaining liquor bottles','Log any breakage or spillage','Restock for next shift','Lock liquor storage'],
-  '💰 Cash':['Count cash drawer','Separate tips','Prepare bank deposit','Reconcile card totals'],
-  '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm'],
-};
-const ALL_ITEMS=Object.values(CHECKLIST_DATA).flat();
-
-const RECIPES=[
-  {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',cost:2.80,price:14,
-    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
-    steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
-  {id:2,emoji:'🍺',name:'Michelada',tag:'Signature',glass:'Pint glass',prepTime:'1.5 min',cost:1.60,price:10,
-    ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
-    steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
-  {id:3,emoji:'🍊',name:'Paloma',tag:'Classic',glass:'Highball',prepTime:'1.5 min',cost:1.90,price:12,
-    ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
-    steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
-  {id:4,emoji:'🥃',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prepTime:'3 min',cost:3.20,price:16,
-    ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
-    steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
-];
-
-function getBarIdFromURL(){return new URLSearchParams(window.location.search).get('bar');}
-function ac(i){return COLORS[i%COLORS.length];}
-function ai(n){return(n||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();}
-function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
-function getStaffLink(){return`${window.location.origin}${window.location.pathname}?bar=${S.bar?.id}`;}
-
-let S={
-  user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
-  checklist:{},closeoutSubmitted:false,customItems:[],newChecklistItem:'',
-  tab:'dashboard',lang:'en',authMode:'login',authLoading:false,authError:'',appLoading:true,
-  showPw:false,
-  loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
-  staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,
-  showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
-  newStaff:{name:'',role:'Bartender',pin:''},
-  newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
-  newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
-  newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:'Bartender'},
-  dropShiftId:null,dropReason:'',
-  clockedIn:[],selectedStaff:null,
-  liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
-  recipeSearch:'',recipeFilter:'All',
-  schedDay:new Date().getDay(),
-  urlBarId:null,
-  showInstallBanner:false,
-  deferredPrompt:null,
-};
-
-// PWA install prompt
-window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();S.deferredPrompt=e;S.showInstallBanner=true;render();});
-
-async function installApp(){
-  if(!S.deferredPrompt)return;
-  S.deferredPrompt.prompt();
-  const{outcome}=await S.deferredPrompt.userChoice;
-  S.deferredPrompt=null;S.showInstallBanner=false;render();
-}
-
-async function init(){
-  setInterval(()=>{
-    S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
-  },1000);
-  const urlBarId=getBarIdFromURL();
-  if(urlBarId){
-    S.urlBarId=urlBarId;
-    const{data:bar}=await db.from('bars').select('*').eq('id',urlBarId).single();
-    if(bar){
-      S.bar=bar;
-      loadCustomItems();
-      const{data:staff}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
-      S.staffLoginStaff=staff||[];
+  // Initialize module state on the existing global S object.
+  // This is defensive — if the user pastes this before S is defined,
+  // we wait and retry.
+  function attach() {
+    if (typeof S === 'undefined' || !S) {
+      return setTimeout(attach, 50);
     }
-    S.appLoading=false;render();return;
-  }
-  const{data:{session}}=await db.auth.getSession();
-  if(session){S.user=session.user;await loadBar();}
-  S.appLoading=false;render();
-  db.auth.onAuthStateChange(async(_,session)=>{
-    if(session){S.user=session.user;await loadBar();}
-    else if(!S.staffUser){S.user=null;S.bar=null;}
-    render();
-  });
-}
 
-async function loadBar(){
-  const{data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
-  if(data){S.bar=data;loadCustomItems();await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules()]);}
-}
-async function loadStaff(){if(!S.bar)return;const{data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
-async function loadSales(){if(!S.bar)return;const{data}=await db.from('sales').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(30);S.sales=data||[];}
-async function loadInventory(){if(!S.bar)return;const{data}=await db.from('inventory').select('*').eq('bar_id',S.bar.id).order('name');S.inventory=data||[];}
-async function loadPhotos(){if(!S.bar)return;const{data}=await db.from('photos').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(50);S.photos=data||[];}
-async function loadSchedules(){
-  if(!S.bar)return;
-  const{data:sc}=await db.from('schedules').select('*').eq('bar_id',S.bar.id).order('day_of_week').order('start_time');
-  const{data:bi}=await db.from('shift_bids').select('*').eq('bar_id',S.bar.id);
-  S.schedules=sc||[];S.bids=bi||[];
-}
+    // ---- State extensions ---------------------------------
+    S.cloverConfig = null;          // { merchant_id, api_token, region, connected_at }
+    S.cloverStatus = 'disconnected'; // disconnected | testing | connected | syncing | error
+    S.cloverLastSync = null;
+    S.cloverSyncLog = [];
+    S.cloverSummary = null;         // result of last sync: { orders, items, employees, revenue }
+    S.cloverError = '';
+    S.cloverForm = { merchant_id: '', api_token: '', region: 'US' };
+    S.cloverShowToken = false;
 
-async function selectStaffMember(m){S.staffLoginSelected=m;S.staffLoginStep='pin';S.staffPinInput='';S.staffPinError='';render();}
-function pinPress(v){
-  if(v==='del')S.staffPinInput=S.staffPinInput.slice(0,-1);
-  else if(S.staffPinInput.length<4)S.staffPinInput+=v;
-  if(S.staffPinInput.length===4)verifyPin();else render();
-}
-async function verifyPin(){
-  const m=S.staffLoginSelected;
-  if(!m.pin||m.pin.toString()===S.staffPinInput.toString()){
-    S.staffUser=m;await loadSchedules();await loadStaff();S.tab='my-schedule';S.staffPinError='';
-  }else{S.staffPinError='Wrong PIN. Try again.';S.staffPinInput='';}
-  render();
-}
-function staffLogout(){
-  S.staffUser=null;
-  if(S.urlBarId){S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.checklist={};S.closeoutSubmitted=false;S.clockedIn=[];}
-  else{S.bar=null;S.staffLoginStaff=[];S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.staff=[];S.checklist={};S.closeoutSubmitted=false;}
-  render();
-}
+    // ---- Base URL helper ----------------------------------
+    window.cloverBase = function () {
+      return CLOVER_REGIONS[S.cloverConfig?.region || S.cloverForm.region] || CLOVER_REGIONS.US;
+    };
 
-async function handleAuth(){
-  S.authError='';S.authLoading=true;render();
-  const email=S.loginEmail.trim(),password=S.loginPassword.trim();
-  if(!email||!password){S.authError='Email and password are required';S.authLoading=false;render();return;}
-  if(S.authMode==='login'){
-    const{error}=await db.auth.signInWithPassword({email,password});
-    if(error){S.authError=error.message;S.authLoading=false;render();return;}
-  }else{
-    if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
-    const{data,error}=await db.auth.signUp({email,password});
-    if(error){S.authError=error.message;S.authLoading=false;render();return;}
-    if(data.user)await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});
-  }
-  S.authLoading=false;render();
-}
-async function logout(){await db.auth.signOut();Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,staffUser:null});render();}
+    // ---- Load saved config on startup ---------------------
+    window.loadCloverConfig = async function () {
+      if (!S.bar) return;
+      try {
+        const { data } = await db
+          .from('clover_config')
+          .select('*')
+          .eq('bar_id', S.bar.id)
+          .maybeSingle();
+        if (data) {
+          S.cloverConfig = data;
+          S.cloverStatus = 'connected';
+          S.cloverForm = {
+            merchant_id: data.merchant_id,
+            api_token: data.api_token,
+            region: data.region || 'US',
+          };
+          S.cloverLastSync = data.last_synced_at;
+        }
+        const { data: logs } = await db
+          .from('clover_sync_log')
+          .select('*')
+          .eq('bar_id', S.bar.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        S.cloverSyncLog = logs || [];
+      } catch (e) {
+        console.warn('[Clover] config load failed:', e.message);
+      }
+    };
 
-async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'Bartender',pin:''};S.showStaffModal=false;await loadStaff();render();}
-async function deleteStaff(id){await db.from('staff').delete().eq('id',id);await loadStaff();render();}
-async function saveSale(){if(!S.bar)return;await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});S.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};S.showSaleModal=false;await loadSales();render();}
-async function saveInv(){if(!S.newInv.name||!S.bar)return;await db.from('inventory').insert({bar_id:S.bar.id,...S.newInv,stock:parseFloat(S.newInv.stock)||0,par_level:parseFloat(S.newInv.par_level)||0});S.newInv={name:'',category:'',unit:'',stock:'',par_level:''};S.showInvModal=false;await loadInventory();render();}
-async function deleteInv(id){await db.from('inventory').delete().eq('id',id);await loadInventory();render();}
-async function updateStock(id,v){await db.from('inventory').update({stock:v,updated_at:new Date()}).eq('id',id);await loadInventory();render();}
+    // ---- Test Connection ----------------------------------
+    window.testCloverConnection = async function () {
+      S.cloverError = '';
+      S.cloverStatus = 'testing';
+      render();
+      const { merchant_id, api_token, region } = S.cloverForm;
+      if (!merchant_id || !api_token) {
+        S.cloverError = 'Merchant ID and API Token are required';
+        S.cloverStatus = 'disconnected';
+        render();
+        return;
+      }
+      try {
+        const base = CLOVER_REGIONS[region] || CLOVER_REGIONS.US;
+        const res = await fetch(`${base}/v3/merchants/${merchant_id}`, {
+          headers: { Authorization: `Bearer ${api_token}` },
+        });
+        if (!res.ok) {
+          const body = await res.text();
+          throw new Error(`Clover API returned ${res.status}: ${body.slice(0, 200)}`);
+        }
+        const merchant = await res.json();
+        // Save config
+        const payload = {
+          bar_id: S.bar.id,
+          merchant_id,
+          api_token,
+          region,
+          clover_name: merchant.name || 'Unknown',
+          connected_at: new Date().toISOString(),
+        };
+        // upsert
+        const { data: existing } = await db
+          .from('clover_config')
+          .select('id')
+          .eq('bar_id', S.bar.id)
+          .maybeSingle();
+        if (existing) {
+          await db.from('clover_config').update(payload).eq('bar_id', S.bar.id);
+        } else {
+          await db.from('clover_config').insert(payload);
+        }
+        S.cloverConfig = payload;
+        S.cloverStatus = 'connected';
+        S.cloverError = '';
+      } catch (e) {
+        S.cloverError = e.message;
+        S.cloverStatus = 'error';
+      }
+      render();
+    };
 
-async function saveShift(){
-  if(!S.newShift.start_time||!S.newShift.end_time||!S.bar){
-    alert('Please fill in start time and end time!');return;
-  }
-  const sm=S.staff.find(s=>s.id===S.newShift.staff_id);
-  await db.from('schedules').insert({
-    bar_id:S.bar.id,
-    staff_id:S.newShift.staff_id||null,
-    staff_name:sm?sm.name:'OPEN',
-    day_of_week:parseInt(S.newShift.day_of_week),
-    start_time:S.newShift.start_time,
-    end_time:S.newShift.end_time,
-    role:S.newShift.role||'Staff',
-    status:S.newShift.staff_id?'scheduled':'open'
-  });
-  S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:'Bartender'};
-  S.showShiftModal=false;
-  await loadSchedules();
-  render();
-}
+    // ---- Disconnect ---------------------------------------
+    window.disconnectClover = async function () {
+      if (!confirm('Disconnect Clover? Synced data will remain in CantinaPro.')) return;
+      await db.from('clover_config').delete().eq('bar_id', S.bar.id);
+      S.cloverConfig = null;
+      S.cloverStatus = 'disconnected';
+      S.cloverLastSync = null;
+      S.cloverForm = { merchant_id: '', api_token: '', region: 'US' };
+      render();
+    };
 
-async function deleteShift(id){await db.from('schedules').delete().eq('id',id);await loadSchedules();render();}
-async function dropShift(id){
-  if(!S.dropReason){alert('Please enter a reason');return;}
-  await db.from('schedules').update({status:'open',dropped_by:S.dropReason}).eq('id',id);
-  S.showDropModal=false;S.dropShiftId=null;S.dropReason='';await loadSchedules();render();
-}
-async function bidOnShift(shiftId,staffId,staffName){
-  if(S.bids.find(b=>b.shift_id===shiftId&&b.staff_id===staffId))return;
-  await db.from('shift_bids').insert({bar_id:S.bar.id,shift_id:shiftId,staff_id:staffId,staff_name:staffName,status:'pending'});
-  await loadSchedules();render();
-}
-async function approveBid(bidId,shiftId,staffId,staffName){
-  await db.from('shift_bids').update({status:'approved'}).eq('id',bidId);
-  await db.from('schedules').update({status:'covered',staff_id:staffId,staff_name:staffName}).eq('id',shiftId);
-  await db.from('shift_bids').update({status:'declined'}).eq('shift_id',shiftId).neq('id',bidId);
-  await loadSchedules();render();
-}
-async function declineBid(bidId){await db.from('shift_bids').update({status:'declined'}).eq('id',bidId);await loadSchedules();render();}
-function toggleCheck(item){S.checklist[item]=!S.checklist[item];render();}
-function customItemsKey(){return S.bar?`cantinapro_custom_items_${S.bar.id}`:null;}
-function loadCustomItems(){
-  const k=customItemsKey();if(!k){S.customItems=[];return;}
-  try{const raw=localStorage.getItem(k);S.customItems=raw?JSON.parse(raw):[];}
-  catch{S.customItems=[];}
-}
-function saveCustomItems(){
-  const k=customItemsKey();if(!k)return;
-  try{localStorage.setItem(k,JSON.stringify(S.customItems));}catch{}
-}
-function addChecklistItem(){
-  const v=(S.newChecklistItem||'').trim();
-  if(!v)return;
-  if(S.customItems.includes(v)||allChecklistItems().includes(v)){S.newChecklistItem='';render();return;}
-  S.customItems.push(v);
-  // Explicitly ensure new item starts UNCHECKED
-  delete S.checklist[v];
-  S.newChecklistItem='';
-  saveCustomItems();
-  render();
-}
-function removeChecklistItem(item){
-  S.customItems=S.customItems.filter(i=>i!==item);
-  delete S.checklist[item];
-  saveCustomItems();
-  render();
-}
-function allChecklistItems(){return [...ALL_ITEMS,...S.customItems];}
-async function submitCloseout(){
-  const items=allChecklistItems();
-  if(items.filter(i=>S.checklist[i]).length<items.length)return;
-  await db.from('checklist_logs').insert({bar_id:S.bar.id,completed_by:S.staffUser?S.staffUser.name:(S.newSale.submitted_by||'Manager'),items_completed:S.checklist});
-  if(Object.values(S.newSale).some(v=>v&&v!==''))await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});
-  S.closeoutSubmitted=true;render();
-}
-async function handlePhotoUpload(e){
-  const files=Array.from(e.target.files);
-  for(const file of files){
-    const reader=new FileReader();
-    reader.onload=async ev=>{await db.from('photos').insert({bar_id:S.bar.id,label:S.photoNote||file.name,tag:S.photoTag,url:ev.target.result,created_at:new Date()});await loadPhotos();render();};
-    reader.readAsDataURL(file);
-  }
-  S.photoNote='';e.target.value='';
-}
-async function generateCaption(photo){
-  S.generatingCaption=true;S.photoCaption=null;render();
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Write a fun Instagram caption for ${S.bar?.name||'our bar'}. Photo: "${photo.label}". Include 1-2 emojis and 3-4 hashtags. Under 150 chars before hashtags.`}]})});
-    const data=await res.json();S.photoCaption=data.content?.find(b=>b.type==='text')?.text||'Could not generate.';
-  }catch{S.photoCaption='Could not generate caption.';}
-  S.generatingCaption=false;render();
-}
-function copyStaffLink(){
-  navigator.clipboard?.writeText(getStaffLink()).then(()=>{
-    const btn=document.getElementById('copy-link-btn');
-    if(btn){btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='📋 COPY STAFF LINK',2000);}
-  });
-}
+    // ---- Low-level API helper ----------------------------
+    async function cloverGET(path) {
+      const { merchant_id, api_token } = S.cloverConfig;
+      const base = cloverBase();
+      const url = `${base}/v3/merchants/${merchant_id}${path}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${api_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`GET ${path} failed [${res.status}]: ${body.slice(0, 200)}`);
+      }
+      return res.json();
+    }
 
-function render(){
-  const root=document.getElementById('root');
-  if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
-  if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();return;}
-  if(S.user&&S.bar){root.innerHTML=renderOwnerApp();return;}
-  if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
-  root.innerHTML=renderAuth();
-}
+    // ---- SYNC: Orders → sales -----------------------------
+    async function syncOrders() {
+      // Today's window in ms since epoch (Clover uses ms timestamps)
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const fromMs = startOfDay.getTime();
 
-function renderAuth(){
-  const isLogin=S.authMode==='login';
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
-    <div class="auth-div"></div>
-    <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="auth-tab ${isLogin?'on':''}" onclick="S.authMode='login';render()">OWNER LOGIN</button>
-        <button class="auth-tab ${!isLogin?'on':''}" onclick="S.authMode='signup';render()">NEW BAR</button>
-      </div>
-      <div class="auth-title">${isLogin?'Welcome Back':'Create Your Bar'}</div>
-      ${S.authError?`<div class="auth-err">${S.authError}</div>`:''}
-      ${!isLogin?`
-        <div class="field"><label>Bar Name</label><input type="text" placeholder="Local Cantina" value="${S.loginBarName}" oninput="S.loginBarName=this.value"/></div>
-        <div class="field"><label>Location</label><input type="text" placeholder="Oak Lawn, IL" value="${S.loginLocation}" oninput="S.loginLocation=this.value"/></div>
-      `:''}
-      <div class="field"><label>Email</label><input type="email" placeholder="owner@mybar.com" value="${S.loginEmail}" oninput="S.loginEmail=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/></div>
-      <div class="field"><label>Password</label>
-        <div class="pw-wrap">
-          <input type="${S.showPw?'text':'password'}" placeholder="••••••••" value="${S.loginPassword}" oninput="S.loginPassword=this.value" onkeydown="if(event.key==='Enter')handleAuth()"/>
-          <button class="pw-eye" onclick="S.showPw=!S.showPw;render()" type="button">${S.showPw?'🙈':'👁️'}</button>
+      // modifiedTime filter pulls orders created/modified today
+      const path = `/orders?filter=modifiedTime>=${fromMs}&expand=payments,lineItems&limit=1000`;
+      const data = await cloverGET(path);
+      const orders = data.elements || [];
+
+      // Aggregate into one sales row
+      let bar_sales = 0;
+      let food_sales = 0;
+      let cash = 0;
+      let card_sales = 0;
+      let tips = 0;
+      let comps = 0;
+      let orderCount = 0;
+
+      for (const o of orders) {
+        if (o.state === 'deleted') continue;
+        orderCount++;
+        // Clover amounts are in cents
+        const total = (o.total || 0) / 100;
+        // Rough split: if the lineItems include any item in a category
+        // with the word "food" in its name, count as food. Otherwise bar.
+        // A merchant can refine this later. For now we treat everything
+        // as bar sales unless we detect food.
+        let isFood = false;
+        if (o.lineItems?.elements) {
+          for (const li of o.lineItems.elements) {
+            const catName = li.item?.categories?.elements?.[0]?.name?.toLowerCase() || '';
+            if (catName.includes('food') || catName.includes('kitchen')) {
+              isFood = true;
+              break;
+            }
+          }
+        }
+        if (isFood) food_sales += total;
+        else bar_sales += total;
+
+        // Payments breakdown
+        if (o.payments?.elements) {
+          for (const p of o.payments.elements) {
+            const amt = (p.amount || 0) / 100;
+            const tip = (p.tipAmount || 0) / 100;
+            tips += tip;
+            const tender = (p.tender?.label || '').toLowerCase();
+            if (tender.includes('cash')) cash += amt;
+            else card_sales += amt;
+          }
+        }
+      }
+
+      // Insert one sales row for today (only if there's data)
+      if (orderCount > 0) {
+        await db.from('sales').insert({
+          bar_id: S.bar.id,
+          bar_sales: bar_sales.toFixed(2),
+          food_sales: food_sales.toFixed(2),
+          cash: cash.toFixed(2),
+          card_sales: card_sales.toFixed(2),
+          tips: tips.toFixed(2),
+          comps: comps.toFixed(2),
+          notes: `Auto-synced from Clover · ${orderCount} orders`,
+          submitted_by: 'Clover Sync',
+        });
+      }
+
+      return {
+        orders: orderCount,
+        revenue: (bar_sales + food_sales).toFixed(2),
+        cash: cash.toFixed(2),
+        card: card_sales.toFixed(2),
+        tips: tips.toFixed(2),
+      };
+    }
+
+    // ---- SYNC: Inventory items → inventory ----------------
+    async function syncInventory() {
+      const data = await cloverGET('/items?expand=categories,itemStock&limit=1000');
+      const items = data.elements || [];
+      let inserted = 0;
+      let updated = 0;
+
+      // Load existing inventory once to decide insert vs update
+      const { data: existing } = await db
+        .from('inventory')
+        .select('id,name')
+        .eq('bar_id', S.bar.id);
+      const existingByName = new Map((existing || []).map((x) => [x.name.toLowerCase().trim(), x.id]));
+
+      for (const it of items) {
+        if (it.hidden || !it.name) continue;
+        const name = it.name.trim();
+        const category = it.categories?.elements?.[0]?.name || 'Uncategorized';
+        const stock = it.itemStock?.quantity ?? 0;
+        const unit = it.unitName || '';
+
+        const key = name.toLowerCase();
+        if (existingByName.has(key)) {
+          await db
+            .from('inventory')
+            .update({ stock, category, unit, updated_at: new Date().toISOString() })
+            .eq('id', existingByName.get(key));
+          updated++;
+        } else {
+          await db.from('inventory').insert({
+            bar_id: S.bar.id,
+            name,
+            category,
+            unit,
+            stock,
+            par_level: Math.max(Math.ceil(stock * 0.3), 5), // sensible default
+          });
+          inserted++;
+        }
+      }
+      return { items: items.length, inserted, updated };
+    }
+
+    // ---- SYNC: Employees → staff --------------------------
+    async function syncEmployees() {
+      const data = await cloverGET('/employees?limit=1000');
+      const emps = data.elements || [];
+      let inserted = 0;
+      let skipped = 0;
+
+      const { data: existing } = await db
+        .from('staff')
+        .select('id,name')
+        .eq('bar_id', S.bar.id);
+      const existingByName = new Set((existing || []).map((x) => x.name.toLowerCase().trim()));
+
+      for (const e of emps) {
+        if (!e.name) continue;
+        if (e.inviteSent === false && e.email === undefined) continue; // likely inactive
+        const name = e.name.trim();
+        if (existingByName.has(name.toLowerCase())) {
+          skipped++;
+          continue;
+        }
+        // Map Clover role to CantinaPro role
+        const roleRaw = (e.role || '').toUpperCase();
+        let role = 'Other';
+        if (roleRaw.includes('ADMIN') || roleRaw.includes('MANAGER')) role = 'Manager';
+        else if (roleRaw.includes('EMPLOYEE')) role = 'Bartender';
+        // Generate a 4-digit PIN from the Clover ID (deterministic but not guessable without it)
+        const pin = String(
+          Math.abs(
+            (e.id || name).split('').reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0)
+          ) % 10000
+        ).padStart(4, '0');
+
+        await db.from('staff').insert({
+          bar_id: S.bar.id,
+          name,
+          role,
+          pin,
+        });
+        inserted++;
+      }
+      return { employees: emps.length, inserted, skipped };
+    }
+
+    // ---- Orchestrator: Sync Now ---------------------------
+    window.runCloverSync = async function () {
+      if (!S.cloverConfig) return;
+      S.cloverStatus = 'syncing';
+      S.cloverError = '';
+      S.cloverSummary = null;
+      render();
+
+      const summary = { orders: null, inventory: null, employees: null, error: null };
+      try {
+        summary.orders = await syncOrders();
+        summary.inventory = await syncInventory();
+        summary.employees = await syncEmployees();
+
+        const syncedAt = new Date().toISOString();
+        await db
+          .from('clover_config')
+          .update({ last_synced_at: syncedAt })
+          .eq('bar_id', S.bar.id);
+        await db.from('clover_sync_log').insert({
+          bar_id: S.bar.id,
+          orders_synced: summary.orders.orders,
+          revenue_synced: summary.orders.revenue,
+          items_synced: summary.inventory.items,
+          employees_synced: summary.employees.inserted,
+          status: 'success',
+        });
+
+        S.cloverConfig.last_synced_at = syncedAt;
+        S.cloverLastSync = syncedAt;
+        S.cloverStatus = 'connected';
+        S.cloverSummary = summary;
+
+        // Refresh data in the app so owner sees new rows
+        await Promise.all([loadSales(), loadInventory(), loadStaff()]);
+      } catch (e) {
+        S.cloverError = e.message;
+        S.cloverStatus = 'error';
+        await db.from('clover_sync_log').insert({
+          bar_id: S.bar.id,
+          status: 'error',
+          error_message: e.message,
+        });
+      }
+      render();
+    };
+
+    // ---- Render: Clover tab UI ----------------------------
+    window.renderCloverTab = function () {
+      const cfg = S.cloverConfig;
+      const connected = !!cfg;
+      const lastSync = S.cloverLastSync
+        ? new Date(S.cloverLastSync).toLocaleString()
+        : 'Never';
+
+      const statusColor =
+        S.cloverStatus === 'connected'
+          ? 'var(--green)'
+          : S.cloverStatus === 'error'
+          ? 'var(--red)'
+          : S.cloverStatus === 'syncing' || S.cloverStatus === 'testing'
+          ? 'var(--gold)'
+          : 'var(--muted)';
+
+      const statusLabel = {
+        disconnected: 'NOT CONNECTED',
+        testing: 'TESTING…',
+        connected: '● CONNECTED',
+        syncing: 'SYNCING…',
+        error: '⚠ ERROR',
+      }[S.cloverStatus] || 'UNKNOWN';
+
+      let html = `<div class="sec-title">🟢 CLOVER POS</div>`;
+
+      // Status card
+      html += `<div class="card">
+        <div class="ct">CONNECTION STATUS</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:22px;color:${statusColor};letter-spacing:2px">${statusLabel}</div>
+            ${connected ? `<div style="font-size:13px;color:var(--muted);margin-top:4px">Merchant: ${cfg.clover_name || cfg.merchant_id}</div>
+            <div style="font-size:12px;color:var(--muted);font-family:'Share Tech Mono',monospace">ID: ${cfg.merchant_id}</div>` : ''}
+          </div>
+          ${connected ? `<div style="text-align:right">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Last sync</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--lcg)">${lastSync}</div>
+          </div>` : ''}
         </div>
-      </div>
-      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE BAR')}</button>
-      <div style="font-size:14px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
-    </div>
-    <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
-    <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
-  </div>`;
-}
+      </div>`;
 
-function renderStaffViaLink(){
-  if(S.staffLoginStep==='select'){
-    return `<div class="auth-wrap">
-      <div class="auth-logo">CantinaPro</div>
-      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--lc);margin-top:10px">${S.bar.name}</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px">📍 ${S.bar.location||''}</div>
-      <div class="auth-div"></div>
-      <div class="auth-card">
-        <div class="auth-title">WHO ARE YOU?</div>
-        ${S.staffLoginStaff.length===0?`<div class="empty-state">No staff found.<br/>Ask your manager to add you to the app.</div>`:''}
-        <div class="staff-select-grid">
-          ${S.staffLoginStaff.map((s,i)=>`
-            <div class="staff-sel-card" onclick="selectStaffMember(${JSON.stringify(s).replace(/"/g,'&quot;')})">
-              <div class="av" style="background:${ac(i)}22;color:${ac(i)};margin:0 auto 10px;width:46px;height:46px;font-size:15px">${ai(s.name)}</div>
-              <div style="font-weight:700;font-size:16px;color:var(--text)">${s.name}</div>
-              <div style="font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:3px">${s.role}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>`;
-  }
-  const dots='●'.repeat(S.staffPinInput.length)+'○'.repeat(4-S.staffPinInput.length);
-  const idx=S.staffLoginStaff.findIndex(s=>s.id===S.staffLoginSelected?.id);
-  const color=ac(idx>=0?idx:0);
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-div"></div>
-    <div class="auth-card">
-      <div style="text-align:center;margin-bottom:18px">
-        <div class="av" style="background:${color}22;color:${color};width:58px;height:58px;font-size:18px;margin:0 auto 12px">${ai(S.staffLoginSelected?.name||'')}</div>
-        <div style="font-weight:700;font-size:20px;color:var(--text)">${S.staffLoginSelected?.name}</div>
-        <div style="font-size:14px;color:var(--muted);text-transform:uppercase;margin-top:4px">${S.staffLoginSelected?.role}</div>
-      </div>
-      <div class="auth-title" style="text-align:center">ENTER YOUR PIN</div>
-      ${S.staffPinError?`<div class="auth-err">${S.staffPinError}</div>`:''}
-      <div class="pin-display">${dots}</div>
-      <div class="pin-grid">
-        ${['1','2','3','4','5','6','7','8','9','','0','del'].map(k=>k===''?`<div></div>`:
-          `<button class="pin-btn" onclick="pinPress('${k}')">${k==='del'?'⌫':k}</button>`).join('')}
-      </div>
-      <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;margin-top:10px;width:100%;text-align:center;padding:10px">← Back</button>
-    </div>
-  </div>`;
-}
+      // Error banner
+      if (S.cloverError) {
+        html += `<div class="auth-err" style="margin-bottom:14px">${S.cloverError}</div>`;
+      }
 
-function renderStaffApp(){
-  const L=S.lang==='es';
-  const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
-  const myTodayShift=myShifts.find(s=>s.day_of_week===new Date().getDay());
-  const openShifts=S.schedules.filter(s=>s.status==='open');
-  const checkItems=allChecklistItems();
-  const checkedCount=checkItems.filter(i=>S.checklist[i]).length;
-  const pct=checkItems.length?Math.round((checkedCount/checkItems.length)*100):0;
-  const allDone=checkItems.length>0&&checkedCount===checkItems.length;
-  const isClockedIn=S.clockedIn.includes(S.staffUser.id);
-
-  const STAFF_TABS=[
-    {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
-    {key:'staff-shift',icon:'⏰',label:L?'Turno':'My Shift'},
-    {key:'staff-photos',icon:'📸',label:L?'Fotos':'Photos'},
-    {key:'staff-recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
-    {key:'staff-closeout',icon:'✅',label:L?'Cierre':'Closeout'},
-  ];
-
-  return `<div class="app">
-    <header class="hdr">
-      <div><div class="hdr-logo">CantinaPro</div><div class="hdr-bar">${S.bar.name}</div></div>
-      <div class="hdr-r">
-        <div class="lang-wrap">
-          <button class="lb ${!L?'on':''}" onclick="S.lang='en';render()">EN</button>
-          <button class="lb ${L?'on':''}" onclick="S.lang='es';render()">ES</button>
-        </div>
-        <span class="staff-badge">${S.staffUser.name}</span>
-        <button class="logout-btn" onclick="staffLogout()">OUT</button>
-      </div>
-    </header>
-    <main class="main">
-
-    ${S.tab==='my-schedule'?`
-      <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
-      ${myTodayShift?`<div class="my-shift-highlight">
-        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ YOUR SHIFT TODAY</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
-        <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
-      </div>`:''}
-      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:14px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>{
-          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
-          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
-          </button>`;
-        }).join('')}
-      </div>
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.</div>`:''}
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
-        const isMyShift=shift.staff_id===S.staffUser.id;
-        const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
-        const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
-        const color=staffIdx>=0?ac(staffIdx):'var(--muted)';
-        return `<div class="shift-card ${isMyShift?'mine':shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between">
-            <div>
-              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
-              <div class="shift-role">${shift.role||'Staff'}</div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
-                <span class="shift-badge ${isMyShift?'mine':shift.status}">${isMyShift?'⭐ YOUR SHIFT':shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
-              </div>
-              ${shift.dropped_by?`<div style="font-size:13px;color:var(--muted);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-              ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:13px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
-                `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
-            </div>
+      // Last sync summary
+      if (S.cloverSummary && S.cloverStatus === 'connected') {
+        const s = S.cloverSummary;
+        html += `<div style="background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:10px;padding:16px;margin-bottom:14px">
+          <div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--green);margin-bottom:10px">✓ SYNC COMPLETE</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><div style="font-family:'Bebas Neue',cursive;font-size:22px;color:var(--text)">${s.orders.orders}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Orders today</div></div>
+            <div><div style="font-family:'Bebas Neue',cursive;font-size:22px;color:var(--lc)">$${parseFloat(s.orders.revenue).toLocaleString()}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Revenue</div></div>
+            <div><div style="font-family:'Bebas Neue',cursive;font-size:22px;color:var(--blue)">${s.inventory.items}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Inventory items</div><div style="font-size:11px;color:var(--muted)">+${s.inventory.inserted} new, ${s.inventory.updated} updated</div></div>
+            <div><div style="font-family:'Bebas Neue',cursive;font-size:22px;color:var(--purple)">${s.employees.inserted}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">New employees</div><div style="font-size:11px;color:var(--muted)">${s.employees.skipped} already exist</div></div>
           </div>
         </div>`;
-      }).join('')}
-      ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">DROP THIS SHIFT</div>
-          <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your shift will open for others to bid. Your manager will be notified.</div>
-          <div class="field"><label>Reason for dropping</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
-            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP SHIFT</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
+      }
 
-    ${S.tab==='staff-shift'?`
-      <div class="sec-title">⏰ ${L?'MI TURNO':'MY SHIFT'}</div>
-      <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
-      ${myTodayShift?`<div class="my-shift-highlight">
-        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">TODAY'S SHIFT</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
-        <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
-      </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;color:var(--muted);font-size:15px">No shift scheduled for today.<br/>Check Schedule tab for open shifts.</div>`}
-      <div class="card">
-        ${isClockedIn?`
-          <div style="text-align:center;margin-bottom:14px">
-            <div style="font-size:14px;color:var(--muted);letter-spacing:1px">STATUS</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:38px;color:var(--green)">● ON CLOCK</div>
-          </div>
-          <button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.staffUser.id}');render()">⏹ ${L?'FINALIZAR TURNO':'CLOCK OUT'}</button>
-        `:`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.staffUser.id}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`}
-      </div>
-      <div class="card">
-        <div class="ct">SHIFT BRIEFING</div>
-        <div style="background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:8px;padding:14px;font-size:15px;line-height:1.8;color:var(--text)">${L?'Bienvenidos al turno. Revisen el inventario, atiendan a los clientes con reservación y reporten incidentes al manager.':'Welcome to your shift. Check inventory levels, attend to reservation guests, and report any incidents to the manager.'}</div>
-      </div>
-    `:''}
-
-    ${S.tab==='staff-photos'?`
-      <div class="sec-title">📸 ${L?'FOTOS':'PHOTOS'}</div>
-      <div class="card">
-        <div class="ct">${L?'TOMAR FOTO / SUBIR':'TAKE OR UPLOAD PHOTO'}</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Sube fotos de recibos, incidentes, o cualquier cosa que necesite atención del manager.':'Upload photos of liquor receipts, incidents, or anything that needs manager attention.'}</div>
-        <div class="field"><label>Tag / Category</label>
-          <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-            ${['Liquor Receipt','Beer Receipt','Food Receipt','Incident','Social Media','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field"><label>${L?'Descripción':'Description / Notes'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué es esta foto?':'What is this photo of?'}"/></div>
-        <label style="display:block;cursor:pointer">
-          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
-          <div class="upzone">
-            <div style="font-size:40px;margin-bottom:10px">📷</div>
-            <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR FOTO':'TAKE PHOTO'}</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:6px">${L?'o toca para subir desde galería':'or tap to upload from gallery'}</div>
-          </div>
-        </label>
-      </div>
-      <div class="photo-grid">
-        ${S.photos.filter(p=>['Liquor Receipt','Beer Receipt','Food Receipt','Incident'].includes(p.tag)||S.photos.indexOf(p)<10).slice(0,10).map(p=>`
-          <div class="pcard">
-            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
-            <div class="photo-overlay">
-              <div class="photo-label">${p.label||p.tag}</div>
-              <div class="photo-time">${p.tag}</div>
+      if (!connected) {
+        // Connect form
+        html += `<div class="card">
+          <div class="ct">CONNECT TO CLOVER</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Enter the merchant's Clover credentials. Get these from the Clover Dashboard → Setup → API Tokens. Required permissions: read_orders, read_payments, read_inventory, read_employees, read_merchant.</div>
+          <div class="field"><label>Merchant ID (mID)</label><input type="text" placeholder="e.g. 7RSRV9DZ1ABCD" value="${S.cloverForm.merchant_id}" oninput="S.cloverForm.merchant_id=this.value" autocomplete="off"/></div>
+          <div class="field"><label>API Token</label>
+            <div class="pw-wrap">
+              <input type="${S.cloverShowToken ? 'text' : 'password'}" placeholder="Bearer token from Clover dashboard" value="${S.cloverForm.api_token}" oninput="S.cloverForm.api_token=this.value" autocomplete="off"/>
+              <button class="pw-eye" type="button" onclick="S.cloverShowToken=!S.cloverShowToken;render()">${S.cloverShowToken ? '🙈' : '👁️'}</button>
             </div>
           </div>
-        `).join('')}
-        ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first photo above!</div>`:''}
-      </div>
-    `:''}
-
-    ${S.tab==='staff-recipes'?`
-      <div class="sec-title">🍹 ${L?'RECETAS':'RECIPE BOOK'}</div>
-      ${renderRecipeBook(false)}
-    `:''}
-
-    ${S.tab==='staff-closeout'?`
-      <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
-      <div class="card">
-        <div class="ct">CLOSING CHECKLIST</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
-        <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${checkItems.length} complete — ${pct}%</div>
-        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-          <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>`).join('')}
-        `).join('')}
-        ${S.customItems.length>0?`
-          <div class="cgroup-t">⭐ ${L?'PERSONALIZADAS':'CUSTOM ITEMS'}</div>
-          ${S.customItems.map(item=>`<div class="citem">
-            <div class="cbox ${S.checklist[item]?'done':''}" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="flex:1">${item}</span>
-            <button onclick="event.stopPropagation();removeChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:20px;padding:4px 8px;line-height:1">×</button>
-          </div>`).join('')}
-        `:''}
-        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-          <input type="text" value="${S.newChecklistItem.replace(/"/g,'&quot;')}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();addChecklistItem();}" placeholder="${L?'Agregar tarea personalizada...':'Add custom task...'}" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px 14px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;-webkit-appearance:none;"/>
-          <button onclick="addChecklistItem()" style="background:var(--lc);border:none;color:#fff;border-radius:8px;padding:0 18px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;cursor:pointer;-webkit-appearance:none;">+ ADD</button>
-        </div>
-        ${S.closeoutSubmitted?`<div class="success-box" style="margin-top:14px">✓ CLOSEOUT SUBMITTED!</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${checkItems.length-checkedCount} ${L?'pendientes':'items remaining'}`}</button>
-        `}
-      </div>
-    `:''}
-
-    </main>
-    <nav class="bot-nav">
-      ${STAFF_TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" onclick="S.tab='${t.key}';render()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span></button>`).join('')}
-    </nav>
-  </div>`;
-}
-
-function renderOwnerApp(){
-  const L=S.lang==='es';
-  const todaySales=S.sales[0]?(parseFloat(S.sales[0].bar_sales||0)+parseFloat(S.sales[0].food_sales||0)):0;
-  const weekSales=S.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
-  const lowItems=S.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
-  const checkItems=allChecklistItems();
-  const checkedCount=checkItems.filter(i=>S.checklist[i]).length;
-  const pct=checkItems.length?Math.round((checkedCount/checkItems.length)*100):0;
-  const allDone=checkItems.length>0&&checkedCount===checkItems.length;
-  const openShifts=S.schedules.filter(s=>s.status==='open').length;
-  const pendingBids=S.bids.filter(b=>b.status==='pending').length;
-  const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
-
-  const TABS=[
-    {key:'dashboard',icon:'📊',label:'Home'},
-    {key:'schedule',icon:'📅',label:'Schedule',badge:openShifts+pendingBids},
-    {key:'shift',icon:'⏰',label:'Shift'},
-    {key:'inventory',icon:'📦',label:'Stock',badge:lowItems},
-    {key:'gallery',icon:'📸',label:'Gallery'},
-    {key:'recipes',icon:'🍹',label:'Recipes'},
-    {key:'closeout',icon:'✅',label:'Close'},
-  ];
-
-  return `<div class="app">
-    <header class="hdr">
-      <div><div class="hdr-logo">CantinaPro</div><div class="hdr-bar">${S.bar.name} · ${S.bar.location||''}</div></div>
-      <div class="hdr-r">
-        <div class="lang-wrap">
-          <button class="lb ${!L?'on':''}" onclick="S.lang='en';render()">EN</button>
-          <button class="lb ${L?'on':''}" onclick="S.lang='es';render()">ES</button>
-        </div>
-        <button class="logout-btn" onclick="logout()">OUT</button>
-        <div class="sdot"></div>
-      </div>
-    </header>
-    <main class="main">
-
-    ${S.showInstallBanner?`<div class="install-banner">
-      <div style="font-size:22px">📱</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">Install CantinaPro</div><div style="font-size:13px;color:var(--muted)">Add to your home screen for quick access</div></div>
-      <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">INSTALL</button>
-    </div>`:''}
-
-    ${S.tab==='dashboard'?`
-      <div class="sec-title">TONIGHT'S OVERVIEW</div>
-      <div class="kpi-grid">
-        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries logged</div></div>
-        <div class="kpi g"><div class="kl">Weekly Revenue</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
-        <div class="kpi b"><div class="kl">Staff</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
-        <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
-      </div>
-      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed — check Schedule</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
-      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
-
-      <div class="card">
-        <div class="ct">👤 STAFF PORTAL LINK</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">Share this link with your staff. They tap it, pick their name, enter their PIN and they're in.</div>
-        <div class="link-box">
-          <div class="link-url">${getStaffLink()}</div>
-          <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
-        </div>
-        <div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center">💡 Staff can also add to home screen to install as an app</div>
-      </div>
-
-      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">+ LOG SALES</button>
-      <div class="card">
-        <div class="ct">RECENT SALES</div>
-        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
-          S.sales.slice(0,5).map(s=>`<div class="row">
-            <div style="flex:1">
-              <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
-              <div style="font-size:13px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
-            </div>
-            <div style="font-size:13px;color:var(--muted);text-align:right">
-              <div>Bar: $${parseFloat(s.bar_sales||0).toLocaleString()}</div>
-              <div>Tips: $${parseFloat(s.tips||0).toLocaleString()}</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    `:''}
-
-    ${S.tab==='schedule'?`
-      <div class="sec-title">📅 SCHEDULE</div>
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>{
-          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
-          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
-          </button>`;
-        }).join('')}
-      </div>
-      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">+ ADD SHIFT FOR ${DAYS[S.schedDay].toUpperCase()}</button>
-      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap the button above to add one.</div>`:''}
-      ${dayShifts.map(shift=>{
-        const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
-        const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
-        const color=staffIdx>=0?ac(staffIdx):'var(--muted)';
-        return `<div class="shift-card ${shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between">
-            <div>
-              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
-              <div class="shift-role">${shift.role||'Staff'}</div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
-                <span class="shift-badge ${shift.status}">${shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
-              </div>
-              ${shift.dropped_by?`<div style="font-size:13px;color:var(--red);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
-            </div>
-            <div style="display:flex;gap:8px">
-              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 12px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:18px;padding:6px 12px" onclick="deleteShift('${shift.id}')">×</button>
-            </div>
+          <div class="field"><label>Region</label>
+            <select onchange="S.cloverForm.region=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              <option value="US" ${S.cloverForm.region === 'US' ? 'selected' : ''}>United States</option>
+              <option value="CA" ${S.cloverForm.region === 'CA' ? 'selected' : ''}>Canada</option>
+              <option value="EU" ${S.cloverForm.region === 'EU' ? 'selected' : ''}>Europe</option>
+              <option value="LA" ${S.cloverForm.region === 'LA' ? 'selected' : ''}>Latin America</option>
+              <option value="SANDBOX" ${S.cloverForm.region === 'SANDBOX' ? 'selected' : ''}>Sandbox (testing)</option>
+            </select>
           </div>
-          ${shift.status==='open'&&S.staff.length>0?`
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">AVAILABLE STAFF TO COVER</div>
-              ${S.staff.map((st,i)=>{
-                const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
-                return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-                  <div class="av" style="background:${ac(i)}22;color:${ac(i)};width:28px;height:28px;font-size:10px">${ai(st.name)}</div>
-                  <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${st.name}</div>
-                  ${hasBid?`<span style="font-size:13px;color:var(--gold)">BID PLACED ⏳</span>`:
-                    `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">ASSIGN</button>`}
-                </div>`;
-              }).join('')}
-            </div>
-          `:''}
-          ${shiftBids.length>0?`
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">🙋 ${shiftBids.length} BID${shiftBids.length!==1?'S':''} — APPROVE ONE</div>
-              ${shiftBids.map(bid=>`<div class="bid-row">
-                <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${bid.staff_name}</div>
-                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:9px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
-                <button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 10px" onclick="declineBid('${bid.id}')">✗</button>
-              </div>`).join('')}
-            </div>
-          `:''}
+          <button class="action-btn" style="background:linear-gradient(135deg,#00a550,#007a3d);color:#fff" onclick="testCloverConnection()" ${S.cloverStatus === 'testing' ? 'disabled' : ''}>${S.cloverStatus === 'testing' ? 'TESTING…' : 'TEST & CONNECT'}</button>
         </div>`;
-      }).join('')}
+      } else {
+        // Sync controls
+        html += `<button class="action-btn" style="background:linear-gradient(135deg,#00a550,#007a3d);color:#fff;margin-bottom:10px" onclick="runCloverSync()" ${S.cloverStatus === 'syncing' ? 'disabled' : ''}>${S.cloverStatus === 'syncing' ? '⟳ SYNCING…' : '⟳ SYNC NOW'}</button>
+        <button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border);margin-bottom:14px" onclick="disconnectClover()">DISCONNECT</button>`;
 
-      ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay].toUpperCase()}</div>
-          <div class="field"><label>Staff Member (optional — leave blank for open shift)</label>
-            <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              <option value="">-- Open Shift (unassigned) --</option>
-              ${S.staff.map(s=>`<option value="${s.id}" ${S.newShift.staff_id===s.id?'selected':''}>${s.name} · ${s.role}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Role / Position</label>
-            <select oninput="S.newShift.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${ROLES.map(r=>`<option value="${r}" ${S.newShift.role===r?'selected':''}>${r}</option>`).join('')}
-            </select>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Start Time</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
-            <div class="field"><label>End Time</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
-          </div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showShiftModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveShift()">SAVE SHIFT</button>
-          </div>
-        </div>
-      </div>`:''}
+        if (S.cloverStatus === 'syncing') {
+          html += `<div class="spinner"></div>`;
+        }
 
-      ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">DROP SHIFT</div>
-          <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Emergency, sick, etc."/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
-            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
+        // Recent sync log
+        if (S.cloverSyncLog.length > 0) {
+          html += `<div class="card">
+            <div class="ct">RECENT SYNCS</div>
+            ${S.cloverSyncLog.slice(0, 8).map((log) => {
+              const ok = log.status === 'success';
+              return `<div class="row">
+                <div style="flex:1">
+                  <div style="font-weight:700;font-size:14px;color:${ok ? 'var(--text)' : 'var(--red)'}">${ok ? '✓' : '✗'} ${new Date(log.created_at).toLocaleString()}</div>
+                  ${ok ? `<div style="font-size:12px;color:var(--muted)">${log.orders_synced || 0} orders · $${parseFloat(log.revenue_synced || 0).toLocaleString()} · ${log.items_synced || 0} items</div>` : `<div style="font-size:12px;color:var(--red)">${log.error_message || 'Unknown error'}</div>`}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`;
+        }
+      }
 
-    ${S.tab==='shift'?`
-      <div class="sec-title">⏰ SHIFT</div>
-      <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
-      <div class="card">
-        <div class="ct">CLOCK IN / OUT</div>
-        ${S.staff.length===0?`<div class="empty-state">No staff added yet.<br/>Tap "+ Add Staff" below.</div>`:''}
-        <div class="staff-grid">
-          ${S.staff.map((s,i)=>{
-            const isIn=S.clockedIn.includes(s.id);
-            return `<div class="staff-pick ${S.selectedStaff===s.id?'on':''}" onclick="S.selectedStaff='${s.id}';render()">
-              <div class="av" style="background:${ac(i)}22;color:${ac(i)}">${ai(s.name)}</div>
-              <div style="font-weight:700;font-size:15px;margin-top:8px;color:var(--text)">${s.name}</div>
-              <div style="font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:2px">${s.role}</div>
-              <div style="font-size:12px;font-weight:700;margin-top:6px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
-            </div>`;
-          }).join('')}
-        </div>
-        ${S.selectedStaff?(()=>{
-          const isIn=S.clockedIn.includes(S.selectedStaff);
-          return isIn
-            ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ CLOCK OUT</button>`
-            :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ CLOCK IN</button>`;
-        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>TAP YOUR NAME ABOVE</button>`}
-      </div>
-      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ADD STAFF MEMBER</button>
-      ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD STAFF MEMBER</div>
-          <div class="field"><label>Full Name</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria Garcia"/></div>
-          <div class="field"><label>Role / Position</label>
-            <select oninput="S.newStaff.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${ROLES.map(r=>`<option value="${r}" ${S.newStaff.role===r?'selected':''}>${r}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>PIN (4 digits — staff use this to log in)</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234" maxlength="4"/></div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showStaffModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveStaff()">Save</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
+      return html;
+    };
 
-    ${S.tab==='inventory'?`
-      <div class="sec-title">📦 INVENTORY</div>
-      <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:14px">+ ADD ITEM</button>
-      <div class="card" style="padding:0;overflow:hidden">
-        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Tap "+ Add Item" above.</div>`:`
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <table class="inv-table">
-            <thead><tr><th>Item</th><th>Unit</th><th>Stock</th><th>Par</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-              ${S.inventory.map(item=>{
-                const st=item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
-                return `<tr>
-                  <td><div style="font-weight:700;font-size:15px;color:var(--text)">${item.name}</div><div style="font-size:12px;color:var(--muted)">${item.category||''}</div></td>
-                  <td style="font-size:13px;color:var(--muted)">${item.unit||''}</td>
-                  <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:14px;width:62px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
-                  <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted)">${item.par_level}</td>
-                  <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
-                  <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:22px;padding:4px">×</button></td>
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>`}
-      </div>
-      ${S.showInvModal?`<div class="modal-bg" onclick="S.showInvModal=false;render()">
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD INVENTORY ITEM</div>
-          <div class="field"><label>Name</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
-          <div class="field"><label>Category</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila, Beer, Wine..."/></div>
-          <div class="field"><label>Unit</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case, Bottle..."/></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Current Stock</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value" placeholder="0"/></div>
-            <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value" placeholder="0"/></div>
-          </div>
-          <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showInvModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveInv()">Save Item</button>
-          </div>
-        </div>
-      </div>`:''}
-    `:''}
+    // ---- Patch the main owner render to include the tab ---
+    // We do this by monkey-patching the nav and the main content.
+    // The existing renderOwnerApp() builds a TABS array and a switch
+    // of `S.tab === 'xxx'` blocks. We add a tab and register a
+    // handler. Because the HTML is built by string concatenation,
+    // we use a MutationObserver to inject into the rendered DOM —
+    // but the cleaner way is to hook `render()` itself.
 
-    ${S.tab==='gallery'?`
-      <div class="sec-title">📸 GALLERY & RECEIPTS</div>
-      ${S.selectedPhoto?`
-        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
-        <div class="card">
-          <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
-            ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:'<div style="font-size:48px">📷</div>'}
-            <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
-          </div>
-          <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
-          ${S.generatingCaption?'<div class="spinner"></div>':''}
-          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText('${S.photoCaption.replace(/'/g,"\\'")}');this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
-        </div>
-      `:`
-        <div class="card">
-          <div class="ct">ADD PHOTO / RECEIPT</div>
-          <div class="field"><label>Category</label>
-            <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${['Liquor Receipt','Beer Receipt','Food Receipt','Social Media','Event','Promo','Staff','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Description</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="Describe this photo..."/></div>
-          <label style="display:block;cursor:pointer">
-            <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
-            <div class="upzone">
-              <div style="font-size:36px;margin-bottom:10px">📷</div>
-              <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">TAKE OR UPLOAD PHOTO</div>
-              <div style="font-size:13px;color:var(--muted);margin-top:6px">Receipts, events, social media content</div>
-            </div>
-          </label>
-        </div>
-        <div class="photo-grid">
-          ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
-            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
-            <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
-          </div>`).join('')}
-          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Upload your first one above!</div>`:''}
-        </div>
-      `}
-    `:''}
+    const _originalRender = window.render;
+    window.render = function () {
+      _originalRender.apply(this, arguments);
+      // Only modify for the owner view
+      if (!S.user || !S.bar || S.staffUser) return;
+      injectCloverIntoOwnerUI();
+    };
 
-    ${S.tab==='recipes'?`
-      <div class="sec-title">🍹 RECIPE BOOK</div>
-      ${renderRecipeBook(true)}
-    `:''}
+    function injectCloverIntoOwnerUI() {
+      // Inject the nav button (if not present)
+      const nav = document.querySelector('.bot-nav');
+      if (nav && !document.getElementById('nav-clover')) {
+        const btn = document.createElement('button');
+        btn.id = 'nav-clover';
+        btn.className = 'nb' + (S.tab === 'clover' ? ' on' : '');
+        btn.innerHTML = `<span class="ni">🟢</span><span class="nl">Clover</span>`;
+        btn.onclick = () => {
+          S.tab = 'clover';
+          render();
+        };
+        nav.appendChild(btn);
+      } else if (nav) {
+        // keep the on/off state in sync
+        const btn = document.getElementById('nav-clover');
+        if (btn) btn.className = 'nb' + (S.tab === 'clover' ? ' on' : '');
+      }
 
-    ${S.tab==='closeout'?`
-      <div class="sec-title">✅ END OF NIGHT</div>
-      <div class="card">
-        <div class="ct">CLOSING CHECKLIST</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before submitting closeout</div>
-        <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${checkItems.length} complete — ${pct}%</div>
-        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-          <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>`).join('')}
-        `).join('')}
-        ${S.customItems.length>0?`
-          <div class="cgroup-t">⭐ CUSTOM ITEMS</div>
-          ${S.customItems.map(item=>`<div class="citem">
-            <div class="cbox ${S.checklist[item]?'done':''}" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="flex:1">${item}</span>
-            <button onclick="event.stopPropagation();removeChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:20px;padding:4px 8px;line-height:1">×</button>
-          </div>`).join('')}
-        `:''}
-        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-          <input type="text" value="${S.newChecklistItem.replace(/"/g,'&quot;')}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();addChecklistItem();}" placeholder="Add custom task..." style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px 14px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;-webkit-appearance:none;"/>
-          <button onclick="addChecklistItem()" style="background:var(--lc);border:none;color:#fff;border-radius:8px;padding:0 18px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:1px;cursor:pointer;-webkit-appearance:none;">+ ADD</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="ct">CLOSEOUT FORM</div>
-        ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>`:`
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-            <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
-            <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
-            <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
-            <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-            <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
-          </div>
-          <div class="field"><label>Closing Staff</label>
-            <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              <option value="">Select staff member</option>
-              ${S.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Notes / Incidents</label><textarea placeholder="Any issues or notes for the owner..." oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${checkItems.length-checkedCount} remaining)`}</button>
-        `}
-      </div>
-    `:''}
-
-    ${S.showSaleModal?`<div class="modal-bg" onclick="S.showSaleModal=false;render()">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-title">+ LOG SALES</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-          <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
-          <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
-          <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
-          <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-          <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
-        </div>
-        <div class="field"><label>Notes</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="Shift notes..."/></div>
-        <div class="modal-actions">
-          <button class="btn-cancel" onclick="S.showSaleModal=false;render()">Cancel</button>
-          <button class="btn-save" onclick="saveSale()">Save Sales</button>
-        </div>
-      </div>
-    </div>`:''}
-
-    </main>
-    <nav class="bot-nav">
-      ${TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" onclick="S.tab='${t.key}';render()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span>${t.badge?`<span class="nbadge">${t.badge}</span>`:''}</button>`).join('')}
-    </nav>
-  </div>`;
-}
-
-
-// ── RECIPE MANAGEMENT ─────────────────────────────────
-S.recipes = [];
-S.showRecipeModal = false;
-S.editingRecipe = null;
-S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
-
-async function loadRecipes(){
-  if(!S.bar) return;
-  const {data} = await db.from('recipes').select('*').eq('bar_id', S.bar.id).order('name');
-  S.recipes = data || [];
-}
-
-async function saveRecipe(){
-  if(!S.bar){alert('No bar loaded. Please log in again.');return;}
-  if(!S.newRecipe.name||!S.newRecipe.name.trim()){alert('Recipe name is required.');return;}
-  const validIngredients=S.newRecipe.ingredients.filter(i=>i.name&&i.name.trim());
-  const validSteps=S.newRecipe.steps.filter(s=>s&&s.trim());
-  const recipe={
-    bar_id:S.bar.id,
-    name:S.newRecipe.name.trim(),
-    tag:S.newRecipe.tag||'Custom',
-    glass:S.newRecipe.glass||'',
-    prep_time:S.newRecipe.prep_time||'',
-    cost:parseFloat(S.newRecipe.cost)||0,
-    price:parseFloat(S.newRecipe.price)||0,
-    emoji:S.newRecipe.emoji||'🍹',
-    ingredients:validIngredients,
-    steps:validSteps,
-  };
-  try{
-    let result;
-    if(S.editingRecipe){
-      result=await db.from('recipes').update(recipe).eq('id',S.editingRecipe);
-      S.editingRecipe=null;
-    }else{
-      result=await db.from('recipes').insert(recipe);
+      // If the user navigated to the Clover tab, render it
+      if (S.tab === 'clover') {
+        const main = document.querySelector('.main');
+        if (main) {
+          main.innerHTML = renderCloverTab();
+        }
+      }
     }
-    if(result.error){
-      console.error('Recipe save error:',result.error);
-      alert('Could not save recipe: '+(result.error.message||'unknown error')+'\n\nIf this is the first time, your database may be missing the "recipes" table. Check Supabase.');
-      return;
+
+    // ---- Hook into bar-loaded so config loads automatically
+    // We override loadBar if it exists so we also fetch Clover config
+    if (typeof loadBar === 'function') {
+      const _origLoadBar = loadBar;
+      window.loadBar = async function () {
+        await _origLoadBar.apply(this, arguments);
+        await loadCloverConfig();
+      };
+      // If the user already logged in before this script ran, fire it now
+      if (S.bar) loadCloverConfig().then(render);
     }
-    S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
-    S.showRecipeModal=false;
-    await loadRecipes();
-    render();
-  }catch(err){
-    console.error('Recipe save exception:',err);
-    alert('Could not save recipe: '+(err.message||err));
-  }
-}
 
-async function deleteRecipe(id){
-  if(!confirm('Delete this recipe?')) return;
-  await db.from('recipes').delete().eq('id', id);
-  await loadRecipes();
-  render();
-}
-
-function editRecipe(r){
-  S.editingRecipe = r.id;
-  S.newRecipe = {
-    name: r.name, tag: r.tag||'Signature', glass: r.glass||'', prep_time: r.prep_time||'',
-    cost: r.cost||'', price: r.price||'', emoji: r.emoji||'🍹',
-    ingredients: r.ingredients&&r.ingredients.length ? r.ingredients : [{amount:'',name:'',note:''}],
-    steps: r.steps&&r.steps.length ? r.steps : [''],
-  };
-  S.showRecipeModal = true;
-  render();
-}
-
-function addIngredientRow(){ S.newRecipe.ingredients.push({amount:'',name:'',note:''});render(); }
-function removeIngredientRow(i){ S.newRecipe.ingredients.splice(i,1);render(); }
-function addStepRow(){ S.newRecipe.steps.push('');render(); }
-function removeStepRow(i){ S.newRecipe.steps.splice(i,1);render(); }
-function recipeMargin(cost,price){ return price>0?Math.round(((price-cost)/price)*100):0; }
-
-function renderRecipeBook(isOwner){
-  const HARDCODED = [
-    {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',cost:2.80,price:14,emoji:'🍹',isDefault:true,
-      ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
-      steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
-    {id:'h2',name:'Michelada',tag:'Signature',glass:'Pint glass',prep_time:'1.5 min',cost:1.60,price:10,emoji:'🍺',isDefault:true,
-      ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
-      steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
-    {id:'h3',name:'Paloma',tag:'Classic',glass:'Highball',prep_time:'1.5 min',cost:1.90,price:12,emoji:'🍊',isDefault:true,
-      ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
-      steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
-    {id:'h4',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prep_time:'3 min',cost:3.20,price:16,emoji:'🥃',isDefault:true,
-      ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
-      steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
-  ];
-  const allRecipes = [...HARDCODED, ...S.recipes.map(r=>({...r,isDefault:false}))];
-  const tags = ['All','Signature','Classic','Premium','Custom'];
-  const filtered = allRecipes.filter(r=>{
-    const ms = r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
-    const mf = S.recipeFilter==='All' || r.tag===S.recipeFilter;
-    return ms && mf;
-  });
-
-  let html = '';
-  if(isOwner){
-    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
-  }
-  html += `<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
-    <span style="color:var(--muted);font-size:18px">🔍</span>
-    <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-    ${tags.map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
-  </div>`;
-
-  if(filtered.length===0){
-    html += `<div class="empty-state">No recipes found.<br/>${isOwner?'Tap "+ Add Your Recipe" above to create your first one!':''}</div>`;
+    console.log('[Clover] Integration module loaded ✓');
   }
 
-  filtered.forEach(r => {
-    const mg = recipeMargin(parseFloat(r.cost)||0, parseFloat(r.price)||0);
-    const rJson = JSON.stringify(r).replace(/"/g,'&quot;').replace(/'/g,"\'");
-    html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji||'🍹'} ${r.name}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${mg>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${mg}% margin</div>`:''}
-          ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
-          <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
-        </div>
-      </div>
-      <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}${r.prep_time?' · '+r.prep_time:''}${r.price?' · $'+r.price:''}</div>
-    </div>
-    <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
-      ${(r.cost&&r.price)?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--red)">$${r.cost}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Cost</div></div>
-        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--lcg)">$${r.price}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Price</div></div>
-        <div style="background:var(--s2);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Bebas Neue',cursive;font-size:20px;color:var(--green)">${mg}%</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase">Margin</div></div>
-      </div>`:''}
-      ${r.ingredients&&r.ingredients.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
-      ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount||''}</div>
-        <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name||''}</div>
-        ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
-      </div>`).join('')}`:''}
-      ${r.steps&&r.steps.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
-      ${r.steps.map((step,idx)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${idx+1}</div>
-        <div style="font-size:15px;line-height:1.7;color:var(--text)">${step}</div>
-      </div>`).join('')}`:''}
-    </div>`;
-  });
+  attach();
+})();
 
-  if(S.showRecipeModal && isOwner){
-    html += `<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-title">${S.editingRecipe?'EDIT RECIPE':'+ ADD RECIPE'}</div>
-        <div style="display:grid;grid-template-columns:60px 1fr;gap:10px">
-          <div class="field"><label>Emoji</label><input type="text" value="${S.newRecipe.emoji}" oninput="S.newRecipe.emoji=this.value" maxlength="2" style="text-align:center;font-size:24px"/></div>
-          <div class="field"><label>Recipe Name *</label><input type="text" value="${S.newRecipe.name}" oninput="S.newRecipe.name=this.value" placeholder="Cantina Margarita"/></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="field"><label>Category</label>
-            <select oninput="S.newRecipe.tag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${['Signature','Classic','Premium','Custom','Shot','Beer','Wine','Non-Alcoholic'].map(t=>`<option value="${t}" ${S.newRecipe.tag===t?'selected':''}>${t}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Glass Type</label><input type="text" value="${S.newRecipe.glass}" oninput="S.newRecipe.glass=this.value" placeholder="Rocks, Highball..."/></div>
-          <div class="field"><label>Prep Time</label><input type="text" value="${S.newRecipe.prep_time}" oninput="S.newRecipe.prep_time=this.value" placeholder="2 min"/></div>
-          <div class="field"><label>Cost ($)</label><input type="number" value="${S.newRecipe.cost}" oninput="S.newRecipe.cost=this.value" placeholder="0.00" step="0.01"/></div>
-          <div class="field"><label>Sale Price ($)</label><input type="number" value="${S.newRecipe.price}" oninput="S.newRecipe.price=this.value" placeholder="0.00" step="0.01"/></div>
-          ${(S.newRecipe.cost&&S.newRecipe.price)?`<div style="background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-family:'Bebas Neue',cursive;font-size:24px;color:var(--green)">${recipeMargin(parseFloat(S.newRecipe.cost)||0,parseFloat(S.newRecipe.price)||0)}%</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Margin</div></div>`:'<div></div>'}
-        </div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:10px 0 8px">INGREDIENTS</div>
-        ${S.newRecipe.ingredients.map((ing,i)=>`
-          <div style="display:grid;grid-template-columns:75px 1fr 30px;gap:6px;margin-bottom:8px;align-items:center">
-            <input type="text" value="${ing.amount}" oninput="S.newRecipe.ingredients[${i}].amount=this.value" placeholder="2 oz" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 8px;font-size:14px;outline:none;font-family:'Share Tech Mono',monospace;width:100%"/>
-            <input type="text" value="${ing.name}" oninput="S.newRecipe.ingredients[${i}].name=this.value" placeholder="Ingredient name" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
-            <button onclick="removeIngredientRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:6px;padding:10px;cursor:pointer;font-size:16px">×</button>
-          </div>
-        `).join('')}
-        <button onclick="addIngredientRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">+ ADD INGREDIENT</button>
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">STEPS</div>
-        ${S.newRecipe.steps.map((step,i)=>`
-          <div style="display:grid;grid-template-columns:28px 1fr 30px;gap:8px;margin-bottom:8px;align-items:center">
-            <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
-            <input type="text" value="${step}" oninput="S.newRecipe.steps[${i}]=this.value" placeholder="Step ${i+1}..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
-            <button onclick="removeStepRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:6px;padding:10px;cursor:pointer;font-size:16px">×</button>
-          </div>
-        `).join('')}
-        <button onclick="addStepRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:6px">+ ADD STEP</button>
-        <div class="modal-actions">
-          <button class="btn-cancel" onclick="S.showRecipeModal=false;S.editingRecipe=null;render()">Cancel</button>
-          <button class="btn-save" onclick="saveRecipe()">${S.editingRecipe?'SAVE CHANGES':'ADD RECIPE'}</button>
-        </div>
-      </div>
-    </div>`;
-  }
+/* ============================================================
+   CLOVER_SCHEMA.sql — run this in your Supabase SQL editor:
+   ------------------------------------------------------------
 
-  return html;
-}
+   create table if not exists clover_config (
+     id uuid primary key default gen_random_uuid(),
+     bar_id uuid not null references bars(id) on delete cascade,
+     merchant_id text not null,
+     api_token text not null,
+     region text not null default 'US',
+     clover_name text,
+     connected_at timestamptz default now(),
+     last_synced_at timestamptz,
+     unique (bar_id)
+   );
 
-// Patch loadBar to also load recipes
-const _origLoadBar = loadBar;
-loadBar = async function(){
-  await _origLoadBar();
-  await loadRecipes();
-};
+   create table if not exists clover_sync_log (
+     id uuid primary key default gen_random_uuid(),
+     bar_id uuid not null references bars(id) on delete cascade,
+     orders_synced int,
+     revenue_synced numeric(10,2),
+     items_synced int,
+     employees_synced int,
+     status text not null,
+     error_message text,
+     created_at timestamptz default now()
+   );
 
+   -- If you have RLS enabled, add policies like:
+   alter table clover_config enable row level security;
+   alter table clover_sync_log enable row level security;
 
-init();
-</script>
-</body>
-</html>
+   create policy "owner reads own clover config"
+     on clover_config for select
+     using (bar_id in (select id from bars where owner_email = auth.email()));
+
+   create policy "owner writes own clover config"
+     on clover_config for all
+     using (bar_id in (select id from bars where owner_email = auth.email()));
+
+   create policy "owner reads own sync log"
+     on clover_sync_log for select
+     using (bar_id in (select id from bars where owner_email = auth.email()));
+
+   create policy "owner writes own sync log"
+     on clover_sync_log for all
+     using (bar_id in (select id from bars where owner_email = auth.email()));
+
+   ============================================================ */
