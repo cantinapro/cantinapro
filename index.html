@@ -254,6 +254,7 @@ let S={
   onboardStarterPack:{liquor:true,beer:true,mixers:true,wine:false},
   onboardSaving:false,
   messages:[],chatInput:'',chatChannel:null,chatScrollPinned:true,
+  barLookupError:null,
 };
 
 // PWA install prompt
@@ -267,29 +268,44 @@ async function installApp(){
 }
 
 async function init(){
-  setInterval(()=>{
-    S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
-  },1000);
-  const urlBarId=getBarIdFromURL();
-  if(urlBarId){
-    S.urlBarId=urlBarId;
-    const{data:bar}=await db.from('bars').select('*').eq('id',urlBarId).single();
-    if(bar){
-      S.bar=bar;
-      const{data:staff}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
-      S.staffLoginStaff=staff||[];
+  try{
+    setInterval(()=>{
+      S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
+    },1000);
+    const urlBarId=getBarIdFromURL();
+    if(urlBarId){
+      S.urlBarId=urlBarId;
+      const{data:bar,error:barError}=await db.from('bars').select('*').eq('id',urlBarId).maybeSingle();
+      if(barError){console.error('[CantinaPro] bar lookup error:',barError);S.barLookupError=barError.message;}
+      if(bar){
+        S.bar=bar;
+        const{data:staff,error:staffError}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
+        if(staffError)console.error('[CantinaPro] staff lookup error:',staffError);
+        S.staffLoginStaff=staff||[];
+      }else if(!barError){
+        S.barLookupError='not_found';
+      }
+      S.appLoading=false;render();return;
     }
-    S.appLoading=false;render();return;
-  }
-  const{data:{session}}=await db.auth.getSession();
-  if(session){S.user=session.user;await loadBar();}
-  S.appLoading=false;render();
-  db.auth.onAuthStateChange(async(_,session)=>{
+    const{data:{session}}=await db.auth.getSession();
     if(session){S.user=session.user;await loadBar();}
-    else if(!S.staffUser){S.user=null;S.bar=null;}
-    render();
-  });
+    S.appLoading=false;render();
+    db.auth.onAuthStateChange(async(_,session)=>{
+      if(session){S.user=session.user;await loadBar();}
+      else if(!S.staffUser){S.user=null;S.bar=null;}
+      render();
+    });
+  }catch(e){
+    console.error('[CantinaPro] init crashed:',e);
+    S.appLoading=false;
+    document.getElementById('root').innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Rajdhani',sans-serif;color:#f0f0ff;background:#080810">
+      <div style="font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:6px;color:#c8102e">CANTINAPRO</div>
+      <div style="font-size:16px;color:#9999bb;margin-top:24px;max-width:380px;line-height:1.6">Something went wrong loading the app. Please refresh the page or check your internet connection.</div>
+      <button onclick="location.reload()" style="margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#c8102e,#a00020);border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer">RELOAD</button>
+      <div style="font-size:12px;color:#666;margin-top:16px;font-family:'Share Tech Mono',monospace">${e.message||''}</div>
+    </div>`;
+  }
 }
 
 async function loadBar(){
@@ -412,7 +428,8 @@ async function handlePhotoUpload(e){
 // ── CHAT / MESSAGES ────────────────────────────────────
 async function loadMessages(){
   if(!S.bar)return;
-  const{data}=await db.from('messages').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:true}).limit(200);
+  const{data,error}=await db.from('messages').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:true}).limit(200);
+  if(error){console.error('[CantinaPro] loadMessages error:',error);alert('Chat error: '+error.message);return;}
   S.messages=data||[];
 }
 
@@ -420,15 +437,16 @@ async function sendMessage(){
   const txt=(S.chatInput||'').trim();
   if(!txt||!S.bar)return;
   const sender=S.staffUser?S.staffUser.name:'Owner';
-  const senderId=S.staffUser?S.staffUser.id:S.user.id;
+  const senderId=S.staffUser?S.staffUser.id:(S.user?.id||'owner');
   const isOwner=!S.staffUser;
   S.chatInput='';
-  const inputEl=document.getElementById('chat-input');if(inputEl)inputEl.value='';
-  const{error}=await db.from('messages').insert({
+  const inputEl=document.getElementById('chat-input');if(inputEl){inputEl.value='';inputEl.style.height='auto';}
+  const{data,error}=await db.from('messages').insert({
     bar_id:S.bar.id,sender_name:sender,sender_id:senderId,
     is_owner:isOwner,text:txt,pinned:false
-  });
-  if(error){alert('Could not send: '+error.message);return;}
+  }).select();
+  if(error){console.error('[CantinaPro] sendMessage error:',error);alert('Could not send: '+error.message);return;}
+  console.log('[CantinaPro] message sent:',data);
   await loadMessages();render();scrollChatToBottom();
 }
 
@@ -474,7 +492,23 @@ function render(){
   if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
   if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
   if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
+  if(S.urlBarId&&!S.bar){root.innerHTML=renderBarNotFound();return;}
   root.innerHTML=renderAuth();
+}
+
+function renderBarNotFound(){
+  return `<div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🤔</div>
+      <div class="auth-title">Bar Not Found</div>
+      <div style="font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:18px">This staff link looks broken or the bar account no longer exists. Ask your manager to send you a fresh staff link from their dashboard.</div>
+      <a href="${window.location.origin}${window.location.pathname}" style="display:block;padding:14px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;text-decoration:none">GO TO LOGIN</a>
+      ${S.barLookupError&&S.barLookupError!=='not_found'?`<div style="font-size:11px;color:var(--muted);margin-top:14px;font-family:'Share Tech Mono',monospace;word-break:break-all">${S.barLookupError}</div>`:''}
+    </div>
+  </div>`;
 }
 
 function scrollActiveTabIntoView(){
@@ -984,30 +1018,30 @@ function renderOwnerApp(){
     </div>`:''}
 
     ${S.tab==='dashboard'?`
-      <div class="sec-title">TONIGHT'S OVERVIEW</div>
+      <div class="sec-title">${L?'RESUMEN DE LA NOCHE':"TONIGHT'S OVERVIEW"}</div>
       <div class="kpi-grid">
-        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries logged</div></div>
-        <div class="kpi g"><div class="kl">Weekly Revenue</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
-        <div class="kpi b"><div class="kl">Staff</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
-        <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
+        <div class="kpi lc"><div class="kl">${L?'Ventas Hoy':"Today's Sales"}</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} ${L?'entradas':'entries logged'}</div></div>
+        <div class="kpi g"><div class="kl">${L?'Ingresos Semanales':'Weekly Revenue'}</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">${L?'Últimos 7 días':'Last 7 days'}</div></div>
+        <div class="kpi b"><div class="kl">${L?'Empleados':'Staff'}</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} ${L?'adentro':'clocked in'}</div></div>
+        <div class="kpi r"><div class="kl">${L?'Stock Bajo':'Low Stock'}</div><div class="kv">${lowItems}</div><div class="kd">${L?'Productos bajo el par':'Items below par'}</div></div>
       </div>
-      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed — check Schedule</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
-      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
+      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} ${L?(openShifts!==1?'Turnos Abiertos':'Turno Abierto'):'Open Shift'+(openShifts!==1?'s':'')}</div><div style="font-size:13px;color:var(--muted)">${L?'Se necesita personal — revisa el horario':'Staff needed — check Schedule'}</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">${L?'VER':'VIEW'}</button></div>`:''}
+      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} ${L?(pendingBids!==1?'Pujas Esperando':'Puja Esperando'):'Bid'+(pendingBids!==1?'s':'')+' Waiting'}</div><div style="font-size:13px;color:var(--muted)">${L?'El personal quiere cubrir turnos abiertos':'Staff want to cover open shifts'}</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">${L?'REVISAR':'REVIEW'}</button></div>`:''}
 
       <div class="card">
-        <div class="ct">👤 STAFF PORTAL LINK</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">Share this link with your staff. They tap it, pick their name, enter their PIN and they're in.</div>
+        <div class="ct">${L?'👤 LINK DEL PORTAL DEL STAFF':'👤 STAFF PORTAL LINK'}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">${L?'Comparte este link con tu staff. Lo tocan, eligen su nombre, ponen su PIN y están adentro.':'Share this link with your staff. They tap it, pick their name, enter their PIN and they\'re in.'}</div>
         <div class="link-box">
           <div class="link-url">${getStaffLink()}</div>
-          <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
+          <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">${L?'📋 COPIAR LINK DEL STAFF':'📋 COPY STAFF LINK'}</button>
         </div>
-        <div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center">💡 Staff can also add to home screen to install as an app</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center">${L?'💡 El staff puede agregar al home screen como una app':'💡 Staff can also add to home screen to install as an app'}</div>
       </div>
 
-      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">+ LOG SALES</button>
+      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">${L?'+ REGISTRAR VENTAS':'+ LOG SALES'}</button>
       <div class="card">
-        <div class="ct">RECENT SALES</div>
-        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
+        <div class="ct">${L?'VENTAS RECIENTES':'RECENT SALES'}</div>
+        ${S.sales.length===0?`<div class="empty-state">${L?'No hay ventas registradas todavía.<br/>Toca "Registrar Ventas" arriba.':'No sales logged yet.<br/>Tap "Log Sales" above.'}</div>`:
           S.sales.slice(0,5).map(s=>`<div class="row">
             <div style="flex:1">
               <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
