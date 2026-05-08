@@ -1474,6 +1474,40 @@ async function deleteRecipe(id){
   render();
 }
 
+function getHiddenDefaults(){
+  return Array.isArray(S.bar?.hidden_default_recipes)?S.bar.hidden_default_recipes:[];
+}
+async function hideDefaultRecipe(id){
+  if(!S.bar)return;
+  const current=getHiddenDefaults();
+  if(current.includes(id))return;
+  const updated=[...current,id];
+  const{error}=await db.from('bars').update({hidden_default_recipes:updated}).eq('id',S.bar.id);
+  if(error){alert('Could not hide recipe: '+error.message);return;}
+  S.bar.hidden_default_recipes=updated;render();
+}
+async function unhideDefaultRecipe(id){
+  if(!S.bar)return;
+  const updated=getHiddenDefaults().filter(x=>x!==id);
+  const{error}=await db.from('bars').update({hidden_default_recipes:updated}).eq('id',S.bar.id);
+  if(error){alert('Could not restore recipe: '+error.message);return;}
+  S.bar.hidden_default_recipes=updated;render();
+}
+async function hideAllDefaults(){
+  if(!S.bar)return;
+  if(!confirm('Hide all built-in recipes? You can restore them anytime.'))return;
+  const allIds=['h1','h2','h3','h4'];
+  const{error}=await db.from('bars').update({hidden_default_recipes:allIds}).eq('id',S.bar.id);
+  if(error){alert('Could not hide recipes: '+error.message);return;}
+  S.bar.hidden_default_recipes=allIds;render();
+}
+async function restoreAllDefaults(){
+  if(!S.bar)return;
+  const{error}=await db.from('bars').update({hidden_default_recipes:[]}).eq('id',S.bar.id);
+  if(error){alert('Could not restore recipes: '+error.message);return;}
+  S.bar.hidden_default_recipes=[];render();
+}
+
 function editRecipe(r){
   S.editingRecipe = r.id;
   S.newRecipe = {
@@ -1571,7 +1605,9 @@ function renderRecipeBook(isOwner){
       ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
       steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
   ];
-  const allRecipes = [...HARDCODED, ...S.recipes.map(r=>({...r,isDefault:false}))];
+  const hiddenIds = isOwner ? getHiddenDefaults() : getHiddenDefaults();
+  const visibleHardcoded = HARDCODED.filter(r=>!hiddenIds.includes(r.id));
+  const allRecipes = [...visibleHardcoded, ...S.recipes.map(r=>({...r,isDefault:false}))];
   const tags = ['All','Signature','Classic','Premium','Custom'];
   const filtered = allRecipes.filter(r=>{
     const ms = r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
@@ -1582,6 +1618,13 @@ function renderRecipeBook(isOwner){
   let html = '';
   if(isOwner){
     html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+    if(visibleHardcoded.length>0){
+      html += `<div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);line-height:1.5">
+        <span style="font-size:18px;flex-shrink:0">💡</span>
+        <span style="flex:1">Want to hide our sample recipes and only show yours?</span>
+        <button onclick="hideAllDefaults()" style="background:rgba(212,160,23,.15);border:1px solid var(--lcg);color:var(--lcg);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">HIDE ALL</button>
+      </div>`;
+    }
   }
   html += `<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
     <span style="color:var(--muted);font-size:18px">🔍</span>
@@ -1605,6 +1648,7 @@ function renderRecipeBook(isOwner){
           ${mg>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)">${mg}% margin</div>`:''}
           ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
           <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
+          ${isOwner&&r.isDefault?`<button onclick="event.stopPropagation();hideDefaultRecipe('${r.id}')" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px">HIDE</button>`:''}
         </div>
       </div>
       <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}${r.prep_time?' · '+r.prep_time:''}${r.price?' · $'+r.price:''}</div>
@@ -1628,6 +1672,21 @@ function renderRecipeBook(isOwner){
       </div>`).join('')}`:''}
     </div>`;
   });
+
+  if(isOwner && hiddenIds.length>0){
+    const hiddenRecipes = HARDCODED.filter(r=>hiddenIds.includes(r.id));
+    html += `<div style="margin-top:24px;padding-top:18px;border-top:1px dashed var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap">
+        <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--muted)">🙈 HIDDEN BUILT-IN RECIPES (${hiddenRecipes.length})</div>
+        <button onclick="restoreAllDefaults()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;-webkit-tap-highlight-color:transparent">RESTORE ALL</button>
+      </div>
+      ${hiddenRecipes.map(r=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;opacity:.7">
+        <div style="font-size:18px">${r.emoji||'🍹'}</div>
+        <div style="flex:1;font-size:14px;color:var(--text)">${r.name}<span style="font-size:12px;color:var(--muted);margin-left:6px">${r.tag}</span></div>
+        <button onclick="unhideDefaultRecipe('${r.id}')" style="background:rgba(0,232,122,.15);border:1px solid var(--green);color:var(--green);border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">SHOW</button>
+      </div>`).join('')}
+    </div>`;
+  }
 
   if(S.showRecipeModal && isOwner){
     html += `<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
