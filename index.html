@@ -62,16 +62,17 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .staff-badge{background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.4);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--lcg);font-family:'Share Tech Mono',monospace;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* BOTTOM NAV - Fixed for Android */
-.bot-nav{background:var(--s1);border-top:2px solid var(--border);display:flex;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:480px;margin:0 auto;z-index:999;padding-bottom:env(safe-area-inset-bottom,0px);}
-.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent;}
-.nb.on{color:var(--lc);border-top-color:var(--lc);}
-.ni{font-size:18px;line-height:1;}
-.nl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:inherit;}
-.nbadge{position:absolute;top:5px;right:6%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;}
+/* TOP NAV (horizontal scroll) */
+.top-nav{background:var(--s1);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;overflow-y:hidden;position:sticky;top:58px;z-index:90;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}
+.top-nav::-webkit-scrollbar{display:none;}
+.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex-shrink:0;padding:11px 16px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;position:relative;-webkit-tap-highlight-color:transparent;min-width:64px;}
+.nb.on{color:var(--lc);border-bottom-color:var(--lc);}
+.ni{font-size:19px;line-height:1;}
+.nl{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:inherit;white-space:nowrap;}
+.nbadge{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;line-height:1.3;}
 
 /* MAIN */
-.main{flex:1;padding:16px;padding-bottom:90px;overflow-y:auto;}
+.main{flex:1;padding:16px;padding-bottom:24px;overflow-y:auto;}
 .sec-title{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
@@ -242,12 +243,17 @@ let S={
   newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:'Bartender'},
   dropShiftId:null,dropReason:'',
   clockedIn:[],selectedStaff:null,
-  liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
+  liveTime:'',selectedPhoto:null,photoTag:'Social Media',photoNote:'',
   recipeSearch:'',recipeFilter:'All',
   schedDay:new Date().getDay(),
   urlBarId:null,
   showInstallBanner:false,
   deferredPrompt:null,
+  onboardingStep:0,
+  onboardStaff:[{name:'',role:'Bartender',pin:''},{name:'',role:'Bartender',pin:''}],
+  onboardStarterPack:{liquor:true,beer:true,mixers:true,wine:false},
+  onboardSaving:false,
+  messages:[],chatInput:'',chatChannel:null,chatScrollPinned:true,
 };
 
 // PWA install prompt
@@ -288,7 +294,7 @@ async function init(){
 
 async function loadBar(){
   const{data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
-  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules()]);}
+  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages()]);subscribeToMessages();}
 }
 async function loadStaff(){if(!S.bar)return;const{data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
 async function loadSales(){if(!S.bar)return;const{data}=await db.from('sales').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(30);S.sales=data||[];}
@@ -310,7 +316,7 @@ function pinPress(v){
 async function verifyPin(){
   const m=S.staffLoginSelected;
   if(!m.pin||m.pin.toString()===S.staffPinInput.toString()){
-    S.staffUser=m;await loadSchedules();await loadStaff();S.tab='my-schedule';S.staffPinError='';
+    S.staffUser=m;await loadSchedules();await loadStaff();await loadMessages();subscribeToMessages();S.tab='my-schedule';S.staffPinError='';
   }else{S.staffPinError='Wrong PIN. Try again.';S.staffPinInput='';}
   render();
 }
@@ -332,7 +338,10 @@ async function handleAuth(){
     if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
     const{data,error}=await db.auth.signUp({email,password});
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
-    if(data.user)await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});
+    if(data.user){
+      await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});
+      S.onboardingStep=1;
+    }
   }
   S.authLoading=false;render();
 }
@@ -400,14 +409,57 @@ async function handlePhotoUpload(e){
   }
   S.photoNote='';e.target.value='';
 }
-async function generateCaption(photo){
-  S.generatingCaption=true;S.photoCaption=null;render();
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Write a fun Instagram caption for ${S.bar?.name||'our bar'}. Photo: "${photo.label}". Include 1-2 emojis and 3-4 hashtags. Under 150 chars before hashtags.`}]})});
-    const data=await res.json();S.photoCaption=data.content?.find(b=>b.type==='text')?.text||'Could not generate.';
-  }catch{S.photoCaption='Could not generate caption.';}
-  S.generatingCaption=false;render();
+// ── CHAT / MESSAGES ────────────────────────────────────
+async function loadMessages(){
+  if(!S.bar)return;
+  const{data}=await db.from('messages').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:true}).limit(200);
+  S.messages=data||[];
 }
+
+async function sendMessage(){
+  const txt=(S.chatInput||'').trim();
+  if(!txt||!S.bar)return;
+  const sender=S.staffUser?S.staffUser.name:'Owner';
+  const senderId=S.staffUser?S.staffUser.id:S.user.id;
+  const isOwner=!S.staffUser;
+  S.chatInput='';
+  const inputEl=document.getElementById('chat-input');if(inputEl)inputEl.value='';
+  const{error}=await db.from('messages').insert({
+    bar_id:S.bar.id,sender_name:sender,sender_id:senderId,
+    is_owner:isOwner,text:txt,pinned:false
+  });
+  if(error){alert('Could not send: '+error.message);return;}
+  await loadMessages();render();scrollChatToBottom();
+}
+
+async function deleteMessage(id){
+  if(!confirm('Delete this message?'))return;
+  await db.from('messages').delete().eq('id',id);
+  await loadMessages();render();
+}
+
+async function togglePin(id,currentPinned){
+  await db.from('messages').update({pinned:!currentPinned}).eq('id',id);
+  await loadMessages();render();
+}
+
+function scrollChatToBottom(){
+  setTimeout(()=>{
+    const el=document.getElementById('chat-scroll');
+    if(el)el.scrollTop=el.scrollHeight;
+  },50);
+}
+
+let _chatSub=null;
+function subscribeToMessages(){
+  if(_chatSub){db.removeChannel(_chatSub);_chatSub=null;}
+  if(!S.bar)return;
+  _chatSub=db.channel(`messages-${S.bar.id}`)
+    .on('postgres_changes',{event:'*',schema:'public',table:'messages',filter:`bar_id=eq.${S.bar.id}`},
+      async()=>{await loadMessages();if(S.tab==='chat'||S.tab==='staff-chat'){render();scrollChatToBottom();}})
+    .subscribe();
+}
+
 function copyStaffLink(){
   navigator.clipboard?.writeText(getStaffLink()).then(()=>{
     const btn=document.getElementById('copy-link-btn');
@@ -418,10 +470,23 @@ function copyStaffLink(){
 function render(){
   const root=document.getElementById('root');
   if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
-  if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();return;}
-  if(S.user&&S.bar){root.innerHTML=renderOwnerApp();return;}
+  if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
+  if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
+  if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
   if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
   root.innerHTML=renderAuth();
+}
+
+function scrollActiveTabIntoView(){
+  setTimeout(()=>{
+    const nav=document.querySelector('.top-nav');
+    const active=nav?.querySelector('.nb.on');
+    if(!nav||!active)return;
+    const navRect=nav.getBoundingClientRect();
+    const btnRect=active.getBoundingClientRect();
+    const targetScroll=nav.scrollLeft+(btnRect.left-navRect.left)-(navRect.width/2)+(btnRect.width/2);
+    nav.scrollTo({left:targetScroll,behavior:'smooth'});
+  },30);
 }
 
 function renderAuth(){
@@ -453,6 +518,198 @@ function renderAuth(){
     </div>
     <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
     <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
+  </div>`;
+}
+
+// ── ONBOARDING WIZARD ──────────────────────────────────
+const STARTER_PACK={
+  liquor:[
+    {name:'Tequila Blanco',category:'Tequila',unit:'750ml',stock:6,par_level:8},
+    {name:'Bourbon',category:'Whiskey',unit:'750ml',stock:4,par_level:6},
+    {name:'Vodka',category:'Vodka',unit:'750ml',stock:5,par_level:8},
+    {name:'Rum',category:'Rum',unit:'750ml',stock:3,par_level:5},
+    {name:'Cointreau',category:'Liqueur',unit:'750ml',stock:2,par_level:3},
+  ],
+  beer:[
+    {name:'Modelo Especial',category:'Beer',unit:'Case',stock:4,par_level:6},
+    {name:'Corona',category:'Beer',unit:'Case',stock:3,par_level:5},
+    {name:'Domestic Draft',category:'Beer',unit:'Keg',stock:1,par_level:2},
+  ],
+  mixers:[
+    {name:'Lime juice',category:'Mixer',unit:'Bottle',stock:6,par_level:10},
+    {name:'Agave syrup',category:'Mixer',unit:'Bottle',stock:2,par_level:3},
+    {name:'Clamato',category:'Mixer',unit:'Bottle',stock:4,par_level:6},
+    {name:'Tonic water',category:'Mixer',unit:'Case',stock:2,par_level:3},
+  ],
+  wine:[
+    {name:'House Red',category:'Wine',unit:'750ml',stock:6,par_level:10},
+    {name:'House White',category:'Wine',unit:'750ml',stock:6,par_level:10},
+  ],
+};
+
+async function onboardFinish(){
+  S.onboardSaving=true;render();
+  const validStaff=S.onboardStaff.filter(s=>s.name.trim()&&s.pin&&s.pin.length===4);
+  for(const st of validStaff){
+    await db.from('staff').insert({bar_id:S.bar.id,name:st.name.trim(),role:st.role,pin:st.pin});
+  }
+  const items=[];
+  Object.keys(S.onboardStarterPack).forEach(k=>{
+    if(S.onboardStarterPack[k])items.push(...STARTER_PACK[k]);
+  });
+  if(items.length>0){
+    await db.from('inventory').insert(items.map(i=>({bar_id:S.bar.id,...i})));
+  }
+  await loadStaff();await loadInventory();
+  S.onboardingStep=0;S.onboardSaving=false;render();
+}
+
+function onboardSkipAll(){
+  if(confirm('Skip setup? You can always add staff and stock later from inside the app.')){
+    S.onboardingStep=0;render();
+  }
+}
+
+function onboardStaffField(idx,field,val){S.onboardStaff[idx][field]=val;}
+function onboardAddStaffRow(){S.onboardStaff.push({name:'',role:'Bartender',pin:''});render();}
+function onboardRemoveStaffRow(i){S.onboardStaff.splice(i,1);render();}
+
+function shareStaffLink(channel){
+  const link=getStaffLink();
+  const msg=`You're invited to ${S.bar.name}'s staff portal! Tap this link, pick your name, and enter your PIN to clock in and see your schedule: ${link}`;
+  if(channel==='sms')window.location.href=`sms:?&body=${encodeURIComponent(msg)}`;
+  else if(channel==='whatsapp')window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  else if(channel==='email')window.location.href=`mailto:?subject=${encodeURIComponent(S.bar.name+' Staff Portal')}&body=${encodeURIComponent(msg)}`;
+  else if(channel==='copy'){
+    navigator.clipboard?.writeText(link).then(()=>{
+      const btn=document.getElementById('onboard-copy-btn');
+      if(btn){btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='📋 COPY LINK',2000);}
+    });
+  }
+}
+
+function renderOnboarding(){
+  const step=S.onboardingStep;
+  const totalSteps=4;
+  const progress=Math.round((step/totalSteps)*100);
+  let body='';
+
+  if(step===1){
+    body=`
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:64px;margin-bottom:8px">🎉</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:3px;color:var(--lc);line-height:1.1">WELCOME TO CANTINAPRO</div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--lcg);margin-top:8px">${S.bar.name}</div>
+      </div>
+      <div style="font-size:16px;line-height:1.7;color:var(--text);margin-bottom:18px">Let's get your bar set up in under 2 minutes. We'll:</div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">👥</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Add your staff</div><div style="font-size:13px;color:var(--muted)">Their name + a 4-digit PIN — that's it</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">📦</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Stock the bar</div><div style="font-size:13px;color:var(--muted)">Pick a starter pack — edit later anytime</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">🔗</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Share your staff link</div><div style="font-size:13px;color:var(--muted)">Text it, share it — they're in instantly</div></div></div>
+      </div>
+      <button class="action-btn red" onclick="S.onboardingStep=2;render()">LET'S GO →</button>
+      <button onclick="onboardSkipAll()" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;width:100%;padding:14px;margin-top:6px">Skip — I'll set it up later</button>
+    `;
+  } else if(step===2){
+    body=`
+      <div style="margin-bottom:18px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">ADD YOUR STAFF</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">Add your bartenders, servers, and managers. They'll use these PINs to log in via the staff link.</div>
+      </div>
+      ${S.onboardStaff.map((st,i)=>`
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;position:relative">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;color:var(--lcg)">STAFF #${i+1}</div>
+            ${S.onboardStaff.length>1?`<button onclick="onboardRemoveStaffRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:5px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">REMOVE</button>`:''}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:8px;margin-bottom:8px">
+            <input type="text" value="${st.name}" oninput="onboardStaffField(${i},'name',this.value)" placeholder="Full name" style="background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:11px 12px;font-size:15px;outline:none;width:100%;-webkit-appearance:none"/>
+            <input type="number" value="${st.pin}" oninput="onboardStaffField(${i},'pin',this.value.slice(0,4))" placeholder="PIN" maxlength="4" style="background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:11px 12px;font-size:15px;outline:none;text-align:center;font-family:'Share Tech Mono',monospace;letter-spacing:3px;-webkit-appearance:none"/>
+          </div>
+          <select onchange="onboardStaffField(${i},'role',this.value)" style="background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:11px 12px;font-size:15px;width:100%;outline:none;-webkit-appearance:none">
+            ${ROLES.map(r=>`<option value="${r}" ${st.role===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+      `).join('')}
+      <button onclick="onboardAddStaffRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:12px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">+ ADD ANOTHER STAFF MEMBER</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=1;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=3;render()">NEXT →</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">💡 Leave blank to skip — you can add staff anytime</div>
+    `;
+  } else if(step===3){
+    const counts=Object.keys(S.onboardStarterPack).reduce((a,k)=>a+(S.onboardStarterPack[k]?STARTER_PACK[k].length:0),0);
+    body=`
+      <div style="margin-bottom:18px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">STARTER STOCK</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">Pick the categories that fit your bar. We'll add common items at typical par levels — adjust later.</div>
+      </div>
+      ${[
+        {key:'liquor',icon:'🥃',title:'Liquor',desc:'Tequila, bourbon, vodka, rum, liqueurs'},
+        {key:'beer',icon:'🍺',title:'Beer',desc:'Modelo, Corona, domestic draft'},
+        {key:'mixers',icon:'🍋',title:'Mixers & Garnish',desc:'Lime juice, agave, Clamato, tonic'},
+        {key:'wine',icon:'🍷',title:'Wine',desc:'House red, house white'},
+      ].map(p=>{
+        const on=S.onboardStarterPack[p.key];
+        return `<div onclick="S.onboardStarterPack.${p.key}=!S.onboardStarterPack.${p.key};render()" style="background:${on?'rgba(200,16,46,.08)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:30px">${p.icon}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:16px;color:var(--text)">${p.title} <span style="color:var(--muted);font-size:13px;font-weight:500">(${STARTER_PACK[p.key].length} items)</span></div>
+            <div style="font-size:13px;color:var(--muted);margin-top:2px">${p.desc}</div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:50%;border:2px solid ${on?'var(--lc)':'var(--border)'};background:${on?'var(--lc)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${on?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#fff" stroke-width="2.5" fill="none"/></svg>':''}</div>
+        </div>`;
+      }).join('')}
+      <div style="text-align:center;font-size:13px;color:var(--muted);margin:14px 0">${counts} items will be added — fully editable later</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=2;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="onboardFinish().then(()=>{S.onboardingStep=4;render()})" ${S.onboardSaving?'disabled':''}>${S.onboardSaving?'SAVING...':'NEXT →'}</button>
+      </div>
+    `;
+  } else if(step===4){
+    const link=getStaffLink();
+    body=`
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:64px;margin-bottom:8px">🚀</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:3px;color:var(--green);line-height:1.1">YOU'RE LIVE</div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--lcg);margin-top:8px">${S.bar.name} is ready to roll</div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--lc)">${S.staff.length}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Staff</div></div>
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--green)">${S.inventory.length}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Items</div></div>
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--lcg)">∞</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Recipes</div></div>
+      </div>
+      <div style="background:rgba(212,160,23,.06);border:2px solid var(--lcg);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">🔗 SHARE WITH STAFF</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.6">Send this link to your team. They tap it, pick their name, enter their PIN — that's it.</div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);word-break:break-all;line-height:1.5">${link}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <button onclick="shareStaffLink('sms')" style="background:linear-gradient(135deg,var(--green),#00a050);border:none;color:#000;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">💬 TEXT</button>
+          <button onclick="shareStaffLink('whatsapp')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">💚 WHATSAPP</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="shareStaffLink('email')" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">📧 EMAIL</button>
+          <button id="onboard-copy-btn" onclick="shareStaffLink('copy')" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">📋 COPY LINK</button>
+        </div>
+      </div>
+      <div style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.3);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--blue);margin-bottom:8px">📱 INSTALL AS APP</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.7">Tell your staff to <strong>"Add to Home Screen"</strong> after opening the link. Works just like a real app — no App Store needed.</div>
+      </div>
+      <button class="action-btn red" onclick="S.onboardingStep=0;render()">ENTER MY DASHBOARD →</button>
+    `;
+  }
+
+  return `<div class="auth-wrap" style="justify-content:flex-start;padding-top:32px">
+    <div style="width:100%;max-width:420px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:3px;color:var(--lc)">CANTINAPRO</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)">STEP ${step} OF ${totalSteps}</div>
+      </div>
+      <div style="background:var(--s2);border-radius:4px;height:6px;overflow:hidden;margin-bottom:20px"><div style="background:linear-gradient(90deg,var(--lc),var(--lcg));height:100%;width:${progress}%;transition:width .3s"></div></div>
+      <div class="auth-card" style="text-align:left">${body}</div>
+    </div>
   </div>`;
 }
 
@@ -515,8 +772,9 @@ function renderStaffApp(){
   const STAFF_TABS=[
     {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
     {key:'staff-shift',icon:'⏰',label:L?'Turno':'My Shift'},
+    {key:'staff-chat',icon:'💬',label:L?'Chat':'Chat'},
     {key:'staff-photos',icon:'📸',label:L?'Fotos':'Photos'},
-    {key:'staff-recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
+    {key:'staff-recipes',icon:'🍹',label:L?'Tragos':'Recipes'},
     {key:'staff-closeout',icon:'✅',label:L?'Cierre':'Closeout'},
   ];
 
@@ -532,6 +790,9 @@ function renderStaffApp(){
         <button class="logout-btn" onclick="staffLogout()">OUT</button>
       </div>
     </header>
+    <nav class="top-nav" id="top-nav-staff">
+      ${STAFF_TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" data-tab-key="${t.key}" onclick="S.tab='${t.key}';render();if('${t.key}'==='staff-chat')scrollChatToBottom()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span></button>`).join('')}
+    </nav>
     <main class="main">
 
     ${S.tab==='my-schedule'?`
@@ -611,6 +872,8 @@ function renderStaffApp(){
       </div>
     `:''}
 
+    ${S.tab==='staff-chat'?renderChat(false):''}
+
     ${S.tab==='staff-photos'?`
       <div class="sec-title">📸 ${L?'FOTOS':'PHOTOS'}</div>
       <div class="card">
@@ -671,9 +934,6 @@ function renderStaffApp(){
     `:''}
 
     </main>
-    <nav class="bot-nav">
-      ${STAFF_TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" onclick="S.tab='${t.key}';render()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span></button>`).join('')}
-    </nav>
   </div>`;
 }
 
@@ -691,11 +951,12 @@ function renderOwnerApp(){
 
   const TABS=[
     {key:'dashboard',icon:'📊',label:'Home'},
-    {key:'schedule',icon:'📅',label:'Schedule',badge:openShifts+pendingBids},
+    {key:'schedule',icon:'📅',label:'Sched',badge:openShifts+pendingBids},
+    {key:'chat',icon:'💬',label:'Chat'},
     {key:'shift',icon:'⏰',label:'Shift'},
     {key:'inventory',icon:'📦',label:'Stock',badge:lowItems},
-    {key:'gallery',icon:'📸',label:'Gallery'},
-    {key:'recipes',icon:'🍹',label:'Recipes'},
+    {key:'gallery',icon:'📸',label:'Photos'},
+    {key:'recipes',icon:'🍹',label:'Drinks'},
     {key:'closeout',icon:'✅',label:'Close'},
   ];
 
@@ -711,6 +972,9 @@ function renderOwnerApp(){
         <div class="sdot"></div>
       </div>
     </header>
+    <nav class="top-nav" id="top-nav-owner">
+      ${TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" data-tab-key="${t.key}" onclick="S.tab='${t.key}';render();if('${t.key}'==='chat')scrollChatToBottom()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span>${t.badge?`<span class="nbadge">${t.badge}</span>`:''}</button>`).join('')}
+    </nav>
     <main class="main">
 
     ${S.showInstallBanner?`<div class="install-banner">
@@ -853,6 +1117,8 @@ function renderOwnerApp(){
       </div>`:''}
     `:''}
 
+    ${S.tab==='chat'?renderChat(true):''}
+
     ${S.tab==='shift'?`
       <div class="sec-title">⏰ SHIFT</div>
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
@@ -941,15 +1207,17 @@ function renderOwnerApp(){
     ${S.tab==='gallery'?`
       <div class="sec-title">📸 GALLERY & RECEIPTS</div>
       ${S.selectedPhoto?`
-        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
+        <button onclick="S.selectedPhoto=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
         <div class="card">
           <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
             ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:'<div style="font-size:48px">📷</div>'}
             <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
           </div>
-          <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
-          ${S.generatingCaption?'<div class="spinner"></div>':''}
-          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText('${S.photoCaption.replace(/'/g,"\\'")}');this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">${S.selectedPhoto.tag||'Photo'}</div>
+            <div style="font-size:15px;color:var(--text);line-height:1.6;margin-bottom:10px">${S.selectedPhoto.label||'No description'}</div>
+            <div style="font-size:12px;color:var(--muted);font-family:'Share Tech Mono',monospace">${new Date(S.selectedPhoto.created_at).toLocaleString()}</div>
+          </div>
         </div>
       `:`
         <div class="card">
@@ -970,7 +1238,7 @@ function renderOwnerApp(){
           </label>
         </div>
         <div class="photo-grid">
-          ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
+          ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};render()">
             ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
             <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
           </div>`).join('')}
@@ -1042,9 +1310,6 @@ function renderOwnerApp(){
     </div>`:''}
 
     </main>
-    <nav class="bot-nav">
-      ${TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" onclick="S.tab='${t.key}';render()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span>${t.badge?`<span class="nbadge">${t.badge}</span>`:''}</button>`).join('')}
-    </nav>
   </div>`;
 }
 
@@ -1111,6 +1376,70 @@ function removeIngredientRow(i){ S.newRecipe.ingredients.splice(i,1);render(); }
 function addStepRow(){ S.newRecipe.steps.push('');render(); }
 function removeStepRow(i){ S.newRecipe.steps.splice(i,1);render(); }
 function recipeMargin(cost,price){ return price>0?Math.round(((price-cost)/price)*100):0; }
+
+function renderChat(isOwner){
+  const L=S.lang==='es';
+  const myName=isOwner?'Owner':(S.staffUser?S.staffUser.name:'?');
+  const myId=isOwner?S.user?.id:S.staffUser?.id;
+  const pinned=S.messages.filter(m=>m.pinned);
+  const messages=S.messages.filter(m=>!m.pinned);
+
+  let html=`
+    <div class="sec-title">💬 ${L?'CHAT DEL EQUIPO':'TEAM CHAT'}</div>
+    <div style="background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px">
+      <div style="width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0"></div>
+      <div style="color:var(--text)"><strong>${L?'En vivo':'Live'}</strong> · ${L?'Mensajes aparecen al instante':'Messages appear instantly'}</div>
+    </div>
+  `;
+
+  if(pinned.length>0){
+    html+=`<div style="margin-bottom:14px">
+      <div style="font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">📌 ${L?'ANUNCIOS':'PINNED'}</div>
+      ${pinned.map(m=>renderMessageBubble(m,myId,isOwner,L,true)).join('')}
+    </div>`;
+  }
+
+  html+=`
+    <div id="chat-scroll" style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;max-height:58vh;min-height:340px;overflow-y:auto;margin-bottom:12px;-webkit-overflow-scrolling:touch">
+      ${messages.length===0?`<div class="empty-state" style="padding:32px 8px">💬<br/>${L?'No hay mensajes todavía. Sé el primero!':'No messages yet. Be the first!'}</div>`:
+        messages.map(m=>renderMessageBubble(m,myId,isOwner,L,false)).join('')}
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;gap:8px;align-items:flex-end">
+      <textarea id="chat-input" placeholder="${L?'Escribe un mensaje...':'Type a message...'}" rows="1" oninput="S.chatInput=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;resize:none;line-height:1.4;max-height:120px;-webkit-appearance:none">${S.chatInput||''}</textarea>
+      <button onclick="sendMessage()" style="background:linear-gradient(135deg,var(--lc),#a00020);border:none;color:#fff;border-radius:8px;width:46px;height:46px;flex-shrink:0;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;-webkit-appearance:none">▶</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">${L?`Posteando como`:`Posting as`} <strong style="color:var(--lcg)">${myName}</strong>${isOwner?` · ${L?'Owner':'Owner'}`:''}</div>
+  `;
+
+  return html;
+}
+
+function renderMessageBubble(m,myId,isOwner,L,isPinnedSection){
+  const isMine=m.sender_id===myId;
+  const isFromOwner=m.is_owner;
+  const time=new Date(m.created_at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const dateStr=new Date(m.created_at).toLocaleDateString([],{month:'short',day:'numeric'});
+  const senderColor=isFromOwner?'var(--lcg)':(isMine?'var(--lc)':'var(--blue)');
+  const bgColor=isMine?'rgba(200,16,46,.12)':isFromOwner?'rgba(212,160,23,.08)':'var(--s2)';
+  const borderColor=isMine?'rgba(200,16,46,.3)':isFromOwner?'rgba(212,160,23,.3)':'var(--border)';
+  const align=isMine?'flex-end':'flex-start';
+  const escapedTxt=(m.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  return `<div style="display:flex;justify-content:${align};margin-bottom:10px">
+    <div style="max-width:85%;background:${bgColor};border:1px solid ${borderColor};border-radius:12px;padding:10px 12px;position:relative">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="font-weight:700;font-size:13px;color:${senderColor}">${m.sender_name||'?'}${isFromOwner?' 👑':''}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted)">${dateStr} · ${time}</div>
+      </div>
+      <div style="font-size:15px;color:var(--text);line-height:1.45;word-wrap:break-word;white-space:pre-wrap">${escapedTxt}</div>
+      ${isOwner?`<div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+        <button onclick="togglePin('${m.id}',${m.pinned})" style="background:${m.pinned?'rgba(212,160,23,.25)':'var(--s3)'};border:none;color:${m.pinned?'var(--lcg)':'var(--muted)'};border-radius:5px;padding:4px 9px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">${m.pinned?'📌 UNPIN':'📌 PIN'}</button>
+        <button onclick="deleteMessage('${m.id}')" style="background:rgba(255,68,85,.15);border:none;color:var(--red);border-radius:5px;padding:4px 9px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">DEL</button>
+      </div>`:''}
+    </div>
+  </div>`;
+}
 
 function renderRecipeBook(isOwner){
   const HARDCODED = [
