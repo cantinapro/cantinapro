@@ -470,14 +470,17 @@ async function handleAuth(){
   const email=S.loginEmail.trim(),password=S.loginPassword.trim();
   if(!email||!password){S.authError='Email and password are required';S.authLoading=false;render();return;}
   if(S.authMode==='login'){
-    const{error}=await db.auth.signInWithPassword({email,password});
+    const{data,error}=await db.auth.signInWithPassword({email,password});
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
+    if(data?.user){S.user=data.user;await loadBar();}
   }else{
     if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
     const{data,error}=await db.auth.signUp({email,password});
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
     if(data.user){
+      S.user=data.user;
       await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});
+      await loadBar();
       S.onboardingStep=1;
     }
   }
