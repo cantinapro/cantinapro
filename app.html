@@ -1218,27 +1218,16 @@ function renderStaffApp(){
           const visible=items.filter(i=>!hidden.includes(i));
           if(visible.length===0)return '';
           return `<div class="cgroup-t">${group}</div>
-          ${visible.map(item=>`<div class="citem" style="position:relative">
-            <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
-              <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-              <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-            </div>
-            <button onclick="event.stopPropagation();hideDefaultChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:rgba(255,68,85,.10);border:none;color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;opacity:.5;-webkit-tap-highlight-color:transparent" title="${L?'Quitar':'Remove'}">×</button>
+          ${visible.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
           </div>`).join('')}`;
         }).join('')}
         ${loadCustomItems().length>0?`<div class="cgroup-t">⭐ ${L?'PERSONALIZADOS':'CUSTOM'}</div>
-        ${loadCustomItems().map(item=>`<div class="citem" style="position:relative">
-          <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>
-          <button onclick="event.stopPropagation();removeCustomChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:rgba(255,68,85,.15);border:none;color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;-webkit-tap-highlight-color:transparent" title="${L?'Quitar':'Remove'}">×</button>
+        ${loadCustomItems().map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+          <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+          <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
         </div>`).join('')}`:''}
-        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)">
-          <input type="text" value="${S.newChecklistItem||''}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter')addCustomChecklistItem()" placeholder="${L?'Agregar otro punto a la lista...':'Add another item to the list...'}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;-webkit-appearance:none"/>
-          <button onclick="addCustomChecklistItem()" style="background:var(--lcg);border:none;color:#000;border-radius:8px;padding:0 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'+ AGREGAR':'+ ADD'}</button>
-        </div>
-        ${loadHiddenDefaults().length>0?`<div style="margin-top:10px;text-align:center"><button onclick="restoreAllChecklistDefaults()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px;padding:6px;-webkit-tap-highlight-color:transparent;text-decoration:underline">${L?`↺ RESTAURAR ${loadHiddenDefaults().length} PUNTO${loadHiddenDefaults().length!==1?'S':''} OCULTO${loadHiddenDefaults().length!==1?'S':''}`:`↺ RESTORE ${loadHiddenDefaults().length} HIDDEN ITEM${loadHiddenDefaults().length!==1?'S':''}`}</button></div>`:''}
         ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO!':'✓ CLOSEOUT SUBMITTED!'}</div>`:`
           <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${allChecklistItems().length-checkedCount} puntos pendientes`:`${allChecklistItems().length-checkedCount} items remaining`)}</button>
         `}
