@@ -209,6 +209,7 @@ const CHECKLIST_DATA={
 const DEFAULT_ITEMS=Object.values(CHECKLIST_DATA).flat();
 
 function customItemsKey(){return `cp_custom_checklist_${S.bar?.id||'none'}`;}
+function hiddenDefaultsKey(){return `cp_hidden_checklist_${S.bar?.id||'none'}`;}
 function loadCustomItems(){
   try{const raw=localStorage.getItem(customItemsKey());return raw?JSON.parse(raw):[];}
   catch(e){return [];}
@@ -216,7 +217,18 @@ function loadCustomItems(){
 function saveCustomItems(items){
   try{localStorage.setItem(customItemsKey(),JSON.stringify(items));}catch(e){}
 }
-function allChecklistItems(){return [...DEFAULT_ITEMS,...loadCustomItems()];}
+function loadHiddenDefaults(){
+  try{const raw=localStorage.getItem(hiddenDefaultsKey());return raw?JSON.parse(raw):[];}
+  catch(e){return [];}
+}
+function saveHiddenDefaults(items){
+  try{localStorage.setItem(hiddenDefaultsKey(),JSON.stringify(items));}catch(e){}
+}
+function visibleDefaultItems(){
+  const hidden=loadHiddenDefaults();
+  return DEFAULT_ITEMS.filter(i=>!hidden.includes(i));
+}
+function allChecklistItems(){return [...visibleDefaultItems(),...loadCustomItems()];}
 function addCustomChecklistItem(){
   const txt=(S.newChecklistItem||'').trim();
   if(!txt)return;
@@ -232,6 +244,16 @@ function removeCustomChecklistItem(item){
   saveCustomItems(items);
   if(S.checklist[item])delete S.checklist[item];
   render();
+}
+function hideDefaultChecklistItem(item){
+  const hidden=loadHiddenDefaults();
+  if(hidden.includes(item))return;
+  hidden.push(item);saveHiddenDefaults(hidden);
+  if(S.checklist[item])delete S.checklist[item];
+  render();
+}
+function restoreAllChecklistDefaults(){
+  saveHiddenDefaults([]);render();
 }
 
 const RECIPES=[
@@ -422,6 +444,7 @@ async function init(){
     if(shouldShowIOSInstall())S.showIOSInstallBanner=true;
     S.appLoading=false;render();
     db.auth.onAuthStateChange(async(_,session)=>{
+      if(_loggingOut)return;
       if(session){S.user=session.user;await loadBar();}
       else if(!S.staffUser){S.user=null;S.bar=null;}
       render();
@@ -454,6 +477,11 @@ async function loadSchedules(){
 }
 
 async function selectStaffMember(m){S.staffLoginSelected=m;S.staffLoginStep='pin';S.staffPinInput='';S.staffPinError='';S.staffPinVerifying=false;render();}
+function selectStaffByIndex(i){
+  const m=S.staffLoginStaff[i];
+  if(!m){console.error('[CantinaPro] selectStaffByIndex: no staff at index',i);return;}
+  selectStaffMember(m);
+}
 function pinPress(v){
   if(S.staffPinVerifying)return;
   if(v==='del')S.staffPinInput=S.staffPinInput.slice(0,-1);
@@ -512,11 +540,11 @@ async function handleAuth(){
   }
   S.authLoading=false;render();
 }
+let _loggingOut=false;
 async function logout(){
-  try{
-    if(_chatSub){await db.removeChannel(_chatSub);_chatSub=null;}
-    await db.auth.signOut();
-  }catch(e){console.error('[CantinaPro] logout error:',e);}
+  _loggingOut=true;
+  // Clear app state synchronously FIRST so UI flips immediately
+  try{if(_chatSub){db.removeChannel(_chatSub);_chatSub=null;}}catch(e){}
   Object.assign(S,{
     user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],
     bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,
@@ -524,6 +552,17 @@ async function logout(){
     tab:'dashboard',selectedPhoto:null,selectedItem:null,
     loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',authMode:'login',authError:''
   });
+  render();
+  // Then sign out from Supabase in the background
+  try{await db.auth.signOut();}
+  catch(e){console.error('[CantinaPro] logout signOut error:',e);}
+  // Belt-and-suspenders: clear any lingering Supabase session in localStorage
+  try{
+    Object.keys(localStorage).forEach(k=>{
+      if(k.startsWith('sb-')||k.includes('supabase.auth'))localStorage.removeItem(k);
+    });
+  }catch(e){}
+  _loggingOut=false;
   render();
 }
 
@@ -685,13 +724,28 @@ function shareStaffWhatsApp(){
 
 function render(){
   const root=document.getElementById('root');
-  if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
-  if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
-  if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
-  if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
-  if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
-  if(S.urlBarId&&!S.bar){root.innerHTML=renderBarNotFound();return;}
-  root.innerHTML=renderAuth();
+  try{
+    if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
+    if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
+    if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
+    if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
+    if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
+    if(S.urlBarId&&!S.bar){root.innerHTML=renderBarNotFound();return;}
+    root.innerHTML=renderAuth();
+  }catch(e){
+    console.error('[CantinaPro] render crashed:',e);
+    console.error('[CantinaPro] state snapshot:',{
+      hasUser:!!S.user,hasBar:!!S.bar,hasStaffUser:!!S.staffUser,
+      urlBarId:S.urlBarId,tab:S.tab,staffCount:S.staff?.length,
+      staffLoginStaffCount:S.staffLoginStaff?.length,staffLoginStep:S.staffLoginStep
+    });
+    root.innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Rajdhani',sans-serif;color:#f0f0ff;background:#080810">
+      <div style="font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:6px;color:#c8102e">CANTINAPRO</div>
+      <div style="font-size:16px;color:#9999bb;margin-top:24px;max-width:380px;line-height:1.6">Something went wrong displaying this page. Please refresh.</div>
+      <button onclick="location.reload()" style="margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#c8102e,#a00020);border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer">RELOAD</button>
+      <div style="font-size:11px;color:#666;margin-top:20px;font-family:'Share Tech Mono',monospace;max-width:90%;word-break:break-word">${(e.message||String(e)).replace(/</g,'&lt;')}</div>
+    </div>`;
+  }
 }
 
 function renderBarNotFound(){
@@ -946,21 +1000,23 @@ function renderOnboarding(){
 }
 
 function renderStaffViaLink(){
+  const barName=S.bar?.name||'';
+  const barLocation=S.bar?.location||'';
   if(S.staffLoginStep==='select'){
     return `<div class="auth-wrap">
       <div class="auth-logo">CantinaPro</div>
-      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--lc);margin-top:10px">${S.bar.name}</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px">📍 ${S.bar.location||''}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--lc);margin-top:10px">${barName}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-top:6px">📍 ${barLocation}</div>
       <div class="auth-div"></div>
       <div class="auth-card">
         <div class="auth-title">WHO ARE YOU?</div>
         ${S.staffLoginStaff.length===0?`<div class="empty-state">No staff found.<br/>Ask your manager to add you to the app.</div>`:''}
         <div class="staff-select-grid">
           ${S.staffLoginStaff.map((s,i)=>`
-            <div class="staff-sel-card" onclick="selectStaffMember(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+            <div class="staff-sel-card" onclick="selectStaffByIndex(${i})">
               <div class="av" style="background:${ac(i)}22;color:${ac(i)};margin:0 auto 10px;width:46px;height:46px;font-size:15px">${ai(s.name)}</div>
-              <div style="font-weight:700;font-size:16px;color:var(--text)">${s.name}</div>
-              <div style="font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:3px">${s.role}</div>
+              <div style="font-weight:700;font-size:16px;color:var(--text)">${(s.name||'').replace(/</g,'&lt;')}</div>
+              <div style="font-size:13px;color:var(--muted);text-transform:uppercase;margin-top:3px">${(s.role||'').replace(/</g,'&lt;')}</div>
             </div>
           `).join('')}
         </div>
@@ -1157,13 +1213,19 @@ function renderStaffApp(){
         <div style="font-size:14px;color:var(--muted);margin-bottom:12px">${L?'Completa todos los puntos antes de salir':'Complete all items before leaving'}</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allChecklistItems().length} ${L?'completados':'complete'} — ${pct}%</div>
-        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-          <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>`).join('')}
-        `).join('')}
+        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>{
+          const hidden=loadHiddenDefaults();
+          const visible=items.filter(i=>!hidden.includes(i));
+          if(visible.length===0)return '';
+          return `<div class="cgroup-t">${group}</div>
+          ${visible.map(item=>`<div class="citem" style="position:relative">
+            <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
+              <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+              <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+            </div>
+            <button onclick="event.stopPropagation();hideDefaultChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:rgba(255,68,85,.10);border:none;color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;opacity:.5;-webkit-tap-highlight-color:transparent" title="${L?'Quitar':'Remove'}">×</button>
+          </div>`).join('')}`;
+        }).join('')}
         ${loadCustomItems().length>0?`<div class="cgroup-t">⭐ ${L?'PERSONALIZADOS':'CUSTOM'}</div>
         ${loadCustomItems().map(item=>`<div class="citem" style="position:relative">
           <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
@@ -1176,6 +1238,7 @@ function renderStaffApp(){
           <input type="text" value="${S.newChecklistItem||''}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter')addCustomChecklistItem()" placeholder="${L?'Agregar otro punto a la lista...':'Add another item to the list...'}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;-webkit-appearance:none"/>
           <button onclick="addCustomChecklistItem()" style="background:var(--lcg);border:none;color:#000;border-radius:8px;padding:0 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'+ AGREGAR':'+ ADD'}</button>
         </div>
+        ${loadHiddenDefaults().length>0?`<div style="margin-top:10px;text-align:center"><button onclick="restoreAllChecklistDefaults()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px;padding:6px;-webkit-tap-highlight-color:transparent;text-decoration:underline">${L?`↺ RESTAURAR ${loadHiddenDefaults().length} PUNTO${loadHiddenDefaults().length!==1?'S':''} OCULTO${loadHiddenDefaults().length!==1?'S':''}`:`↺ RESTORE ${loadHiddenDefaults().length} HIDDEN ITEM${loadHiddenDefaults().length!==1?'S':''}`}</button></div>`:''}
         ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO!':'✓ CLOSEOUT SUBMITTED!'}</div>`:`
           <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${allChecklistItems().length-checkedCount} puntos pendientes`:`${allChecklistItems().length-checkedCount} items remaining`)}</button>
         `}
@@ -1555,13 +1618,19 @@ function renderOwnerApp(){
         <div style="font-size:14px;color:var(--muted);margin-bottom:12px">${L?'Completa todos los puntos antes de enviar el cierre':'Complete all items before submitting closeout'}</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allChecklistItems().length} ${L?'completados':'complete'} — ${pct}%</div>
-        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
-          <div class="cgroup-t">${group}</div>
-          ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
-            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
-          </div>`).join('')}
-        `).join('')}
+        ${Object.entries(CHECKLIST_DATA).map(([group,items])=>{
+          const hidden=loadHiddenDefaults();
+          const visible=items.filter(i=>!hidden.includes(i));
+          if(visible.length===0)return '';
+          return `<div class="cgroup-t">${group}</div>
+          ${visible.map(item=>`<div class="citem" style="position:relative">
+            <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
+              <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+              <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+            </div>
+            <button onclick="event.stopPropagation();hideDefaultChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:rgba(255,68,85,.10);border:none;color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;opacity:.5;-webkit-tap-highlight-color:transparent" title="${L?'Quitar':'Remove'}">×</button>
+          </div>`).join('')}`;
+        }).join('')}
         ${loadCustomItems().length>0?`<div class="cgroup-t">⭐ ${L?'PERSONALIZADOS':'CUSTOM'}</div>
         ${loadCustomItems().map(item=>`<div class="citem" style="position:relative">
           <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
@@ -1574,6 +1643,7 @@ function renderOwnerApp(){
           <input type="text" value="${S.newChecklistItem||''}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter')addCustomChecklistItem()" placeholder="${L?'Agregar otro punto a la lista...':'Add another item to the list...'}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;-webkit-appearance:none"/>
           <button onclick="addCustomChecklistItem()" style="background:var(--lcg);border:none;color:#000;border-radius:8px;padding:0 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'+ AGREGAR':'+ ADD'}</button>
         </div>
+        ${loadHiddenDefaults().length>0?`<div style="margin-top:10px;text-align:center"><button onclick="restoreAllChecklistDefaults()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px;padding:6px;-webkit-tap-highlight-color:transparent;text-decoration:underline">${L?`↺ RESTAURAR ${loadHiddenDefaults().length} PUNTO${loadHiddenDefaults().length!==1?'S':''} OCULTO${loadHiddenDefaults().length!==1?'S':''}`:`↺ RESTORE ${loadHiddenDefaults().length} HIDDEN ITEM${loadHiddenDefaults().length!==1?'S':''}`}</button></div>`:''}
       </div>
       <div class="card">
         <div class="ct">${L?'FORMULARIO DE CIERRE':'CLOSEOUT FORM'}</div>
