@@ -62,16 +62,17 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 .staff-badge{background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.4);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--lcg);font-family:'Share Tech Mono',monospace;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* BOTTOM NAV - Fixed for Android */
-.bot-nav{background:var(--s1);border-top:2px solid var(--border);display:flex;position:fixed;bottom:0;left:0;right:0;width:100%;max-width:480px;margin:0 auto;z-index:999;padding-bottom:env(safe-area-inset-bottom,0px);}
-.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex:1;padding:10px 2px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent;transition:all .2s;position:relative;-webkit-tap-highlight-color:transparent;}
-.nb.on{color:var(--lc);border-top-color:var(--lc);}
-.ni{font-size:18px;line-height:1;}
-.nl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:inherit;}
-.nbadge{position:absolute;top:5px;right:6%;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;}
+/* TOP NAV (horizontal scroll) */
+.top-nav{background:var(--s1);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;overflow-y:hidden;position:sticky;top:58px;z-index:90;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}
+.top-nav::-webkit-scrollbar{display:none;}
+.nb{background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;flex-shrink:0;padding:11px 16px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;position:relative;-webkit-tap-highlight-color:transparent;min-width:64px;}
+.nb.on{color:var(--lc);border-bottom-color:var(--lc);}
+.ni{font-size:19px;line-height:1;}
+.nl{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:inherit;white-space:nowrap;}
+.nbadge{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;font-weight:700;line-height:1.3;}
 
 /* MAIN */
-.main{flex:1;padding:16px;padding-bottom:90px;overflow-y:auto;}
+.main{flex:1;padding:16px;padding-bottom:24px;overflow-y:auto;}
 .sec-title{font-family:'Bebas Neue',cursive;font-size:17px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
@@ -208,16 +209,16 @@ const CHECKLIST_DATA={
 const ALL_ITEMS=Object.values(CHECKLIST_DATA).flat();
 
 const RECIPES=[
-  {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',cost:2.80,price:14,
+  {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',
     ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
     steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
-  {id:2,emoji:'🍺',name:'Michelada',tag:'Signature',glass:'Pint glass',prepTime:'1.5 min',cost:1.60,price:10,
+  {id:2,emoji:'🍺',name:'Michelada',tag:'Signature',glass:'Pint glass',prepTime:'1.5 min',
     ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
     steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
-  {id:3,emoji:'🍊',name:'Paloma',tag:'Classic',glass:'Highball',prepTime:'1.5 min',cost:1.90,price:12,
+  {id:3,emoji:'🍊',name:'Paloma',tag:'Classic',glass:'Highball',prepTime:'1.5 min',
     ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
     steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
-  {id:4,emoji:'🥃',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prepTime:'3 min',cost:3.20,price:16,
+  {id:4,emoji:'🥃',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prepTime:'3 min',
     ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
     steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
 ];
@@ -225,19 +226,15 @@ const RECIPES=[
 function getBarIdFromURL(){return new URLSearchParams(window.location.search).get('bar');}
 function ac(i){return COLORS[i%COLORS.length];}
 function ai(n){return(n||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();}
-function margin(r){return r.price>0?Math.round(((r.price-r.cost)/r.price)*100):0;}
 function getStaffLink(){return`${window.location.origin}${window.location.pathname}?bar=${S.bar?.id}`;}
 
 let S={
   user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
   checklist:{},closeoutSubmitted:false,
   tab:'dashboard',lang:'en',authMode:'login',authLoading:false,authError:'',appLoading:true,
-  authStep:'landing',
   showPw:false,
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
-  onboardBarName:'',onboardLocation:'',onboardStaffCount:'',onboardPOS:'',onboardPains:[],
-  onboardBarType:'',onboardRole:'',onboardClosingTime:'',onboardPhone:'',onboardOwnerName:'',
-  staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffUser:null,
+  staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffPinVerifying:false,staffUser:null,
   showStaffModal:false,showInvModal:false,showSaleModal:false,showShiftModal:false,showDropModal:false,
   newStaff:{name:'',role:'Bartender',pin:''},
   newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
@@ -245,36 +242,42 @@ let S={
   newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:'Bartender'},
   dropShiftId:null,dropReason:'',
   clockedIn:[],selectedStaff:null,
-  liveTime:'',photoCaption:null,generatingCaption:false,selectedPhoto:null,photoTag:'Social Media',photoNote:'',
+  liveTime:'',selectedPhoto:null,photoNote:'',
   recipeSearch:'',recipeFilter:'All',
   schedDay:new Date().getDay(),
   urlBarId:null,
   showInstallBanner:false,
+  showIOSInstallBanner:false,
+  showInstallModal:false,
   deferredPrompt:null,
+  onboardingStep:0,
+  onboardStaff:[{name:'',role:'Bartender',pin:''},{name:'',role:'Bartender',pin:''}],
+  onboardStarterPack:{liquor:true,beer:true,mixers:true,wine:false},
+  onboardSaving:false,
+  messages:[],chatInput:'',chatChannel:null,chatScrollPinned:true,
+  barLookupError:null,
+  showPins:false,editingStaff:null,
 };
-
-// Restore onboarding data from localStorage if user bounced
-try{
-  const saved=localStorage.getItem('cantinapro_onboarding');
-  if(saved){
-    const d=JSON.parse(saved);
-    S.onboardBarName=d.barName||'';
-    S.onboardLocation=d.location||'';
-    S.onboardStaffCount=d.staffCount||'';
-    S.onboardPOS=d.pos||'';
-    S.onboardPains=Array.isArray(d.pains)?d.pains:[];
-    S.onboardBarType=d.barType||'';
-    S.onboardRole=d.role||'';
-    S.onboardClosingTime=d.closingTime||'';
-    S.onboardPhone=d.phone||'';
-    S.onboardOwnerName=d.ownerName||'';
-    S.loginBarName=d.barName||'';
-    S.loginLocation=d.location||'';
-  }
-}catch(e){}
 
 // PWA install prompt
 window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();S.deferredPrompt=e;S.showInstallBanner=true;render();});
+
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+}
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+}
+function shouldShowIOSInstall(){
+  if(!isIOS())return false;
+  if(isStandalone())return false;
+  try{if(localStorage.getItem('cp_ios_install_dismissed')==='1')return false;}catch(e){}
+  return true;
+}
+function dismissIOSInstall(){
+  try{localStorage.setItem('cp_ios_install_dismissed','1');}catch(e){}
+  S.showIOSInstallBanner=false;S.showInstallModal=false;render();
+}
 
 async function installApp(){
   if(!S.deferredPrompt)return;
@@ -283,35 +286,134 @@ async function installApp(){
   S.deferredPrompt=null;S.showInstallBanner=false;render();
 }
 
+function openInstallGuide(){S.showInstallModal=true;render();}
+function closeInstallGuide(){S.showInstallModal=false;render();}
+
+function renderIOSInstallBanner(){
+  if(!S.showIOSInstallBanner)return '';
+  return `<div style="background:linear-gradient(135deg,rgba(77,159,255,.12),rgba(212,160,23,.08));border:1px solid rgba(77,159,255,.4);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+    <div style="font-size:24px">📱</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-weight:700;font-size:15px;color:var(--text)">Install on your iPhone</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">Tap Share <span style="color:var(--blue);font-weight:700">⬆️</span> then "Add to Home Screen"</div>
+    </div>
+    <button onclick="openInstallGuide()" style="background:var(--blue);border:none;color:#fff;border-radius:6px;padding:8px 12px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0">SHOW ME</button>
+    <button onclick="dismissIOSInstall()" aria-label="Dismiss" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1;-webkit-tap-highlight-color:transparent">×</button>
+  </div>`;
+}
+
+function renderInstallModal(){
+  if(!S.showInstallModal)return '';
+  const ios=isIOS();
+  return `<div class="modal-bg" onclick="closeInstallGuide()">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width:380px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px">
+        <div>
+          <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--lc);line-height:1">📱 INSTALL CANTINAPRO</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px">Add the app to your home screen — no App Store needed</div>
+        </div>
+        <button onclick="closeInstallGuide()" aria-label="Close" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0 4px;line-height:1">×</button>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:14px;background:var(--s2);border-radius:8px;padding:4px">
+        <button onclick="S.installGuideTab='ios';render()" style="flex:1;background:${(S.installGuideTab||(ios?'ios':'android'))==='ios'?'var(--lc)':'transparent'};color:${(S.installGuideTab||(ios?'ios':'android'))==='ios'?'#fff':'var(--muted)'};border:none;border-radius:6px;padding:9px;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1.5px;cursor:pointer">🍎 IPHONE</button>
+        <button onclick="S.installGuideTab='android';render()" style="flex:1;background:${(S.installGuideTab||(ios?'ios':'android'))==='android'?'var(--lc)':'transparent'};color:${(S.installGuideTab||(ios?'ios':'android'))==='android'?'#fff':'var(--muted)'};border:none;border-radius:6px;padding:9px;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1.5px;cursor:pointer">🤖 ANDROID</button>
+      </div>
+
+      ${(S.installGuideTab||(ios?'ios':'android'))==='ios'?`
+        <div style="font-size:14px;color:var(--text);line-height:1.6">
+          <div style="background:rgba(77,159,255,.06);border:1px solid rgba(77,159,255,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px"><strong style="color:var(--blue)">Important:</strong> You must use <strong>Safari</strong> on iPhone — not Chrome or another browser.</div>
+
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--lc);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:16px;flex-shrink:0">1</div>
+            <div><strong>Tap the Share button</strong><br/><span style="color:var(--muted);font-size:13px">It's the square with an arrow pointing up — at the bottom of Safari (or top on iPad)</span>
+              <div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px"><svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M7 1V11M7 1L3 5M7 1L11 5" stroke="#4d9fff" stroke-width="1.5" stroke-linecap="round"/><rect x="1" y="7" width="12" height="10" rx="2" stroke="#4d9fff" stroke-width="1.5"/></svg> <span style="color:var(--blue)">Share</span></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--lc);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:16px;flex-shrink:0">2</div>
+            <div><strong>Scroll and tap "Add to Home Screen"</strong><br/><span style="color:var(--muted);font-size:13px">It looks like a square with a + sign inside. Scroll down in the share menu if you don't see it.</span></div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--lc);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:16px;flex-shrink:0">3</div>
+            <div><strong>Tap "Add" in the top right</strong><br/><span style="color:var(--muted);font-size:13px">CantinaPro now lives on your home screen. Tap the icon anytime to open it like a real app.</span></div>
+          </div>
+
+          <button onclick="dismissIOSInstall()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);width:100%;padding:11px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1.5px;cursor:pointer;margin-top:8px">DON'T SHOW ME AGAIN</button>
+        </div>
+      `:`
+        <div style="font-size:14px;color:var(--text);line-height:1.6">
+          ${S.deferredPrompt?`<button onclick="installApp();closeInstallGuide()" style="background:linear-gradient(135deg,var(--lc),#a00020);border:none;color:#fff;width:100%;padding:14px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px">📱 INSTALL APP NOW</button>`:''}
+          <div style="background:rgba(0,232,122,.06);border:1px solid rgba(0,232,122,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px"><strong style="color:var(--green)">Tip:</strong> Use <strong>Chrome</strong> or <strong>Samsung Browser</strong> for the smoothest install.</div>
+
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--lc);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:16px;flex-shrink:0">1</div>
+            <div><strong>Tap the menu button (⋮)</strong><br/><span style="color:var(--muted);font-size:13px">It's the three dots in the top right of Chrome.</span></div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--lc);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:16px;flex-shrink:0">2</div>
+            <div><strong>Tap "Install app" or "Add to Home screen"</strong><br/><span style="color:var(--muted);font-size:13px">The wording depends on your phone. Either one works.</span></div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--lc);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:16px;flex-shrink:0">3</div>
+            <div><strong>Tap "Install" or "Add"</strong><br/><span style="color:var(--muted);font-size:13px">Done! CantinaPro is now on your home screen.</span></div>
+          </div>
+        </div>
+      `}
+    </div>
+  </div>`;
+}
+
 async function init(){
-  setInterval(()=>{
-    S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
-  },1000);
-  const urlBarId=getBarIdFromURL();
-  if(urlBarId){
-    S.urlBarId=urlBarId;
-    const{data:bar}=await db.from('bars').select('*').eq('id',urlBarId).single();
-    if(bar){
-      S.bar=bar;
-      const{data:staff}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
-      S.staffLoginStaff=staff||[];
+  try{
+    setInterval(()=>{
+      S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
+    },1000);
+    const urlBarId=getBarIdFromURL();
+    if(urlBarId){
+      S.urlBarId=urlBarId;
+      const{data:bar,error:barError}=await db.from('bars').select('*').eq('id',urlBarId).maybeSingle();
+      if(barError){console.error('[CantinaPro] bar lookup error:',barError);S.barLookupError=barError.message;}
+      if(bar){
+        S.bar=bar;
+        const{data:staff,error:staffError}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
+        if(staffError)console.error('[CantinaPro] staff lookup error:',staffError);
+        S.staffLoginStaff=staff||[];
+      }else if(!barError){
+        S.barLookupError='not_found';
+      }
+      if(shouldShowIOSInstall())S.showIOSInstallBanner=true;
+      S.appLoading=false;render();return;
     }
-    S.appLoading=false;render();return;
-  }
-  const{data:{session}}=await db.auth.getSession();
-  if(session){S.user=session.user;await loadBar();}
-  S.appLoading=false;render();
-  db.auth.onAuthStateChange(async(_,session)=>{
+    const{data:{session}}=await db.auth.getSession();
     if(session){S.user=session.user;await loadBar();}
-    else if(!S.staffUser){S.user=null;S.bar=null;}
-    render();
-  });
+    if(shouldShowIOSInstall())S.showIOSInstallBanner=true;
+    S.appLoading=false;render();
+    db.auth.onAuthStateChange(async(_,session)=>{
+      if(session){S.user=session.user;await loadBar();}
+      else if(!S.staffUser){S.user=null;S.bar=null;}
+      render();
+    });
+  }catch(e){
+    console.error('[CantinaPro] init crashed:',e);
+    S.appLoading=false;
+    document.getElementById('root').innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Rajdhani',sans-serif;color:#f0f0ff;background:#080810">
+      <div style="font-family:'Bebas Neue',cursive;font-size:42px;letter-spacing:6px;color:#c8102e">CANTINAPRO</div>
+      <div style="font-size:16px;color:#9999bb;margin-top:24px;max-width:380px;line-height:1.6">Something went wrong loading the app. Please refresh the page or check your internet connection.</div>
+      <button onclick="location.reload()" style="margin-top:24px;padding:14px 28px;background:linear-gradient(135deg,#c8102e,#a00020);border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer">RELOAD</button>
+      <div style="font-size:12px;color:#666;margin-top:16px;font-family:'Share Tech Mono',monospace">${e.message||''}</div>
+    </div>`;
+  }
 }
 
 async function loadBar(){
   const{data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
-  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules()]);}
+  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);subscribeToMessages();}
 }
 async function loadStaff(){if(!S.bar)return;const{data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
 async function loadSales(){if(!S.bar)return;const{data}=await db.from('sales').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(30);S.sales=data||[];}
@@ -324,21 +426,39 @@ async function loadSchedules(){
   S.schedules=sc||[];S.bids=bi||[];
 }
 
-async function selectStaffMember(m){S.staffLoginSelected=m;S.staffLoginStep='pin';S.staffPinInput='';S.staffPinError='';render();}
+async function selectStaffMember(m){S.staffLoginSelected=m;S.staffLoginStep='pin';S.staffPinInput='';S.staffPinError='';S.staffPinVerifying=false;render();}
 function pinPress(v){
+  if(S.staffPinVerifying)return;
   if(v==='del')S.staffPinInput=S.staffPinInput.slice(0,-1);
   else if(S.staffPinInput.length<4)S.staffPinInput+=v;
-  if(S.staffPinInput.length===4)verifyPin();else render();
+  render();
+  if(S.staffPinInput.length===4){
+    S.staffPinVerifying=true;
+    setTimeout(()=>{render();verifyPin();},150);
+  }
 }
 async function verifyPin(){
   const m=S.staffLoginSelected;
   if(!m.pin||m.pin.toString()===S.staffPinInput.toString()){
-    S.staffUser=m;await loadSchedules();await loadStaff();S.tab='my-schedule';S.staffPinError='';
-  }else{S.staffPinError='Wrong PIN. Try again.';S.staffPinInput='';}
+    try{
+      S.staffUser=m;
+      await loadSchedules();await loadStaff();await loadMessages();await loadRecipes();
+      subscribeToMessages();
+      S.tab='my-schedule';S.staffPinError='';S.staffPinVerifying=false;
+    }catch(e){
+      console.error('[CantinaPro] verifyPin load error:',e);
+      S.staffPinError='Could not load. Check your connection.';
+      S.staffUser=null;S.staffPinInput='';S.staffPinVerifying=false;
+    }
+  }else{
+    S.staffPinError=S.lang==='es'?'PIN incorrecto. Intenta de nuevo.':'Wrong PIN. Try again.';
+    S.staffPinInput='';S.staffPinVerifying=false;
+  }
   render();
 }
-function staffLogout(){
-  S.staffUser=null;
+async function staffLogout(){
+  try{if(_chatSub){await db.removeChannel(_chatSub);_chatSub=null;}}catch(e){}
+  S.staffUser=null;S.messages=[];S.chatInput='';
   if(S.urlBarId){S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.checklist={};S.closeoutSubmitted=false;S.clockedIn=[];}
   else{S.bar=null;S.staffLoginStaff=[];S.staffLoginStep='select';S.staffLoginSelected=null;S.staffPinInput='';S.schedules=[];S.bids=[];S.staff=[];S.checklist={};S.closeoutSubmitted=false;}
   render();
@@ -349,38 +469,51 @@ async function handleAuth(){
   const email=S.loginEmail.trim(),password=S.loginPassword.trim();
   if(!email||!password){S.authError='Email and password are required';S.authLoading=false;render();return;}
   if(S.authMode==='login'){
-    const{error}=await db.auth.signInWithPassword({email,password});
+    const{data,error}=await db.auth.signInWithPassword({email,password});
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
+    if(data?.user){S.user=data.user;await loadBar();}
   }else{
     if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
     const{data,error}=await db.auth.signUp({email,password});
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
     if(data.user){
-      const baseRecord={name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email};
-      const extraRecord={...baseRecord};
-      if(S.onboardStaffCount)extraRecord.staff_count=S.onboardStaffCount;
-      if(S.onboardPOS)extraRecord.pos_system=S.onboardPOS;
-      if(S.onboardPains&&S.onboardPains.length)extraRecord.pain_points=S.onboardPains;
-      if(S.onboardBarType)extraRecord.bar_type=S.onboardBarType;
-      if(S.onboardRole)extraRecord.owner_role=S.onboardRole;
-      if(S.onboardClosingTime)extraRecord.closing_time=S.onboardClosingTime;
-      if(S.onboardPhone)extraRecord.phone=S.onboardPhone.trim();
-      if(S.onboardOwnerName)extraRecord.owner_name=S.onboardOwnerName.trim();
-      let{error:insertErr}=await db.from('bars').insert(extraRecord);
-      if(insertErr){
-        // Columns may not exist yet — fall back to base fields only
-        console.warn('Bar insert with extras failed, retrying with base:',insertErr);
-        await db.from('bars').insert(baseRecord);
-      }
-      try{localStorage.removeItem('cantinapro_onboarding');}catch(e){}
+      S.user=data.user;
+      await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});
+      await loadBar();
+      S.onboardingStep=1;
     }
   }
   S.authLoading=false;render();
 }
-async function logout(){await db.auth.signOut();Object.assign(S,{user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,staffUser:null});render();}
+async function logout(){
+  try{
+    if(_chatSub){await db.removeChannel(_chatSub);_chatSub=null;}
+    await db.auth.signOut();
+  }catch(e){console.error('[CantinaPro] logout error:',e);}
+  Object.assign(S,{
+    user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],
+    bids:[],checklist:{},closeoutSubmitted:false,clockedIn:[],selectedStaff:null,
+    staffUser:null,messages:[],chatInput:'',onboardingStep:0,
+    tab:'dashboard',selectedPhoto:null,selectedItem:null,
+    loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',authMode:'login',authError:''
+  });
+  render();
+}
 
 async function saveStaff(){if(!S.newStaff.name||!S.bar)return;await db.from('staff').insert({bar_id:S.bar.id,...S.newStaff});S.newStaff={name:'',role:'Bartender',pin:''};S.showStaffModal=false;await loadStaff();render();}
 async function deleteStaff(id){await db.from('staff').delete().eq('id',id);await loadStaff();render();}
+
+async function saveEditedStaff(){
+  if(!S.editingStaff||!S.editingStaff.name)return;
+  const{id,name,role,pin}=S.editingStaff;
+  await db.from('staff').update({name:name.trim(),role,pin}).eq('id',id);
+  S.editingStaff=null;await loadStaff();render();
+}
+async function confirmDeleteStaff(staff){
+  if(!confirm(`Delete ${staff.name}? This cannot be undone.`))return;
+  await deleteStaff(staff.id);
+  S.editingStaff=null;render();
+}
 async function saveSale(){if(!S.bar)return;await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});S.newSale={bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''};S.showSaleModal=false;await loadSales();render();}
 async function saveInv(){if(!S.newInv.name||!S.bar)return;await db.from('inventory').insert({bar_id:S.bar.id,...S.newInv,stock:parseFloat(S.newInv.stock)||0,par_level:parseFloat(S.newInv.par_level)||0});S.newInv={name:'',category:'',unit:'',stock:'',par_level:''};S.showInvModal=false;await loadInventory();render();}
 async function deleteInv(id){await db.from('inventory').delete().eq('id',id);await loadInventory();render();}
@@ -436,19 +569,70 @@ async function handlePhotoUpload(e){
   const files=Array.from(e.target.files);
   for(const file of files){
     const reader=new FileReader();
-    reader.onload=async ev=>{await db.from('photos').insert({bar_id:S.bar.id,label:S.photoNote||file.name,tag:S.photoTag,url:ev.target.result,created_at:new Date()});await loadPhotos();render();};
+    reader.onload=async ev=>{await db.from('photos').insert({bar_id:S.bar.id,label:S.photoNote||file.name,tag:'Social Media',url:ev.target.result,created_at:new Date()});await loadPhotos();render();};
     reader.readAsDataURL(file);
   }
   S.photoNote='';e.target.value='';
 }
-async function generateCaption(photo){
-  S.generatingCaption=true;S.photoCaption=null;render();
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:`Write a fun Instagram caption for ${S.bar?.name||'our bar'}. Photo: "${photo.label}". Include 1-2 emojis and 3-4 hashtags. Under 150 chars before hashtags.`}]})});
-    const data=await res.json();S.photoCaption=data.content?.find(b=>b.type==='text')?.text||'Could not generate.';
-  }catch{S.photoCaption='Could not generate caption.';}
-  S.generatingCaption=false;render();
+// ── CHAT / MESSAGES ────────────────────────────────────
+async function loadMessages(){
+  if(!S.bar)return;
+  const{data,error}=await db.from('messages').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:true}).limit(200);
+  if(error){console.error('[CantinaPro] loadMessages error:',error);alert('Chat error: '+error.message);return;}
+  S.messages=data||[];
 }
+
+async function sendMessage(){
+  const txt=(S.chatInput||'').trim();
+  if(!txt||!S.bar)return;
+  const sender=S.staffUser?S.staffUser.name:'Owner';
+  const senderId=S.staffUser?S.staffUser.id:(S.user?.id||'owner');
+  const isOwner=!S.staffUser;
+  S.chatInput='';
+  const inputEl=document.getElementById('chat-input');if(inputEl){inputEl.value='';inputEl.style.height='auto';}
+  const{data,error}=await db.from('messages').insert({
+    bar_id:S.bar.id,sender_name:sender,sender_id:senderId,
+    is_owner:isOwner,text:txt,pinned:false
+  }).select();
+  if(error){console.error('[CantinaPro] sendMessage error:',error);alert('Could not send: '+error.message);return;}
+  console.log('[CantinaPro] message sent:',data);
+  await loadMessages();render();scrollChatToBottom();
+}
+
+async function deleteMessage(id){
+  if(!confirm('Delete this message?'))return;
+  await db.from('messages').delete().eq('id',id);
+  await loadMessages();render();
+}
+
+async function togglePin(id,currentPinned){
+  await db.from('messages').update({pinned:!currentPinned}).eq('id',id);
+  await loadMessages();render();
+}
+
+function scrollChatToBottom(){
+  setTimeout(()=>{
+    const el=document.getElementById('chat-scroll');
+    if(el)el.scrollTop=el.scrollHeight;
+  },50);
+}
+
+let _chatSub=null;
+function subscribeToMessages(){
+  if(_chatSub){db.removeChannel(_chatSub);_chatSub=null;}
+  if(!S.bar)return;
+  _chatSub=db.channel(`messages-${S.bar.id}`)
+    .on('postgres_changes',{event:'*',schema:'public',table:'messages',filter:`bar_id=eq.${S.bar.id}`},
+      async()=>{await loadMessages();if(S.tab==='chat'||S.tab==='staff-chat'){render();scrollChatToBottom();}})
+    .subscribe();
+}
+
+function buildStaffShareMessage(){
+  const link=getStaffLink();
+  const barName=S.bar?.name||'our team';
+  return `📲 ${barName} Staff Portal — log in here:\n\n${link}\n\nHow to use it:\n1. Tap the link above\n2. Pick your name from the list\n3. Enter your 4-digit PIN\n\n💡 To install as an app on your phone:\n• iPhone (Safari): Tap Share ⬆️ then "Add to Home Screen"\n• Android (Chrome): Tap menu ⋮ then "Install app"`;
+}
+
 function copyStaffLink(){
   navigator.clipboard?.writeText(getStaffLink()).then(()=>{
     const btn=document.getElementById('copy-link-btn');
@@ -456,309 +640,72 @@ function copyStaffLink(){
   });
 }
 
+function copyStaffMessage(){
+  navigator.clipboard?.writeText(buildStaffShareMessage()).then(()=>{
+    const btn=document.getElementById('copy-msg-btn');
+    if(btn){btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='📨 COPY FULL INVITE MESSAGE',2000);}
+  });
+}
+
+function shareStaffSMS(){
+  const msg=buildStaffShareMessage();
+  window.location.href=`sms:?&body=${encodeURIComponent(msg)}`;
+}
+function shareStaffWhatsApp(){
+  const msg=buildStaffShareMessage();
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
 function render(){
   const root=document.getElementById('root');
   if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
-  if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();return;}
-  if(S.user&&S.bar){root.innerHTML=renderOwnerApp();return;}
+  if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
+  if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
+  if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
   if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
+  if(S.urlBarId&&!S.bar){root.innerHTML=renderBarNotFound();return;}
   root.innerHTML=renderAuth();
 }
 
-// ── ONBOARDING FUNCTIONS ─────────────────────────────
-function saveOnboardingLocal(){
-  try{
-    localStorage.setItem('cantinapro_onboarding',JSON.stringify({
-      barName:S.onboardBarName,
-      location:S.onboardLocation,
-      staffCount:S.onboardStaffCount,
-      pos:S.onboardPOS,
-      pains:S.onboardPains,
-      barType:S.onboardBarType,
-      role:S.onboardRole,
-      closingTime:S.onboardClosingTime,
-      phone:S.onboardPhone,
-      ownerName:S.onboardOwnerName,
-      ts:Date.now()
-    }));
-  }catch(e){}
+function renderBarNotFound(){
+  return `<div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🤔</div>
+      <div class="auth-title">Bar Not Found</div>
+      <div style="font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:18px">This staff link looks broken or the bar account no longer exists. Ask your manager to send you a fresh staff link from their dashboard.</div>
+      <a href="${window.location.origin}${window.location.pathname}" style="display:block;padding:14px;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;text-decoration:none">GO TO LOGIN</a>
+      ${S.barLookupError&&S.barLookupError!=='not_found'?`<div style="font-size:11px;color:var(--muted);margin-top:14px;font-family:'Share Tech Mono',monospace;word-break:break-all">${S.barLookupError}</div>`:''}
+    </div>
+  </div>`;
 }
 
-// Pain points: how owners describe problems, mapped silently to features for the pay page
-const PAIN_POINTS=[
-  {id:'noshows',label:'Staff no-shows & last-minute call-offs',emoji:'😤',feature:'Shift Bidding',tab:'schedule'},
-  {id:'sched_chaos',label:'Schedule changes through 50 text messages',emoji:'📱',feature:'Live Schedule',tab:'schedule'},
-  {id:'drink_specs',label:"Bartenders forgetting drink specs",emoji:'🍹',feature:'Recipe Book',tab:'recipes'},
-  {id:'stockouts',label:'Running out of liquor or product mid-shift',emoji:'📦',feature:'Inventory & Par Levels',tab:'inventory'},
-  {id:'cash_short',label:"Cash, tips & card totals don't add up at close",emoji:'💰',feature:'Nightly Closeout',tab:'closeout'},
-  {id:'buddy_punch',label:'Staff buddy-punching the clock for each other',emoji:'⏰',feature:'PIN Time Clock',tab:'shift'},
-  {id:'no_visibility',label:"Curious how the night closed without having to go in or call staff",emoji:'👀',feature:'Owner Dashboard',tab:'dashboard'},
-  {id:'paper_trail',label:"No photos of the night to post on social media",emoji:'📸',feature:'Photo Gallery',tab:'gallery'},
-];
-
-function togglePain(id){
-  if(S.onboardPains.includes(id))S.onboardPains=S.onboardPains.filter(p=>p!==id);
-  else S.onboardPains=[...S.onboardPains,id];
-  saveOnboardingLocal();
-  render();
-}
-
-function isPainCardDismissed(){
-  if(!S.bar)return true;
-  try{return localStorage.getItem('cantinapro_pains_dismissed_'+S.bar.id)==='1';}catch(e){return false;}
-}
-function dismissPainCard(){
-  if(!S.bar)return;
-  try{localStorage.setItem('cantinapro_pains_dismissed_'+S.bar.id,'1');}catch(e){}
-  render();
-}
-
-async function submitOnboarding(){
-  if(!S.onboardBarName.trim()||!S.onboardLocation.trim()||!S.onboardBarType||!S.onboardOwnerName.trim()||!S.onboardRole||!S.onboardClosingTime||!S.onboardPhone.trim()||!S.onboardStaffCount||!S.onboardPOS){
-    S.authError='Please fill out all fields so we can set up your bar.';
-    render();return;
-  }
-  S.authError='';
-  saveOnboardingLocal();
-  S.authStep='pains';
-  render();
-}
-
-async function submitPains(){
-  S.authError='';
-  saveOnboardingLocal();
-  // Save lead to Supabase (don't block if it fails — table may not exist yet)
-  try{
-    await db.from('leads').insert({
-      bar_name:S.onboardBarName.trim(),
-      location:S.onboardLocation.trim(),
-      staff_count:S.onboardStaffCount,
-      pos_system:S.onboardPOS,
-      pain_points:S.onboardPains,
-      bar_type:S.onboardBarType,
-      owner_role:S.onboardRole,
-      closing_time:S.onboardClosingTime,
-      phone:S.onboardPhone.trim(),
-      owner_name:S.onboardOwnerName.trim(),
-      created_at:new Date()
-    });
-  }catch(e){console.warn('Lead save failed:',e);}
-  // Pre-fill signup fields
-  S.loginBarName=S.onboardBarName;
-  S.loginLocation=S.onboardLocation;
-  S.authStep='pay';
-  render();
-}
-
-function goToSignup(){
-  S.authStep='signup';
-  S.authMode='signup';
-  render();
+function scrollActiveTabIntoView(){
+  setTimeout(()=>{
+    const nav=document.querySelector('.top-nav');
+    const active=nav?.querySelector('.nb.on');
+    if(!nav||!active)return;
+    const navRect=nav.getBoundingClientRect();
+    const btnRect=active.getBoundingClientRect();
+    const targetScroll=nav.scrollLeft+(btnRect.left-navRect.left)-(navRect.width/2)+(btnRect.width/2);
+    nav.scrollTo({left:targetScroll,behavior:'smooth'});
+  },30);
 }
 
 function renderAuth(){
-  if(S.authStep==='landing')return renderLanding();
-  if(S.authStep==='onboarding')return renderOnboarding();
-  if(S.authStep==='pains')return renderPains();
-  if(S.authStep==='pay')return renderPay();
-  if(S.authStep==='signup'||S.authStep==='login')return renderSignupLogin();
-  return renderLanding();
-}
-
-function renderLanding(){
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
-    <div class="auth-div"></div>
-    <div style="max-width:400px;width:100%;text-align:center;margin-bottom:24px">
-      <div style="font-family:'Playfair Display',serif;font-size:26px;color:var(--text);line-height:1.3;margin-bottom:12px">Run your bar like a pro.</div>
-      <div style="font-size:16px;color:var(--muted);line-height:1.6">Sales, staff, inventory, schedules, and closeout — all in one app your team will actually use.</div>
-    </div>
-    <div class="auth-card" style="text-align:left">
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-bottom:14px">
-        <div style="font-size:22px">📅</div><div style="font-size:15px;color:var(--text)">Live scheduling with shift bidding</div>
-        <div style="font-size:22px">📦</div><div style="font-size:15px;color:var(--text)">Inventory & par level tracking</div>
-        <div style="font-size:22px">⏰</div><div style="font-size:15px;color:var(--text)">Staff clock in/out with PIN</div>
-        <div style="font-size:22px">✅</div><div style="font-size:15px;color:var(--text)">Nightly closeout checklist</div>
-        <div style="font-size:22px">🍹</div><div style="font-size:15px;color:var(--text)">Recipe book your bartenders will use</div>
-      </div>
-      <button class="auth-btn" onclick="S.authStep='onboarding';S.authError='';render()">GET STARTED →</button>
-      <button onclick="S.authStep='login';S.authMode='login';S.authError='';render()" style="width:100%;background:none;border:none;color:var(--muted);font-size:15px;margin-top:12px;cursor:pointer;padding:10px">I already have an account</button>
-    </div>
-    <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
-  </div>`;
-}
-
-function renderOnboarding(){
-  const POS_OPTIONS=['Clover','Square','Toast','Aldelo','TouchBistro','Lightspeed','SpotOn','Other','None / Pen & Paper'];
-  const BAR_TYPES=['Sports Bar','Cocktail Bar / Lounge','Neighborhood Bar / Dive','Nightclub','Restaurant w/ Bar','Brewery / Taproom','Hotel Bar','Other'];
-  const ROLES=['Owner','General Manager','Bar Manager','Investor / Partner','Other'];
-  const CLOSING_TIMES=['10:00 PM','11:00 PM','12:00 AM','1:00 AM','2:00 AM','3:00 AM','4:00 AM','5:00 AM'];
-  const sectionStyle='font-family:\'Bebas Neue\',cursive;font-size:12px;letter-spacing:2px;color:var(--lcg);margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)';
-  const selectStyle='background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;';
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-sub">TELL US ABOUT YOUR BAR</div>
-    <div class="auth-div"></div>
-    <div class="auth-card">
-      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:18px">
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--border);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--border);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--border);border-radius:2px"></div>
-      </div>
-      <div class="auth-title">Set Up Your Bar</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:18px;text-align:center;line-height:1.5">Takes a minute. We'll use this to set up your account.</div>
-      ${S.authError?`<div class="auth-err">${S.authError}</div>`:''}
-
-      <div style="${sectionStyle}">🏢 THE BAR</div>
-      <div class="field"><label>Bar Name *</label><input type="text" placeholder="Local Cantina" value="${S.onboardBarName}" oninput="S.onboardBarName=this.value;saveOnboardingLocal()"/></div>
-      <div class="field"><label>Bar Type *</label>
-        <select oninput="S.onboardBarType=this.value;saveOnboardingLocal()" style="${selectStyle}">
-          <option value="">Select bar type...</option>
-          ${BAR_TYPES.map(b=>`<option value="${b}" ${S.onboardBarType===b?'selected':''}>${b}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Location *</label><input type="text" placeholder="Oak Lawn, IL" value="${S.onboardLocation}" oninput="S.onboardLocation=this.value;saveOnboardingLocal()"/></div>
-      <div class="field"><label>Closing Time *</label>
-        <select oninput="S.onboardClosingTime=this.value;saveOnboardingLocal()" style="${selectStyle}">
-          <option value="">When do you close?</option>
-          ${CLOSING_TIMES.map(t=>`<option value="${t}" ${S.onboardClosingTime===t?'selected':''}>${t}</option>`).join('')}
-        </select>
-      </div>
-
-      <div style="${sectionStyle}">👤 YOU</div>
-      <div class="field"><label>Your Name *</label><input type="text" placeholder="Luis" value="${S.onboardOwnerName}" oninput="S.onboardOwnerName=this.value;saveOnboardingLocal()"/></div>
-      <div class="field"><label>Your Role *</label>
-        <select oninput="S.onboardRole=this.value;saveOnboardingLocal()" style="${selectStyle}">
-          <option value="">What's your role?</option>
-          ${ROLES.map(r=>`<option value="${r}" ${S.onboardRole===r?'selected':''}>${r}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Phone Number *</label><input type="tel" placeholder="(555) 123-4567" value="${S.onboardPhone}" oninput="S.onboardPhone=this.value;saveOnboardingLocal()"/></div>
-
-      <div style="${sectionStyle}">⚙️ OPERATIONS</div>
-      <div class="field"><label># of Staff *</label>
-        <select oninput="S.onboardStaffCount=this.value;saveOnboardingLocal()" style="${selectStyle}">
-          <option value="">Select...</option>
-          ${['1-5','6-10','11-20','21-50','50+'].map(n=>`<option value="${n}" ${S.onboardStaffCount===n?'selected':''}>${n} staff</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>POS System *</label>
-        <select oninput="S.onboardPOS=this.value;saveOnboardingLocal()" style="${selectStyle}">
-          <option value="">Select your POS...</option>
-          ${POS_OPTIONS.map(p=>`<option value="${p}" ${S.onboardPOS===p?'selected':''}>${p}</option>`).join('')}
-        </select>
-      </div>
-
-      <button class="auth-btn" style="margin-top:18px" onclick="submitOnboarding()">CONTINUE →</button>
-      <button onclick="S.authStep='landing';S.authError='';render()" style="width:100%;background:none;border:none;color:var(--muted);font-size:15px;margin-top:12px;cursor:pointer;padding:10px">← Back</button>
-    </div>
-  </div>`;
-}
-
-function renderPains(){
-  const selectedCount=S.onboardPains.length;
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-sub">WHAT'S HOLDING YOU BACK?</div>
-    <div class="auth-div"></div>
-    <div class="auth-card">
-      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:18px">
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--border);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--border);border-radius:2px"></div>
-      </div>
-      <div class="auth-title">What's the headache?</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:18px;text-align:center;line-height:1.5">Pick everything that drives you crazy at ${S.onboardBarName||'your bar'}. We'll show you how CantinaPro fixes it.</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
-        ${PAIN_POINTS.map(p=>{
-          const on=S.onboardPains.includes(p.id);
-          return `<div onclick="togglePain('${p.id}')" style="background:${on?'rgba(200,16,46,.12)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s">
-            <div style="font-size:24px;flex-shrink:0">${p.emoji}</div>
-            <div style="flex:1;font-size:15px;font-weight:600;color:var(--text);line-height:1.4">${p.label}</div>
-            <div style="width:26px;height:26px;border-radius:6px;border:2px solid ${on?'var(--lc)':'var(--border)'};background:${on?'var(--lc)':'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">${on?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#fff" stroke-width="2.5" fill="none"/></svg>':''}</div>
-          </div>`;
-        }).join('')}
-      </div>
-      <div style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:14px">${selectedCount===0?'Select all that apply, or skip if none':`<span style="color:var(--lcg);font-weight:700">${selectedCount} selected</span> — we've got you covered`}</div>
-      <button class="auth-btn" onclick="submitPains()">${selectedCount>0?'SHOW ME THE FIX →':'CONTINUE →'}</button>
-      <button onclick="S.authStep='onboarding';S.authError='';render()" style="width:100%;background:none;border:none;color:var(--muted);font-size:15px;margin-top:12px;cursor:pointer;padding:10px">← Back</button>
-    </div>
-  </div>`;
-}
-
-function renderPay(){
-  const selectedPains=PAIN_POINTS.filter(p=>S.onboardPains.includes(p.id));
-  return `<div class="auth-wrap">
-    <div class="auth-logo">CantinaPro</div>
-    <div class="auth-sub">${S.onboardBarName.toUpperCase()}</div>
-    <div class="auth-div"></div>
-    <div class="auth-card">
-      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:18px">
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--border);border-radius:2px"></div>
-      </div>
-      <div style="text-align:center;margin-bottom:20px">
-        <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--text);margin-bottom:8px">You're almost in, ${(S.onboardOwnerName||'').trim().split(' ')[0]||S.onboardBarName}.</div>
-        <div style="font-size:15px;color:var(--muted);line-height:1.6">Start your subscription to unlock the full app for ${S.onboardBarName||'your team'}.</div>
-      </div>
-      ${selectedPains.length>0?`
-        <div style="background:rgba(0,232,122,.06);border:1px solid rgba(0,232,122,.3);border-radius:12px;padding:16px;margin-bottom:18px">
-          <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--green);margin-bottom:12px;text-align:center">✓ HERE'S HOW WE FIX IT</div>
-          ${selectedPains.map(p=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,232,122,.15)">
-            <div style="font-size:20px;flex-shrink:0">${p.emoji}</div>
-            <div style="flex:1">
-              <div style="font-size:14px;color:var(--muted);line-height:1.4">${p.label}</div>
-              <div style="font-size:14px;color:var(--green);font-weight:700;margin-top:2px">→ ${p.feature}</div>
-            </div>
-          </div>`).join('')}
-        </div>
-      `:''}
-      <div style="background:linear-gradient(135deg,rgba(200,16,46,.12),rgba(212,160,23,.08));border:2px solid var(--lcg);border-radius:14px;padding:20px;margin-bottom:18px;text-align:center">
-        <div style="font-family:'Bebas Neue',cursive;font-size:48px;letter-spacing:2px;color:var(--lcg);line-height:1">$50<span style="font-size:20px;color:var(--muted)">/mo</span></div>
-        <div style="font-size:13px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px">UNLIMITED STAFF · CANCEL ANYTIME</div>
-      </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px">
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">EVERYTHING YOU GET</div>
-        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:14px;color:var(--text)">
-          <div style="color:var(--green)">✓</div><div>Live scheduling with staff bidding</div>
-          <div style="color:var(--green)">✓</div><div>Inventory & par level tracking</div>
-          <div style="color:var(--green)">✓</div><div>Staff time clock with PIN login</div>
-          <div style="color:var(--green)">✓</div><div>Nightly closeout & sales reports</div>
-          <div style="color:var(--green)">✓</div><div>Custom recipe book</div>
-          <div style="color:var(--green)">✓</div><div>Photo gallery + AI captions</div>
-          <div style="color:var(--green)">✓</div><div>English & Spanish for your team</div>
-        </div>
-      </div>
-      <a href="${STRIPE_LINK}" target="_blank" class="auth-btn" style="display:block;text-decoration:none;text-align:center">SUBSCRIBE NOW →</a>
-      <button onclick="goToSignup()" style="width:100%;background:none;border:1px solid var(--border);color:var(--text);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;margin-top:10px;cursor:pointer">I'VE SUBSCRIBED — CREATE MY ACCOUNT</button>
-      <button onclick="S.authStep='pains';render()" style="width:100%;background:none;border:none;color:var(--muted);font-size:14px;margin-top:10px;cursor:pointer;padding:8px">← Back</button>
-    </div>
-  </div>`;
-}
-
-function renderSignupLogin(){
-  const isLogin=S.authStep==='login';
+  const isLogin=S.authMode==='login';
   return `<div class="auth-wrap">
     <div class="auth-logo">CantinaPro</div>
     <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
     <div class="auth-div"></div>
     <div class="auth-card">
-      ${!isLogin?`<div style="display:flex;justify-content:center;gap:6px;margin-bottom:18px">
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-        <div style="width:24px;height:4px;background:var(--lc);border-radius:2px"></div>
-      </div>`:''}
       <div class="auth-tabs">
-        <button class="auth-tab ${isLogin?'on':''}" onclick="S.authStep='login';S.authMode='login';S.authError='';render()">OWNER LOGIN</button>
-        <button class="auth-tab ${!isLogin?'on':''}" onclick="S.authStep='signup';S.authMode='signup';S.authError='';render()">CREATE ACCOUNT</button>
+        <button class="auth-tab ${isLogin?'on':''}" onclick="S.authMode='login';render()">OWNER LOGIN</button>
+        <button class="auth-tab ${!isLogin?'on':''}" onclick="S.authMode='signup';render()">NEW BAR</button>
       </div>
-      <div class="auth-title">${isLogin?'Welcome Back':'Create Your Account'}</div>
+      <div class="auth-title">${isLogin?'Welcome Back':'Create Your Bar'}</div>
       ${S.authError?`<div class="auth-err">${S.authError}</div>`:''}
       ${!isLogin?`
         <div class="field"><label>Bar Name</label><input type="text" placeholder="Local Cantina" value="${S.loginBarName}" oninput="S.loginBarName=this.value"/></div>
@@ -771,11 +718,203 @@ function renderSignupLogin(){
           <button class="pw-eye" onclick="S.showPw=!S.showPw;render()" type="button">${S.showPw?'🙈':'👁️'}</button>
         </div>
       </div>
-      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE ACCOUNT')}</button>
-      ${!isLogin?`<button onclick="S.authStep='pay';render()" style="width:100%;background:none;border:none;color:var(--muted);font-size:14px;margin-top:10px;cursor:pointer;padding:8px">← Back to subscription</button>`:`<button onclick="S.authStep='landing';render()" style="width:100%;background:none;border:none;color:var(--muted);font-size:14px;margin-top:10px;cursor:pointer;padding:8px">← Back</button>`}
+      <button class="auth-btn" onclick="handleAuth()" ${S.authLoading?'disabled':''}>${S.authLoading?'Loading...':(isLogin?'LOG IN':'CREATE BAR')}</button>
+      <div style="font-size:14px;color:var(--muted);margin-top:14px">${isLogin?'New bar? Tap NEW BAR above':'Already registered? Tap OWNER LOGIN'}</div>
     </div>
     <div style="margin-top:18px;font-size:14px;color:var(--muted)">Staff? Ask your manager for the staff link.</div>
     <div style="margin-top:12px;font-size:13px;color:var(--muted)">📱 Tip: Add to your home screen to install as an app!</div>
+  </div>`;
+}
+
+// ── ONBOARDING WIZARD ──────────────────────────────────
+const STARTER_PACK={
+  liquor:[
+    {name:'Tequila Blanco',category:'Tequila',unit:'750ml',stock:6,par_level:8},
+    {name:'Bourbon',category:'Whiskey',unit:'750ml',stock:4,par_level:6},
+    {name:'Vodka',category:'Vodka',unit:'750ml',stock:5,par_level:8},
+    {name:'Rum',category:'Rum',unit:'750ml',stock:3,par_level:5},
+    {name:'Cointreau',category:'Liqueur',unit:'750ml',stock:2,par_level:3},
+  ],
+  beer:[
+    {name:'Modelo Especial',category:'Beer',unit:'Case',stock:4,par_level:6},
+    {name:'Corona',category:'Beer',unit:'Case',stock:3,par_level:5},
+    {name:'Domestic Draft',category:'Beer',unit:'Keg',stock:1,par_level:2},
+  ],
+  mixers:[
+    {name:'Lime juice',category:'Mixer',unit:'Bottle',stock:6,par_level:10},
+    {name:'Agave syrup',category:'Mixer',unit:'Bottle',stock:2,par_level:3},
+    {name:'Clamato',category:'Mixer',unit:'Bottle',stock:4,par_level:6},
+    {name:'Tonic water',category:'Mixer',unit:'Case',stock:2,par_level:3},
+  ],
+  wine:[
+    {name:'House Red',category:'Wine',unit:'750ml',stock:6,par_level:10},
+    {name:'House White',category:'Wine',unit:'750ml',stock:6,par_level:10},
+  ],
+};
+
+async function onboardFinish(){
+  S.onboardSaving=true;render();
+  const validStaff=S.onboardStaff.filter(s=>s.name.trim()&&s.pin&&s.pin.length===4);
+  for(const st of validStaff){
+    await db.from('staff').insert({bar_id:S.bar.id,name:st.name.trim(),role:st.role,pin:st.pin});
+  }
+  const items=[];
+  Object.keys(S.onboardStarterPack).forEach(k=>{
+    if(S.onboardStarterPack[k])items.push(...STARTER_PACK[k]);
+  });
+  if(items.length>0){
+    await db.from('inventory').insert(items.map(i=>({bar_id:S.bar.id,...i})));
+  }
+  await loadStaff();await loadInventory();
+  S.onboardingStep=0;S.onboardSaving=false;render();
+}
+
+function onboardSkipAll(){
+  if(confirm('Skip setup? You can always add staff and stock later from inside the app.')){
+    S.onboardingStep=0;render();
+  }
+}
+
+function onboardStaffField(idx,field,val){S.onboardStaff[idx][field]=val;}
+function onboardAddStaffRow(){S.onboardStaff.push({name:'',role:'Bartender',pin:''});render();}
+function onboardRemoveStaffRow(i){S.onboardStaff.splice(i,1);render();}
+
+function shareStaffLink(channel){
+  const link=getStaffLink();
+  const msg=`You're invited to ${S.bar.name}'s staff portal! Tap this link, pick your name, and enter your PIN to clock in and see your schedule: ${link}`;
+  if(channel==='sms')window.location.href=`sms:?&body=${encodeURIComponent(msg)}`;
+  else if(channel==='whatsapp')window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  else if(channel==='email')window.location.href=`mailto:?subject=${encodeURIComponent(S.bar.name+' Staff Portal')}&body=${encodeURIComponent(msg)}`;
+  else if(channel==='copy'){
+    navigator.clipboard?.writeText(link).then(()=>{
+      const btn=document.getElementById('onboard-copy-btn');
+      if(btn){btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='📋 COPY LINK',2000);}
+    });
+  }
+}
+
+function renderOnboarding(){
+  const step=S.onboardingStep;
+  const totalSteps=4;
+  const progress=Math.round((step/totalSteps)*100);
+  let body='';
+
+  if(step===1){
+    body=`
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:64px;margin-bottom:8px">🎉</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:3px;color:var(--lc);line-height:1.1">WELCOME TO CANTINAPRO</div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--lcg);margin-top:8px">${S.bar.name}</div>
+      </div>
+      <div style="font-size:16px;line-height:1.7;color:var(--text);margin-bottom:18px">Let's get your bar set up in under 2 minutes. We'll:</div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">👥</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Add your staff</div><div style="font-size:13px;color:var(--muted)">Their name + a 4-digit PIN — that's it</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">📦</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Stock the bar</div><div style="font-size:13px;color:var(--muted)">Pick a starter pack — edit later anytime</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">🔗</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Share your staff link</div><div style="font-size:13px;color:var(--muted)">Text it, share it — they're in instantly</div></div></div>
+      </div>
+      <button class="action-btn red" onclick="S.onboardingStep=2;render()">LET'S GO →</button>
+      <button onclick="onboardSkipAll()" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;width:100%;padding:14px;margin-top:6px">Skip — I'll set it up later</button>
+    `;
+  } else if(step===2){
+    body=`
+      <div style="margin-bottom:18px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">ADD YOUR STAFF</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">Add your bartenders, servers, and managers. They'll use these PINs to log in via the staff link.</div>
+      </div>
+      ${S.onboardStaff.map((st,i)=>`
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;position:relative">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;color:var(--lcg)">STAFF #${i+1}</div>
+            ${S.onboardStaff.length>1?`<button onclick="onboardRemoveStaffRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:5px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">REMOVE</button>`:''}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:8px;margin-bottom:8px">
+            <input type="text" value="${st.name}" oninput="onboardStaffField(${i},'name',this.value)" placeholder="Full name" style="background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:11px 12px;font-size:15px;outline:none;width:100%;-webkit-appearance:none"/>
+            <input type="number" value="${st.pin}" oninput="onboardStaffField(${i},'pin',this.value.slice(0,4))" placeholder="PIN" maxlength="4" style="background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:11px 12px;font-size:15px;outline:none;text-align:center;font-family:'Share Tech Mono',monospace;letter-spacing:3px;-webkit-appearance:none"/>
+          </div>
+          <select onchange="onboardStaffField(${i},'role',this.value)" style="background:var(--s1);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:11px 12px;font-size:15px;width:100%;outline:none;-webkit-appearance:none">
+            ${ROLES.map(r=>`<option value="${r}" ${st.role===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+      `).join('')}
+      <button onclick="onboardAddStaffRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:12px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">+ ADD ANOTHER STAFF MEMBER</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=1;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=3;render()">NEXT →</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">💡 Leave blank to skip — you can add staff anytime</div>
+    `;
+  } else if(step===3){
+    const counts=Object.keys(S.onboardStarterPack).reduce((a,k)=>a+(S.onboardStarterPack[k]?STARTER_PACK[k].length:0),0);
+    body=`
+      <div style="margin-bottom:18px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">STARTER STOCK</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">Pick the categories that fit your bar. We'll add common items at typical par levels — adjust later.</div>
+      </div>
+      ${[
+        {key:'liquor',icon:'🥃',title:'Liquor',desc:'Tequila, bourbon, vodka, rum, liqueurs'},
+        {key:'beer',icon:'🍺',title:'Beer',desc:'Modelo, Corona, domestic draft'},
+        {key:'mixers',icon:'🍋',title:'Mixers & Garnish',desc:'Lime juice, agave, Clamato, tonic'},
+        {key:'wine',icon:'🍷',title:'Wine',desc:'House red, house white'},
+      ].map(p=>{
+        const on=S.onboardStarterPack[p.key];
+        return `<div onclick="S.onboardStarterPack.${p.key}=!S.onboardStarterPack.${p.key};render()" style="background:${on?'rgba(200,16,46,.08)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:30px">${p.icon}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:16px;color:var(--text)">${p.title} <span style="color:var(--muted);font-size:13px;font-weight:500">(${STARTER_PACK[p.key].length} items)</span></div>
+            <div style="font-size:13px;color:var(--muted);margin-top:2px">${p.desc}</div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:50%;border:2px solid ${on?'var(--lc)':'var(--border)'};background:${on?'var(--lc)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${on?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#fff" stroke-width="2.5" fill="none"/></svg>':''}</div>
+        </div>`;
+      }).join('')}
+      <div style="text-align:center;font-size:13px;color:var(--muted);margin:14px 0">${counts} items will be added — fully editable later</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=2;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="onboardFinish().then(()=>{S.onboardingStep=4;render()})" ${S.onboardSaving?'disabled':''}>${S.onboardSaving?'SAVING...':'NEXT →'}</button>
+      </div>
+    `;
+  } else if(step===4){
+    const link=getStaffLink();
+    body=`
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:64px;margin-bottom:8px">🚀</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:3px;color:var(--green);line-height:1.1">YOU'RE LIVE</div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--lcg);margin-top:8px">${S.bar.name} is ready to roll</div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--lc)">${S.staff.length}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Staff</div></div>
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--green)">${S.inventory.length}</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Items</div></div>
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--lcg)">∞</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">Recipes</div></div>
+      </div>
+      <div style="background:rgba(212,160,23,.06);border:2px solid var(--lcg);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">🔗 SHARE WITH STAFF</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.6">Send this link to your team. They tap it, pick their name, enter their PIN — that's it.</div>
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--lcg);word-break:break-all;line-height:1.5">${link}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <button onclick="shareStaffLink('sms')" style="background:linear-gradient(135deg,var(--green),#00a050);border:none;color:#000;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">💬 TEXT</button>
+          <button onclick="shareStaffLink('whatsapp')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">💚 WHATSAPP</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="shareStaffLink('email')" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">📧 EMAIL</button>
+          <button id="onboard-copy-btn" onclick="shareStaffLink('copy')" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;padding:13px;border-radius:8px;cursor:pointer">📋 COPY LINK</button>
+        </div>
+      </div>
+      <div style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.3);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--blue);margin-bottom:8px">📱 INSTALL AS APP</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.7">Tell your staff to <strong>"Add to Home Screen"</strong> after opening the link. Works just like a real app — no App Store needed.</div>
+      </div>
+      <button class="action-btn red" onclick="S.onboardingStep=0;render()">ENTER MY DASHBOARD →</button>
+    `;
+  }
+
+  return `<div class="auth-wrap" style="justify-content:flex-start;padding-top:32px">
+    <div style="width:100%;max-width:420px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:3px;color:var(--lc)">CANTINAPRO</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted)">STEP ${step} OF ${totalSteps}</div>
+      </div>
+      <div style="background:var(--s2);border-radius:4px;height:6px;overflow:hidden;margin-bottom:20px"><div style="background:linear-gradient(90deg,var(--lc),var(--lcg));height:100%;width:${progress}%;transition:width .3s"></div></div>
+      <div class="auth-card" style="text-align:left">${body}</div>
+    </div>
   </div>`;
 }
 
@@ -798,7 +937,9 @@ function renderStaffViaLink(){
             </div>
           `).join('')}
         </div>
+        ${!isStandalone()?`<button onclick="openInstallGuide()" style="background:none;border:1px solid var(--border);color:var(--muted);width:100%;padding:11px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1.5px;margin-top:14px;cursor:pointer;-webkit-tap-highlight-color:transparent">📱 INSTALL ON MY PHONE</button>`:''}
       </div>
+      ${renderInstallModal()}
     </div>`;
   }
   const dots='●'.repeat(S.staffPinInput.length)+'○'.repeat(4-S.staffPinInput.length);
@@ -813,14 +954,14 @@ function renderStaffViaLink(){
         <div style="font-weight:700;font-size:20px;color:var(--text)">${S.staffLoginSelected?.name}</div>
         <div style="font-size:14px;color:var(--muted);text-transform:uppercase;margin-top:4px">${S.staffLoginSelected?.role}</div>
       </div>
-      <div class="auth-title" style="text-align:center">ENTER YOUR PIN</div>
+      <div class="auth-title" style="text-align:center">${S.staffPinVerifying?(S.lang==='es'?'VERIFICANDO...':'VERIFYING...'):'ENTER YOUR PIN'}</div>
       ${S.staffPinError?`<div class="auth-err">${S.staffPinError}</div>`:''}
-      <div class="pin-display">${dots}</div>
-      <div class="pin-grid">
+      <div class="pin-display" style="${S.staffPinVerifying?'color:var(--green);opacity:.85':''}">${S.staffPinVerifying?'<div class="spinner" style="margin:6px auto"></div>':dots}</div>
+      <div class="pin-grid" style="${S.staffPinVerifying?'opacity:.4;pointer-events:none':''}">
         ${['1','2','3','4','5','6','7','8','9','','0','del'].map(k=>k===''?`<div></div>`:
-          `<button class="pin-btn" onclick="pinPress('${k}')">${k==='del'?'⌫':k}</button>`).join('')}
+          `<button class="pin-btn" onclick="pinPress('${k}')" ${S.staffPinVerifying?'disabled':''}>${k==='del'?'⌫':k}</button>`).join('')}
       </div>
-      <button onclick="S.staffLoginStep='select';render()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;margin-top:10px;width:100%;text-align:center;padding:10px">← Back</button>
+      <button onclick="S.staffLoginStep='select';S.staffPinVerifying=false;S.staffPinInput='';S.staffPinError='';render()" ${S.staffPinVerifying?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;margin-top:10px;width:100%;text-align:center;padding:10px;${S.staffPinVerifying?'opacity:.4':''}">← Back</button>
     </div>
   </div>`;
 }
@@ -838,8 +979,9 @@ function renderStaffApp(){
   const STAFF_TABS=[
     {key:'my-schedule',icon:'📅',label:L?'Horario':'Schedule'},
     {key:'staff-shift',icon:'⏰',label:L?'Turno':'My Shift'},
+    {key:'staff-chat',icon:'💬',label:L?'Chat':'Chat'},
     {key:'staff-photos',icon:'📸',label:L?'Fotos':'Photos'},
-    {key:'staff-recipes',icon:'🍹',label:L?'Recetas':'Recipes'},
+    {key:'staff-recipes',icon:'🍹',label:L?'Tragos':'Recipes'},
     {key:'staff-closeout',icon:'✅',label:L?'Cierre':'Closeout'},
   ];
 
@@ -855,7 +997,18 @@ function renderStaffApp(){
         <button class="logout-btn" onclick="staffLogout()">OUT</button>
       </div>
     </header>
+    <nav class="top-nav" id="top-nav-staff">
+      ${STAFF_TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" data-tab-key="${t.key}" onclick="S.tab='${t.key}';render();if('${t.key}'==='staff-chat')scrollChatToBottom()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span></button>`).join('')}
+    </nav>
     <main class="main">
+
+    ${renderIOSInstallBanner()}
+    ${S.showInstallBanner?`<div class="install-banner">
+      <div style="font-size:22px">📱</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">${L?'Instalar CantinaPro':'Install CantinaPro'}</div><div style="font-size:13px;color:var(--muted)">${L?'Agrega al home screen':'Add to your home screen'}</div></div>
+      <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">${L?'INSTALAR':'INSTALL'}</button>
+    </div>`:''}
+    ${renderInstallModal()}
 
     ${S.tab==='my-schedule'?`
       <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
@@ -934,17 +1087,14 @@ function renderStaffApp(){
       </div>
     `:''}
 
+    ${S.tab==='staff-chat'?renderChat(false):''}
+
     ${S.tab==='staff-photos'?`
-      <div class="sec-title">📸 ${L?'FOTOS':'PHOTOS'}</div>
+      <div class="sec-title">📸 ${L?'FOTOS DE REDES SOCIALES':'SOCIAL MEDIA PHOTOS'}</div>
       <div class="card">
         <div class="ct">${L?'TOMAR FOTO / SUBIR':'TAKE OR UPLOAD PHOTO'}</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Sube fotos de recibos, incidentes, o cualquier cosa que necesite atención del manager.':'Upload photos of liquor receipts, incidents, or anything that needs manager attention.'}</div>
-        <div class="field"><label>Tag / Category</label>
-          <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-            ${['Liquor Receipt','Beer Receipt','Food Receipt','Incident','Social Media','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field"><label>${L?'Descripción':'Description / Notes'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué es esta foto?':'What is this photo of?'}"/></div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Captura momentos del bar — eventos, tragos, ambiente — para postear en redes sociales después.':'Capture moments from the bar — events, drinks, vibes — for posting to social media later.'}</div>
+        <div class="field"><label>${L?'Descripción':'Description / Caption'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'¿Qué pasó en esta foto?':"What's happening in this photo?"}"/></div>
         <label style="display:block;cursor:pointer">
           <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
           <div class="upzone">
@@ -955,16 +1105,16 @@ function renderStaffApp(){
         </label>
       </div>
       <div class="photo-grid">
-        ${S.photos.filter(p=>['Liquor Receipt','Beer Receipt','Food Receipt','Incident'].includes(p.tag)||S.photos.indexOf(p)<10).slice(0,10).map(p=>`
+        ${S.photos.slice(0,12).map(p=>`
           <div class="pcard">
-            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
+            ${p.url?`<img src="${p.url}" alt="${p.label||''}"/>`:'<div style="font-size:36px">📷</div>'}
             <div class="photo-overlay">
-              <div class="photo-label">${p.label||p.tag}</div>
-              <div class="photo-time">${p.tag}</div>
+              <div class="photo-label">${p.label||'Social Media'}</div>
+              <div class="photo-time">Social Media</div>
             </div>
           </div>
         `).join('')}
-        ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Take your first photo above!</div>`:''}
+        ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">${L?'No hay fotos todavía.<br/>¡Toma la primera arriba!':'No photos yet.<br/>Take your first one above!'}</div>`:''}
       </div>
     `:''}
 
@@ -994,9 +1144,6 @@ function renderStaffApp(){
     `:''}
 
     </main>
-    <nav class="bot-nav">
-      ${STAFF_TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" onclick="S.tab='${t.key}';render()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span></button>`).join('')}
-    </nav>
   </div>`;
 }
 
@@ -1014,11 +1161,12 @@ function renderOwnerApp(){
 
   const TABS=[
     {key:'dashboard',icon:'📊',label:'Home'},
-    {key:'schedule',icon:'📅',label:'Schedule',badge:openShifts+pendingBids},
+    {key:'schedule',icon:'📅',label:'Sched',badge:openShifts+pendingBids},
+    {key:'chat',icon:'💬',label:'Chat'},
     {key:'shift',icon:'⏰',label:'Shift'},
-    {key:'inventory',icon:'📦',label:'Stock',badge:lowItems},
-    {key:'gallery',icon:'📸',label:'Gallery'},
-    {key:'recipes',icon:'🍹',label:'Recipes'},
+    {key:'inventory',icon:'📦',label:'Inventory',badge:lowItems},
+    {key:'gallery',icon:'📸',label:'Photos'},
+    {key:'recipes',icon:'🍹',label:'Drinks'},
     {key:'closeout',icon:'✅',label:'Close'},
   ];
 
@@ -1034,56 +1182,55 @@ function renderOwnerApp(){
         <div class="sdot"></div>
       </div>
     </header>
+    <nav class="top-nav" id="top-nav-owner">
+      ${TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" data-tab-key="${t.key}" onclick="S.tab='${t.key}';render();if('${t.key}'==='chat')scrollChatToBottom()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span>${t.badge?`<span class="nbadge">${t.badge}</span>`:''}</button>`).join('')}
+    </nav>
     <main class="main">
 
+    ${renderIOSInstallBanner()}
     ${S.showInstallBanner?`<div class="install-banner">
       <div style="font-size:22px">📱</div>
       <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">Install CantinaPro</div><div style="font-size:13px;color:var(--muted)">Add to your home screen for quick access</div></div>
       <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">INSTALL</button>
     </div>`:''}
+    ${renderInstallModal()}
 
     ${S.tab==='dashboard'?`
-      ${(S.bar.pain_points&&S.bar.pain_points.length&&!isPainCardDismissed())?(()=>{
-        const myPains=PAIN_POINTS.filter(p=>S.bar.pain_points.includes(p.id));
-        if(myPains.length===0)return '';
-        return `<div style="background:linear-gradient(135deg,rgba(0,232,122,.08),rgba(77,159,255,.06));border:1px solid rgba(0,232,122,.35);border-radius:12px;padding:16px;margin-bottom:14px;position:relative">
-          <button onclick="dismissPainCard()" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,.05);border:none;color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center" title="Dismiss">✕</button>
-          <div style="font-family:'Bebas Neue',cursive;font-size:15px;letter-spacing:2px;color:var(--green);margin-bottom:4px;padding-right:30px">👋 WELCOME TO CANTINAPRO</div>
-          <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.5;padding-right:30px">Based on what you told us, here's where to start:</div>
-          ${myPains.map(p=>`<div onclick="S.tab='${p.tab}';render()" style="display:flex;align-items:center;gap:12px;padding:11px 10px;background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer">
-            <div style="font-size:22px;flex-shrink:0">${p.emoji}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:13px;color:var(--muted);line-height:1.3">${p.label}</div>
-              <div style="font-size:14px;color:var(--green);font-weight:700;margin-top:2px">→ Open ${p.feature}</div>
-            </div>
-            <div style="font-size:18px;color:var(--muted);flex-shrink:0">›</div>
-          </div>`).join('')}
-        </div>`;
-      })():''}
-      <div class="sec-title">TONIGHT'S OVERVIEW</div>
+      <div class="sec-title">${L?'RESUMEN DE LA NOCHE':"TONIGHT'S OVERVIEW"}</div>
       <div class="kpi-grid">
-        <div class="kpi lc"><div class="kl">Today's Sales</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} entries logged</div></div>
-        <div class="kpi g"><div class="kl">Weekly Revenue</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">Last 7 days</div></div>
-        <div class="kpi b"><div class="kl">Staff</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} clocked in</div></div>
-        <div class="kpi r"><div class="kl">Low Stock</div><div class="kv">${lowItems}</div><div class="kd">Items below par</div></div>
+        <div class="kpi lc"><div class="kl">${L?'Ventas Hoy':"Today's Sales"}</div><div class="kv">$${todaySales.toLocaleString()}</div><div class="kd">${S.sales.length} ${L?'entradas':'entries logged'}</div></div>
+        <div class="kpi g"><div class="kl">${L?'Ingresos Semanales':'Weekly Revenue'}</div><div class="kv">$${weekSales.toLocaleString()}</div><div class="kd">${L?'Últimos 7 días':'Last 7 days'}</div></div>
+        <div class="kpi b"><div class="kl">${L?'Empleados':'Staff'}</div><div class="kv">${S.staff.length}</div><div class="kd">${S.clockedIn.length} ${L?'adentro':'clocked in'}</div></div>
+        <div class="kpi r"><div class="kl">${L?'Stock Bajo':'Low Stock'}</div><div class="kv">${lowItems}</div><div class="kd">${L?'Productos bajo el par':'Items below par'}</div></div>
       </div>
-      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} Open Shift${openShifts!==1?'s':''}</div><div style="font-size:13px;color:var(--muted)">Staff needed — check Schedule</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">VIEW</button></div>`:''}
-      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} Bid${pendingBids!==1?'s':''} Waiting</div><div style="font-size:13px;color:var(--muted)">Staff want to cover open shifts</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">REVIEW</button></div>`:''}
+      ${openShifts>0?`<div class="open-banner"><div style="font-size:22px">⚠️</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${openShifts} ${L?(openShifts!==1?'Turnos Abiertos':'Turno Abierto'):'Open Shift'+(openShifts!==1?'s':'')}</div><div style="font-size:13px;color:var(--muted)">${L?'Se necesita personal — revisa el horario':'Staff needed — check Schedule'}</div></div><button class="btn-sm" style="background:var(--lc);color:#fff;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">${L?'VER':'VIEW'}</button></div>`:''}
+      ${pendingBids>0?`<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px"><div style="font-size:22px">🙋</div><div><div style="font-weight:700;font-size:16px;color:var(--text)">${pendingBids} ${L?(pendingBids!==1?'Pujas Esperando':'Puja Esperando'):'Bid'+(pendingBids!==1?'s':'')+' Waiting'}</div><div style="font-size:13px;color:var(--muted)">${L?'El personal quiere cubrir turnos abiertos':'Staff want to cover open shifts'}</div></div><button class="btn-sm" style="background:var(--gold);color:#000;margin-left:auto;font-size:13px;padding:9px 14px" onclick="S.tab='schedule';render()">${L?'REVISAR':'REVIEW'}</button></div>`:''}
 
       <div class="card">
-        <div class="ct">👤 STAFF PORTAL LINK</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">Share this link with your staff. They tap it, pick their name, enter their PIN and they're in.</div>
-        <div class="link-box">
+        <div class="ct">${L?'👤 INVITAR AL STAFF':'👤 INVITE YOUR STAFF'}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">${L?'Envíales este link. Lo tocan, eligen su nombre, ponen su PIN y están adentro.':'Send them this link. They tap it, pick their name, enter their PIN and they\'re in.'}</div>
+        <div class="link-box" style="margin-bottom:10px">
           <div class="link-url">${getStaffLink()}</div>
-          <button id="copy-link-btn" class="action-btn gold" style="margin-top:0" onclick="copyStaffLink()">📋 COPY STAFF LINK</button>
         </div>
-        <div style="font-size:13px;color:var(--muted);margin-top:8px;text-align:center">💡 Staff can also add to home screen to install as an app</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <button onclick="shareStaffSMS()" style="background:linear-gradient(135deg,var(--green),#00a050);border:none;color:#000;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;padding:13px;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent">💬 ${L?'TEXTO':'TEXT'}</button>
+          <button onclick="shareStaffWhatsApp()" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;padding:13px;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent">💚 WHATSAPP</button>
+        </div>
+        <button id="copy-msg-btn" onclick="copyStaffMessage()" style="background:var(--s2);border:1px solid var(--lcg);color:var(--lcg);width:100%;padding:11px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:1.5px;cursor:pointer;margin-bottom:6px;-webkit-tap-highlight-color:transparent">📨 ${L?'COPIAR MENSAJE COMPLETO':'COPY FULL INVITE MESSAGE'}</button>
+        <button id="copy-link-btn" onclick="copyStaffLink()" style="background:none;border:1px solid var(--border);color:var(--muted);width:100%;padding:9px;border-radius:8px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1.5px;cursor:pointer;-webkit-tap-highlight-color:transparent">${L?'📋 COPIAR SOLO EL LINK':'📋 COPY LINK ONLY'}</button>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center;line-height:1.5">${L?'💡 El "Mensaje Completo" incluye instrucciones de cómo instalar la app':'💡 "Full Message" includes phone install instructions'}</div>
       </div>
 
-      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">+ LOG SALES</button>
       <div class="card">
-        <div class="ct">RECENT SALES</div>
-        ${S.sales.length===0?`<div class="empty-state">No sales logged yet.<br/>Tap "Log Sales" above.</div>`:
+        <div class="ct">📱 ${L?'INSTALAR EN MI TELÉFONO':'INSTALL ON MY PHONE'}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:10px;line-height:1.6">${L?'Agrega CantinaPro a tu home screen para abrirla como una app real — sin App Store.':'Add CantinaPro to your home screen to open it like a real app — no App Store needed.'}</div>
+        ${isStandalone()?`<div style="background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.3);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">✓</span><span style="font-size:14px;color:var(--green);font-weight:700">${L?'¡Ya está instalada!':'Already installed!'}</span></div>`:`<button onclick="openInstallGuide()" class="action-btn blue" style="margin-top:0">📱 ${L?'CÓMO INSTALAR':'SHOW ME HOW'}</button>`}
+      </div>
+
+      <button class="action-btn red" onclick="S.showSaleModal=true;render()" style="margin-bottom:14px">${L?'+ REGISTRAR VENTAS':'+ LOG SALES'}</button>
+      <div class="card">
+        <div class="ct">${L?'VENTAS RECIENTES':'RECENT SALES'}</div>
+        ${S.sales.length===0?`<div class="empty-state">${L?'No hay ventas registradas todavía.<br/>Toca "Registrar Ventas" arriba.':'No sales logged yet.<br/>Tap "Log Sales" above.'}</div>`:
           S.sales.slice(0,5).map(s=>`<div class="row">
             <div style="flex:1">
               <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
@@ -1193,6 +1340,8 @@ function renderOwnerApp(){
       </div>`:''}
     `:''}
 
+    ${S.tab==='chat'?renderChat(true):''}
+
     ${S.tab==='shift'?`
       <div class="sec-title">⏰ SHIFT</div>
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
@@ -1215,9 +1364,46 @@ function renderOwnerApp(){
           return isIn
             ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ CLOCK OUT</button>`
             :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ CLOCK IN</button>`;
-        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>TAP YOUR NAME ABOVE</button>`}
+        })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>${L?'TOCA TU NOMBRE ARRIBA':'TAP YOUR NAME ABOVE'}</button>`}
       </div>
-      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">+ ADD STAFF MEMBER</button>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+          <div class="ct" style="margin-bottom:0">${L?'👥 EQUIPO':'👥 MANAGE STAFF'}</div>
+          ${S.staff.length>0?`<button onclick="S.showPins=!S.showPins;render()" style="background:${S.showPins?'rgba(212,160,23,.2)':'var(--s2)'};border:1px solid ${S.showPins?'var(--lcg)':'var(--border)'};color:${S.showPins?'var(--lcg)':'var(--muted)'};border-radius:6px;padding:6px 12px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1.5px;cursor:pointer;-webkit-tap-highlight-color:transparent">${S.showPins?(L?'👁️ OCULTAR PINS':'👁️ HIDE PINS'):(L?'👁 MOSTRAR PINS':'👁 SHOW PINS')}</button>`:''}
+        </div>
+        ${S.staff.length===0?`<div class="empty-state" style="padding:20px 8px">${L?'Aún no hay empleados.':'No staff yet.'}<br/>${L?'Agrega tu primer empleado abajo.':'Add your first one below.'}</div>`:
+        S.staff.map((s,i)=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+          <div class="av" style="background:${ac(i)}22;color:${ac(i)};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${ai(s.name)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:15px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name}</div>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:2px">${s.role}</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:${S.showPins?'var(--lcg)':'var(--muted)'};margin-top:4px;letter-spacing:2px">PIN: ${S.showPins?(s.pin||'—'):'••••'}</div>
+          </div>
+          <button onclick='S.editingStaff=${JSON.stringify(s).replace(/'/g,"&#39;")};render()' style="background:var(--s3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 14px;font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:1.5px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'EDITAR':'EDIT'}</button>
+        </div>`).join('')}
+        ${S.staff.length>0&&!S.showPins?`<div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;line-height:1.5">${L?'🔒 Los PINs están ocultos por seguridad. Toca "Mostrar PINs" para verlos.':'🔒 PINs are hidden for security. Tap "Show PINs" to view.'}</div>`:''}
+      </div>
+
+      ${S.editingStaff?`<div class="modal-bg" onclick="S.editingStaff=null;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-title">${L?'EDITAR EMPLEADO':'EDIT STAFF'}</div>
+          <div class="field"><label>${L?'Nombre Completo':'Full Name'}</label><input type="text" value="${S.editingStaff.name}" oninput="S.editingStaff.name=this.value" placeholder="Maria Garcia"/></div>
+          <div class="field"><label>${L?'Puesto':'Role / Position'}</label>
+            <select oninput="S.editingStaff.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+              ${ROLES.map(r=>`<option value="${r}" ${S.editingStaff.role===r?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>${L?'PIN (4 dígitos — restablecer si lo olvidaron)':'PIN (4 digits — reset if forgotten)'}</label><input type="number" value="${S.editingStaff.pin||''}" oninput="S.editingStaff.pin=this.value.slice(0,4)" placeholder="1234" maxlength="4"/></div>
+          <div class="modal-actions" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <button class="btn-cancel" onclick="S.editingStaff=null;render()">${L?'Cancelar':'Cancel'}</button>
+            <button onclick='confirmDeleteStaff(${JSON.stringify(S.editingStaff).replace(/'/g,"&#39;")})' style="background:rgba(255,68,85,.15);border:1px solid var(--red);color:var(--red);border-radius:8px;padding:13px;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;cursor:pointer">${L?'BORRAR':'DELETE'}</button>
+            <button class="btn-save" onclick="saveEditedStaff()">${L?'Guardar':'Save'}</button>
+          </div>
+        </div>
+      </div>`:''}
+
+      <button class="action-btn blue" onclick="S.showStaffModal=true;render()">${L?'+ AGREGAR EMPLEADO':'+ ADD STAFF MEMBER'}</button>
       ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
           <div class="modal-title">+ ADD STAFF MEMBER</div>
@@ -1279,42 +1465,40 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='gallery'?`
-      <div class="sec-title">📸 GALLERY & RECEIPTS</div>
+      <div class="sec-title">📸 ${L?'FOTOS DE REDES SOCIALES':'SOCIAL MEDIA PHOTOS'}</div>
       ${S.selectedPhoto?`
-        <button onclick="S.selectedPhoto=null;S.photoCaption=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← BACK</button>
+        <button onclick="S.selectedPhoto=null;render()" style="background:none;border:none;color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;cursor:pointer;margin-bottom:14px;padding:0">← ${L?'ATRÁS':'BACK'}</button>
         <div class="card">
           <div style="background:linear-gradient(135deg,#1a0008,#0a0a1a);border-radius:10px;overflow:hidden;margin-bottom:14px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative">
             ${S.selectedPhoto.url?`<img src="${S.selectedPhoto.url}" style="max-width:100%;max-height:280px;object-fit:contain"/>`:'<div style="font-size:48px">📷</div>'}
             <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);border-radius:5px;padding:5px 10px"><div style="font-family:'Bebas Neue',cursive;font-size:11px;color:var(--lc)">CantinaPro</div><div style="font-family:'Bebas Neue',cursive;font-size:9px;color:var(--lcg)">${S.bar.name}</div></div>
           </div>
-          <button class="action-btn purple" onclick="generateCaption(S.selectedPhoto)" ${S.generatingCaption?'disabled':''}>✨ GENERATE AI CAPTION</button>
-          ${S.generatingCaption?'<div class="spinner"></div>':''}
-          ${S.photoCaption?`<div style="background:var(--s2);border:1px solid var(--purple);border-radius:10px;padding:14px;font-size:15px;line-height:1.8;margin-top:10px;color:var(--text)">${S.photoCaption}<button onclick="navigator.clipboard?.writeText('${S.photoCaption.replace(/'/g,"\\'")}');this.textContent='✓ COPIED!';setTimeout(()=>this.textContent='COPY',2000)" style="display:block;margin-top:10px;background:none;border:1px solid var(--purple);color:var(--purple);border-radius:5px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:'Bebas Neue',cursive;letter-spacing:1px">COPY</button></div>`:''}
+          <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">Social Media</div>
+            <div style="font-size:15px;color:var(--text);line-height:1.6;margin-bottom:10px">${S.selectedPhoto.label||(L?'Sin descripción':'No description')}</div>
+            <div style="font-size:12px;color:var(--muted);font-family:'Share Tech Mono',monospace">${new Date(S.selectedPhoto.created_at).toLocaleString()}</div>
+          </div>
         </div>
       `:`
         <div class="card">
-          <div class="ct">ADD PHOTO / RECEIPT</div>
-          <div class="field"><label>Category</label>
-            <select onchange="S.photoTag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${['Liquor Receipt','Beer Receipt','Food Receipt','Social Media','Event','Promo','Staff','Other'].map(t=>`<option ${S.photoTag===t?'selected':''}>${t}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Description</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="Describe this photo..."/></div>
+          <div class="ct">${L?'AGREGAR FOTO':'ADD PHOTO'}</div>
+          <div style="font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6">${L?'Construye una galería de momentos del bar — eventos, especiales, ambiente — para postear en redes sociales.':'Build a library of bar moments — events, specials, vibes — for posting to social media.'}</div>
+          <div class="field"><label>${L?'Descripción':'Description / Caption'}</label><input type="text" value="${S.photoNote}" oninput="S.photoNote=this.value" placeholder="${L?'Describe esta foto...':'Describe this photo...'}"/></div>
           <label style="display:block;cursor:pointer">
             <input type="file" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotoUpload(event)"/>
             <div class="upzone">
               <div style="font-size:36px;margin-bottom:10px">📷</div>
-              <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">TAKE OR UPLOAD PHOTO</div>
-              <div style="font-size:13px;color:var(--muted);margin-top:6px">Receipts, events, social media content</div>
+              <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;color:var(--muted)">${L?'TOMAR O SUBIR FOTO':'TAKE OR UPLOAD PHOTO'}</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:6px">${L?'Eventos, especiales, contenido para redes':'Events, specials, social content'}</div>
             </div>
           </label>
         </div>
         <div class="photo-grid">
-          ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};S.photoCaption=null;render()">
-            ${p.url?`<img src="${p.url}" alt="${p.label}"/>`:'<div style="font-size:36px">📷</div>'}
-            <div class="photo-overlay"><div class="photo-label">${p.label||p.tag}</div><div class="photo-time">${p.tag}</div></div>
+          ${S.photos.map(p=>`<div class="pcard" onclick="S.selectedPhoto=${JSON.stringify(p).replace(/"/g,'&quot;')};render()">
+            ${p.url?`<img src="${p.url}" alt="${p.label||''}"/>`:'<div style="font-size:36px">📷</div>'}
+            <div class="photo-overlay"><div class="photo-label">${p.label||'Social Media'}</div><div class="photo-time">Social Media</div></div>
           </div>`).join('')}
-          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">No photos yet.<br/>Upload your first one above!</div>`:''}
+          ${S.photos.length===0?`<div class="empty-state" style="grid-column:span 2">${L?'No hay fotos todavía.<br/>¡Sube la primera arriba!':'No photos yet.<br/>Upload your first one above!'}</div>`:''}
         </div>
       `}
     `:''}
@@ -1382,18 +1566,14 @@ function renderOwnerApp(){
     </div>`:''}
 
     </main>
-    <nav class="bot-nav">
-      ${TABS.map(t=>`<button class="nb ${S.tab===t.key?'on':''}" onclick="S.tab='${t.key}';render()"><span class="ni">${t.icon}</span><span class="nl">${t.label}</span>${t.badge?`<span class="nbadge">${t.badge}</span>`:''}</button>`).join('')}
-    </nav>
   </div>`;
 }
-
 
 // ── RECIPE MANAGEMENT ─────────────────────────────────
 S.recipes = [];
 S.showRecipeModal = false;
 S.editingRecipe = null;
-S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
+S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
 
 async function loadRecipes(){
   if(!S.bar) return;
@@ -1409,8 +1589,6 @@ async function saveRecipe(){
     tag: S.newRecipe.tag,
     glass: S.newRecipe.glass,
     prep_time: S.newRecipe.prep_time,
-    cost: parseFloat(S.newRecipe.cost)||0,
-    price: parseFloat(S.newRecipe.price)||0,
     emoji: S.newRecipe.emoji||'🍹',
     ingredients: S.newRecipe.ingredients.filter(i=>i.name),
     steps: S.newRecipe.steps.filter(s=>s),
@@ -1421,7 +1599,7 @@ async function saveRecipe(){
   } else {
     await db.from('recipes').insert(recipe);
   }
-  S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
+  S.newRecipe = {name:'',tag:'Signature',glass:'',prep_time:'2 min',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};
   S.showRecipeModal = false;
   await loadRecipes();
   render();
@@ -1434,11 +1612,45 @@ async function deleteRecipe(id){
   render();
 }
 
+function getHiddenDefaults(){
+  return Array.isArray(S.bar?.hidden_default_recipes)?S.bar.hidden_default_recipes:[];
+}
+async function hideDefaultRecipe(id){
+  if(!S.bar)return;
+  const current=getHiddenDefaults();
+  if(current.includes(id))return;
+  const updated=[...current,id];
+  const{error}=await db.from('bars').update({hidden_default_recipes:updated}).eq('id',S.bar.id);
+  if(error){alert('Could not hide recipe: '+error.message);return;}
+  S.bar.hidden_default_recipes=updated;render();
+}
+async function unhideDefaultRecipe(id){
+  if(!S.bar)return;
+  const updated=getHiddenDefaults().filter(x=>x!==id);
+  const{error}=await db.from('bars').update({hidden_default_recipes:updated}).eq('id',S.bar.id);
+  if(error){alert('Could not restore recipe: '+error.message);return;}
+  S.bar.hidden_default_recipes=updated;render();
+}
+async function hideAllDefaults(){
+  if(!S.bar)return;
+  if(!confirm('Hide all built-in recipes? You can restore them anytime.'))return;
+  const allIds=['h1','h2','h3','h4'];
+  const{error}=await db.from('bars').update({hidden_default_recipes:allIds}).eq('id',S.bar.id);
+  if(error){alert('Could not hide recipes: '+error.message);return;}
+  S.bar.hidden_default_recipes=allIds;render();
+}
+async function restoreAllDefaults(){
+  if(!S.bar)return;
+  const{error}=await db.from('bars').update({hidden_default_recipes:[]}).eq('id',S.bar.id);
+  if(error){alert('Could not restore recipes: '+error.message);return;}
+  S.bar.hidden_default_recipes=[];render();
+}
+
 function editRecipe(r){
   S.editingRecipe = r.id;
   S.newRecipe = {
     name: r.name, tag: r.tag||'Signature', glass: r.glass||'', prep_time: r.prep_time||'',
-    cost: r.cost||'', price: r.price||'', emoji: r.emoji||'🍹',
+    emoji: r.emoji||'🍹',
     ingredients: r.ingredients&&r.ingredients.length ? r.ingredients : [{amount:'',name:'',note:''}],
     steps: r.steps&&r.steps.length ? r.steps : [''],
   };
@@ -1450,24 +1662,89 @@ function addIngredientRow(){ S.newRecipe.ingredients.push({amount:'',name:'',not
 function removeIngredientRow(i){ S.newRecipe.ingredients.splice(i,1);render(); }
 function addStepRow(){ S.newRecipe.steps.push('');render(); }
 function removeStepRow(i){ S.newRecipe.steps.splice(i,1);render(); }
-function recipeMargin(cost,price){ return price>0?Math.round(((price-cost)/price)*100):0; }
+
+function renderChat(isOwner){
+  const L=S.lang==='es';
+  const myName=isOwner?'Owner':(S.staffUser?S.staffUser.name:'?');
+  const myId=isOwner?S.user?.id:S.staffUser?.id;
+  const pinned=S.messages.filter(m=>m.pinned);
+  const messages=S.messages.filter(m=>!m.pinned);
+
+  let html=`
+    <div class="sec-title">💬 ${L?'CHAT DEL EQUIPO':'TEAM CHAT'}</div>
+    <div style="background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px">
+      <div style="width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0"></div>
+      <div style="color:var(--text)"><strong>${L?'En vivo':'Live'}</strong> · ${L?'Mensajes aparecen al instante':'Messages appear instantly'}</div>
+    </div>
+  `;
+
+  if(pinned.length>0){
+    html+=`<div style="margin-bottom:14px">
+      <div style="font-family:'Bebas Neue',cursive;font-size:12px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">📌 ${L?'ANUNCIOS':'PINNED'}</div>
+      ${pinned.map(m=>renderMessageBubble(m,myId,isOwner,L,true)).join('')}
+    </div>`;
+  }
+
+  html+=`
+    <div id="chat-scroll" style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;max-height:58vh;min-height:340px;overflow-y:auto;margin-bottom:12px;-webkit-overflow-scrolling:touch">
+      ${messages.length===0?`<div class="empty-state" style="padding:32px 8px">💬<br/>${L?'No hay mensajes todavía. Sé el primero!':'No messages yet. Be the first!'}</div>`:
+        messages.map(m=>renderMessageBubble(m,myId,isOwner,L,false)).join('')}
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;gap:8px;align-items:flex-end">
+      <textarea id="chat-input" placeholder="${L?'Escribe un mensaje...':'Type a message...'}" rows="1" oninput="S.chatInput=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;resize:none;line-height:1.4;max-height:120px;-webkit-appearance:none">${S.chatInput||''}</textarea>
+      <button onclick="sendMessage()" style="background:linear-gradient(135deg,var(--lc),#a00020);border:none;color:#fff;border-radius:8px;width:46px;height:46px;flex-shrink:0;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;-webkit-appearance:none">▶</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">${L?`Posteando como`:`Posting as`} <strong style="color:var(--lcg)">${myName}</strong>${isOwner?` · ${L?'Owner':'Owner'}`:''}</div>
+  `;
+
+  return html;
+}
+
+function renderMessageBubble(m,myId,isOwner,L,isPinnedSection){
+  const isMine=m.sender_id===myId;
+  const isFromOwner=m.is_owner;
+  const time=new Date(m.created_at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const dateStr=new Date(m.created_at).toLocaleDateString([],{month:'short',day:'numeric'});
+  const senderColor=isFromOwner?'var(--lcg)':(isMine?'var(--lc)':'var(--blue)');
+  const bgColor=isMine?'rgba(200,16,46,.12)':isFromOwner?'rgba(212,160,23,.08)':'var(--s2)';
+  const borderColor=isMine?'rgba(200,16,46,.3)':isFromOwner?'rgba(212,160,23,.3)':'var(--border)';
+  const align=isMine?'flex-end':'flex-start';
+  const escapedTxt=(m.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  return `<div style="display:flex;justify-content:${align};margin-bottom:10px">
+    <div style="max-width:85%;background:${bgColor};border:1px solid ${borderColor};border-radius:12px;padding:10px 12px;position:relative">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="font-weight:700;font-size:13px;color:${senderColor}">${m.sender_name||'?'}${isFromOwner?' 👑':''}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted)">${dateStr} · ${time}</div>
+      </div>
+      <div style="font-size:15px;color:var(--text);line-height:1.45;word-wrap:break-word;white-space:pre-wrap">${escapedTxt}</div>
+      ${isOwner?`<div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+        <button onclick="togglePin('${m.id}',${m.pinned})" style="background:${m.pinned?'rgba(212,160,23,.25)':'var(--s3)'};border:none;color:${m.pinned?'var(--lcg)':'var(--muted)'};border-radius:5px;padding:4px 9px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">${m.pinned?'📌 UNPIN':'📌 PIN'}</button>
+        <button onclick="deleteMessage('${m.id}')" style="background:rgba(255,68,85,.15);border:none;color:var(--red);border-radius:5px;padding:4px 9px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px">DEL</button>
+      </div>`:''}
+    </div>
+  </div>`;
+}
 
 function renderRecipeBook(isOwner){
   const HARDCODED = [
-    {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',cost:2.80,price:14,emoji:'🍹',isDefault:true,
+    {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',emoji:'🍹',isDefault:true,
       ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
       steps:['Tajín rim the glass. Fill with fresh ice.','Shake tequila, Cointreau, lime, agave with ice 10 sec.','Double strain over fresh rocks. Lime wheel garnish.']},
-    {id:'h2',name:'Michelada',tag:'Signature',glass:'Pint glass',prep_time:'1.5 min',cost:1.60,price:10,emoji:'🍺',isDefault:true,
+    {id:'h2',name:'Michelada',tag:'Signature',glass:'Pint glass',prep_time:'1.5 min',emoji:'🍺',isDefault:true,
       ingredients:[{amount:'1',name:'Modelo Especial',note:'ice cold'},{amount:'2 oz',name:'Clamato juice',note:''},{amount:'4 dashes',name:'Valentina hot sauce',note:''},{amount:'1 dash',name:'Soy sauce',note:'secret'}],
       steps:['Tajín rim. Fill pint glass with ice.','Mix Clamato, lime, Valentina, Worcestershire, soy sauce.','Pour Modelo slowly. Dust Tajín on top.']},
-    {id:'h3',name:'Paloma',tag:'Classic',glass:'Highball',prep_time:'1.5 min',cost:1.90,price:12,emoji:'🍊',isDefault:true,
+    {id:'h3',name:'Paloma',tag:'Classic',glass:'Highball',prep_time:'1.5 min',emoji:'🍊',isDefault:true,
       ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:''},{amount:'1/2 oz',name:'Fresh lime juice',note:''},{amount:'4 oz',name:'Jarritos Grapefruit',note:'preferred'}],
       steps:['Salt rim. Fill highball with ice.','Add tequila and lime juice.','Top with Jarritos. Stir gently.']},
-    {id:'h4',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prep_time:'3 min',cost:3.20,price:16,emoji:'🥃',isDefault:true,
+    {id:'h4',name:'Old Fashioned',tag:'Premium',glass:'Rocks',prep_time:'3 min',emoji:'🥃',isDefault:true,
       ingredients:[{amount:'2 oz',name:'Bulleit Bourbon',note:''},{amount:'1/4 oz',name:'Demerara syrup',note:'2:1'},{amount:'2 dashes',name:'Angostura bitters',note:''}],
       steps:['Large ice cube in rocks glass.','Stir all ingredients with ice 30 sec.','Strain over the big cube. Orange peel garnish.']},
   ];
-  const allRecipes = [...HARDCODED, ...S.recipes.map(r=>({...r,isDefault:false}))];
+  const hiddenIds = getHiddenDefaults();
+  const visibleHardcoded = HARDCODED.filter(r=>!hiddenIds.includes(r.id));
+  const allRecipes = [...visibleHardcoded, ...S.recipes.map(r=>({...r,isDefault:false}))];
   const tags = ['All','Signature','Classic','Premium','Custom'];
   const filtered = allRecipes.filter(r=>{
     const ms = r.name.toLowerCase().includes(S.recipeSearch.toLowerCase());
@@ -1477,7 +1754,14 @@ function renderRecipeBook(isOwner){
 
   let html = '';
   if(isOwner){
-    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',cost:'',price:'',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+    if(visibleHardcoded.length>0){
+      html += `<div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);line-height:1.5">
+        <span style="font-size:18px;flex-shrink:0">💡</span>
+        <span style="flex:1">Want to hide our sample recipes and only show yours?</span>
+        <button onclick="hideAllDefaults()" style="background:rgba(212,160,23,.15);border:1px solid var(--lcg);color:var(--lcg);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">HIDE ALL</button>
+      </div>`;
+    }
   }
   html += `<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
     <span style="color:var(--muted);font-size:18px">🔍</span>
@@ -1492,17 +1776,17 @@ function renderRecipeBook(isOwner){
   }
 
   filtered.forEach(r => {
-    const mg = recipeMargin(parseFloat(r.cost)||0, parseFloat(r.price)||0);
-    const rJson = JSON.stringify(r).replace(/"/g,'&quot;').replace(/'/g,"\'");
+    const rJson = JSON.stringify(r).replace(/"/g,'&quot;').replace(/'/g,"\\'");
     html += `<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji||'🍹'} ${r.name}</div>
         <div style="display:flex;align-items:center;gap:8px">
           ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
           <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
+          ${isOwner&&r.isDefault?`<button onclick="event.stopPropagation();hideDefaultRecipe('${r.id}')" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px">HIDE</button>`:''}
         </div>
       </div>
-      <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}</div>
+      <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}${r.prep_time?' · '+r.prep_time:''}</div>
     </div>
     <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
       ${r.ingredients&&r.ingredients.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
@@ -1519,6 +1803,21 @@ function renderRecipeBook(isOwner){
     </div>`;
   });
 
+  if(isOwner && hiddenIds.length>0){
+    const hiddenRecipes = HARDCODED.filter(r=>hiddenIds.includes(r.id));
+    html += `<div style="margin-top:24px;padding-top:18px;border-top:1px dashed var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap">
+        <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--muted)">🙈 HIDDEN BUILT-IN RECIPES (${hiddenRecipes.length})</div>
+        <button onclick="restoreAllDefaults()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;-webkit-tap-highlight-color:transparent">RESTORE ALL</button>
+      </div>
+      ${hiddenRecipes.map(r=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;opacity:.7">
+        <div style="font-size:18px">${r.emoji||'🍹'}</div>
+        <div style="flex:1;font-size:14px;color:var(--text)">${r.name}<span style="font-size:12px;color:var(--muted);margin-left:6px">${r.tag}</span></div>
+        <button onclick="unhideDefaultRecipe('${r.id}')" style="background:rgba(0,232,122,.15);border:1px solid var(--green);color:var(--green);border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">SHOW</button>
+      </div>`).join('')}
+    </div>`;
+  }
+
   if(S.showRecipeModal && isOwner){
     html += `<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
       <div class="modal" onclick="event.stopPropagation()">
@@ -1527,13 +1826,14 @@ function renderRecipeBook(isOwner){
           <div class="field"><label>Emoji</label><input type="text" value="${S.newRecipe.emoji}" oninput="S.newRecipe.emoji=this.value" maxlength="2" style="text-align:center;font-size:24px"/></div>
           <div class="field"><label>Recipe Name *</label><input type="text" value="${S.newRecipe.name}" oninput="S.newRecipe.name=this.value" placeholder="Cantina Margarita"/></div>
         </div>
+        <div class="field"><label>Category</label>
+          <select oninput="S.newRecipe.tag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
+            ${['Signature','Classic','Premium','Custom','Shot','Beer','Wine','Non-Alcoholic'].map(t=>`<option value="${t}" ${S.newRecipe.tag===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="field"><label>Category</label>
-            <select oninput="S.newRecipe.tag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              ${['Signature','Classic','Premium','Custom','Shot','Beer','Wine','Non-Alcoholic'].map(t=>`<option value="${t}" ${S.newRecipe.tag===t?'selected':''}>${t}</option>`).join('')}
-            </select>
-          </div>
           <div class="field"><label>Glass Type</label><input type="text" value="${S.newRecipe.glass}" oninput="S.newRecipe.glass=this.value" placeholder="Rocks, Highball..."/></div>
+          <div class="field"><label>Prep Time</label><input type="text" value="${S.newRecipe.prep_time}" oninput="S.newRecipe.prep_time=this.value" placeholder="2 min"/></div>
         </div>
         <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:10px 0 8px">INGREDIENTS</div>
         ${S.newRecipe.ingredients.map((ing,i)=>`
@@ -1563,14 +1863,6 @@ function renderRecipeBook(isOwner){
 
   return html;
 }
-
-// Patch loadBar to also load recipes
-const _origLoadBar = loadBar;
-loadBar = async function(){
-  await _origLoadBar();
-  await loadRecipes();
-};
-
 
 init();
 </script>
