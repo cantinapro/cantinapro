@@ -1013,11 +1013,11 @@ function renderStaffApp(){
     ${S.tab==='my-schedule'?`
       <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
       ${myTodayShift?`<div class="my-shift-highlight">
-        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ YOUR SHIFT TODAY</div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ ${L?'TU TURNO HOY':'YOUR SHIFT TODAY'}</div>
         <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
         <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
       </div>`:''}
-      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} Open Shift${openShifts.length!==1?'s':''}</div><div style="font-size:14px;color:var(--muted)">Tap any open shift to bid</div></div></div>`:''}
+      ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} ${L?(openShifts.length!==1?'Turnos Abiertos':'Turno Abierto'):'Open Shift'+(openShifts.length!==1?'s':'')}</div><div style="font-size:14px;color:var(--muted)">${L?'Toca cualquier turno abierto para pujar':'Tap any open shift to bid'}</div></div></div>`:''}
       <div class="day-tabs">
         ${DAYS.map((d,i)=>{
           const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
@@ -1026,7 +1026,7 @@ function renderStaffApp(){
           </button>`;
         }).join('')}
       </div>
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">No shifts scheduled for ${DAYS[S.schedDay]}.</div>`:''}
+      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">${L?'No hay turnos programados para':'No shifts scheduled for'} ${DAYS[S.schedDay]}.</div>`:''}
       ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
         const isMyShift=shift.staff_id===S.staffUser.id;
         const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
@@ -1039,26 +1039,26 @@ function renderStaffApp(){
               <div class="shift-role">${shift.role||'Staff'}</div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
                 ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
-                <span class="shift-badge ${isMyShift?'mine':shift.status}">${isMyShift?'⭐ YOUR SHIFT':shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
+                <span class="shift-badge ${isMyShift?'mine':shift.status}">${isMyShift?(L?'⭐ TU TURNO':'⭐ YOUR SHIFT'):shift.status==='open'?(L?'🔴 ABIERTO':'🔴 OPEN'):shift.status==='covered'?(L?'✅ CUBIERTO':'✅ COVERED'):shift.staff_name}</span>
               </div>
-              ${shift.dropped_by?`<div style="font-size:13px;color:var(--muted);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
+              ${shift.dropped_by?`<div style="font-size:13px;color:var(--muted);margin-top:6px">${L?'Dejado:':'Dropped:'} ${shift.dropped_by}</div>`:''}
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-              ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
-              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:13px;color:var(--gold);font-family:'Share Tech Mono',monospace">BID SENT ⏳</span>`:
-                `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">BID</button>`:''}
+              ${isMyShift&&shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 14px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">${L?'DEJAR':'DROP'}</button>`:''}
+              ${shift.status==='open'&&!isMyShift?hasBid?`<span style="font-size:13px;color:var(--gold);font-family:'Share Tech Mono',monospace">${L?'PUJA ENVIADA ⏳':'BID SENT ⏳'}</span>`:
+                `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 14px" onclick="bidOnShift('${shift.id}','${S.staffUser.id}','${S.staffUser.name}')">${L?'PUJAR':'BID'}</button>`:''}
             </div>
           </div>
         </div>`;
       }).join('')}
       ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">DROP THIS SHIFT</div>
-          <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">Your shift will open for others to bid. Your manager will be notified.</div>
-          <div class="field"><label>Reason for dropping</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Family emergency, sick, etc."/></div>
+          <div class="modal-title">${L?'DEJAR ESTE TURNO':'DROP THIS SHIFT'}</div>
+          <div style="font-size:15px;color:var(--muted);margin-bottom:16px;line-height:1.6">${L?'Tu turno se abrirá para que otros pujen. Tu manager será notificado.':'Your shift will open for others to bid. Your manager will be notified.'}</div>
+          <div class="field"><label>${L?'Razón para dejar':'Reason for dropping'}</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="${L?'Emergencia familiar, enfermo, etc.':'Family emergency, sick, etc.'}"/></div>
           <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
-            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP SHIFT</button>
+            <button class="btn-cancel" onclick="S.showDropModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">${L?'DEJAR TURNO':'DROP SHIFT'}</button>
           </div>
         </div>
       </div>`:''}
@@ -1082,7 +1082,7 @@ function renderStaffApp(){
         `:`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.staffUser.id}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`}
       </div>
       <div class="card">
-        <div class="ct">SHIFT BRIEFING</div>
+        <div class="ct">${L?'INFORMACIÓN DEL TURNO':'SHIFT BRIEFING'}</div>
         <div style="background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:8px;padding:14px;font-size:15px;line-height:1.8;color:var(--text)">${L?'Bienvenidos al turno. Revisen el inventario, atiendan a los clientes con reservación y reporten incidentes al manager.':'Welcome to your shift. Check inventory levels, attend to reservation guests, and report any incidents to the manager.'}</div>
       </div>
     `:''}
@@ -1126,10 +1126,10 @@ function renderStaffApp(){
     ${S.tab==='staff-closeout'?`
       <div class="sec-title">✅ ${L?'CIERRE':'END OF NIGHT'}</div>
       <div class="card">
-        <div class="ct">CLOSING CHECKLIST</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before leaving</div>
+        <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">${L?'Completa todos los puntos antes de salir':'Complete all items before leaving'}</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} ${L?'completados':'complete'} — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
           ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
@@ -1137,8 +1137,8 @@ function renderStaffApp(){
             <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
           </div>`).join('')}
         `).join('')}
-        ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED!</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):`${ALL_ITEMS.length-checkedCount} items remaining`}</button>
+        ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO!':'✓ CLOSEOUT SUBMITTED!'}</div>`:`
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${ALL_ITEMS.length-checkedCount} puntos pendientes`:`${ALL_ITEMS.length-checkedCount} items remaining`)}</button>
         `}
       </div>
     `:''}
@@ -1160,14 +1160,14 @@ function renderOwnerApp(){
   const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
 
   const TABS=[
-    {key:'dashboard',icon:'📊',label:'Home'},
-    {key:'schedule',icon:'📅',label:'Sched',badge:openShifts+pendingBids},
-    {key:'chat',icon:'💬',label:'Chat'},
-    {key:'shift',icon:'⏰',label:'Shift'},
-    {key:'inventory',icon:'📦',label:'Inventory',badge:lowItems},
-    {key:'gallery',icon:'📸',label:'Photos'},
-    {key:'recipes',icon:'🍹',label:'Drinks'},
-    {key:'closeout',icon:'✅',label:'Close'},
+    {key:'dashboard',icon:'📊',label:L?'Inicio':'Home'},
+    {key:'schedule',icon:'📅',label:L?'Horario':'Sched',badge:openShifts+pendingBids},
+    {key:'chat',icon:'💬',label:L?'Chat':'Chat'},
+    {key:'shift',icon:'⏰',label:L?'Turno':'Shift'},
+    {key:'inventory',icon:'📦',label:L?'Inventario':'Inventory',badge:lowItems},
+    {key:'gallery',icon:'📸',label:L?'Fotos':'Photos'},
+    {key:'recipes',icon:'🍹',label:L?'Tragos':'Drinks'},
+    {key:'closeout',icon:'✅',label:L?'Cierre':'Close'},
   ];
 
   return `<div class="app">
@@ -1190,8 +1190,8 @@ function renderOwnerApp(){
     ${renderIOSInstallBanner()}
     ${S.showInstallBanner?`<div class="install-banner">
       <div style="font-size:22px">📱</div>
-      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">Install CantinaPro</div><div style="font-size:13px;color:var(--muted)">Add to your home screen for quick access</div></div>
-      <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">INSTALL</button>
+      <div style="flex:1"><div style="font-weight:700;font-size:16px;color:var(--text)">${L?'Instalar CantinaPro':'Install CantinaPro'}</div><div style="font-size:13px;color:var(--muted)">${L?'Agrega a tu pantalla de inicio para acceso rápido':'Add to your home screen for quick access'}</div></div>
+      <button onclick="installApp()" class="btn-sm" style="background:var(--blue);color:#fff;font-size:13px;padding:9px 14px">${L?'INSTALAR':'INSTALL'}</button>
     </div>`:''}
     ${renderInstallModal()}
 
@@ -1245,17 +1245,17 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='schedule'?`
-      <div class="sec-title">📅 SCHEDULE</div>
+      <div class="sec-title">📅 ${L?'HORARIO':'SCHEDULE'}</div>
       <div class="day-tabs">
         ${DAYS.map((d,i)=>{
           const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
           return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
+            <div>${d}</div>${hasOpen?`<div style="font-size:8px;color:var(--red)">${L?'ABIERTO':'OPEN'}</div>`:''}
           </button>`;
         }).join('')}
       </div>
-      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">+ ADD SHIFT FOR ${DAYS[S.schedDay].toUpperCase()}</button>
-      ${dayShifts.length===0?`<div class="empty-state">No shifts for ${DAYS[S.schedDay]}.<br/>Tap the button above to add one.</div>`:''}
+      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">${L?'+ AGREGAR TURNO PARA':'+ ADD SHIFT FOR'} ${DAYS[S.schedDay].toUpperCase()}</button>
+      ${dayShifts.length===0?`<div class="empty-state">${L?'No hay turnos para':'No shifts for'} ${DAYS[S.schedDay]}.<br/>${L?'Toca el botón de arriba para agregar uno.':'Tap the button above to add one.'}</div>`:''}
       ${dayShifts.map(shift=>{
         const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
         const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
@@ -1267,35 +1267,35 @@ function renderOwnerApp(){
               <div class="shift-role">${shift.role||'Staff'}</div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
                 ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
-                <span class="shift-badge ${shift.status}">${shift.status==='open'?'🔴 OPEN':shift.status==='covered'?'✅ COVERED':shift.staff_name}</span>
+                <span class="shift-badge ${shift.status}">${shift.status==='open'?(L?'🔴 ABIERTO':'🔴 OPEN'):shift.status==='covered'?(L?'✅ CUBIERTO':'✅ COVERED'):shift.staff_name}</span>
               </div>
-              ${shift.dropped_by?`<div style="font-size:13px;color:var(--red);margin-top:6px">Dropped: ${shift.dropped_by}</div>`:''}
+              ${shift.dropped_by?`<div style="font-size:13px;color:var(--red);margin-top:6px">${L?'Dejado:':'Dropped:'} ${shift.dropped_by}</div>`:''}
             </div>
             <div style="display:flex;gap:8px">
-              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 12px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">DROP</button>`:''}
+              ${shift.status==='scheduled'?`<button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 12px" onclick="S.dropShiftId='${shift.id}';S.showDropModal=true;render()">${L?'DEJAR':'DROP'}</button>`:''}
               <button class="btn-sm" style="background:rgba(255,68,85,.15);color:var(--red);font-size:18px;padding:6px 12px" onclick="deleteShift('${shift.id}')">×</button>
             </div>
           </div>
           ${shift.status==='open'&&S.staff.length>0?`
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">AVAILABLE STAFF TO COVER</div>
+              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${L?'PERSONAL DISPONIBLE PARA CUBRIR':'AVAILABLE STAFF TO COVER'}</div>
               ${S.staff.map((st,i)=>{
                 const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===st.id);
                 return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
                   <div class="av" style="background:${ac(i)}22;color:${ac(i)};width:28px;height:28px;font-size:10px">${ai(st.name)}</div>
                   <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${st.name}</div>
-                  ${hasBid?`<span style="font-size:13px;color:var(--gold)">BID PLACED ⏳</span>`:
-                    `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">ASSIGN</button>`}
+                  ${hasBid?`<span style="font-size:13px;color:var(--gold)">${L?'PUJA HECHA ⏳':'BID PLACED ⏳'}</span>`:
+                    `<button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);font-size:13px;padding:9px 12px" onclick="bidOnShift('${shift.id}','${st.id}','${st.name}')">${L?'ASIGNAR':'ASSIGN'}</button>`}
                 </div>`;
               }).join('')}
             </div>
           `:''}
           ${shiftBids.length>0?`
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">🙋 ${shiftBids.length} BID${shiftBids.length!==1?'S':''} — APPROVE ONE</div>
+              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">🙋 ${shiftBids.length} ${L?(shiftBids.length!==1?'PUJAS':'PUJA')+' — APRUEBA UNA':'BID'+(shiftBids.length!==1?'S':'')+' — APPROVE ONE'}</div>
               ${shiftBids.map(bid=>`<div class="bid-row">
                 <div style="flex:1;font-size:16px;font-weight:600;color:var(--text)">${bid.staff_name}</div>
-                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:9px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">✓ APPROVE</button>
+                <button class="btn-sm" style="background:rgba(0,232,122,.2);color:var(--green);margin-right:8px;font-size:13px;padding:9px 12px" onclick="approveBid('${bid.id}','${shift.id}','${bid.staff_id}','${bid.staff_name}')">${L?'✓ APROBAR':'✓ APPROVE'}</button>
                 <button class="btn-sm" style="background:rgba(255,68,85,.2);color:var(--red);font-size:13px;padding:9px 10px" onclick="declineBid('${bid.id}')">✗</button>
               </div>`).join('')}
             </div>
@@ -1305,36 +1305,36 @@ function renderOwnerApp(){
 
       ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD SHIFT — ${DAYS[S.schedDay].toUpperCase()}</div>
-          <div class="field"><label>Staff Member (optional — leave blank for open shift)</label>
+          <div class="modal-title">${L?'+ AGREGAR TURNO —':'+ ADD SHIFT —'} ${DAYS[S.schedDay].toUpperCase()}</div>
+          <div class="field"><label>${L?'Empleado (opcional — deja en blanco para turno abierto)':'Staff Member (optional — leave blank for open shift)'}</label>
             <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              <option value="">-- Open Shift (unassigned) --</option>
+              <option value="">${L?'-- Turno Abierto (sin asignar) --':'-- Open Shift (unassigned) --'}</option>
               ${S.staff.map(s=>`<option value="${s.id}" ${S.newShift.staff_id===s.id?'selected':''}>${s.name} · ${s.role}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>Role / Position</label>
+          <div class="field"><label>${L?'Puesto / Posición':'Role / Position'}</label>
             <select oninput="S.newShift.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
               ${ROLES.map(r=>`<option value="${r}" ${S.newShift.role===r?'selected':''}>${r}</option>`).join('')}
             </select>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Start Time</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
-            <div class="field"><label>End Time</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
+            <div class="field"><label>${L?'Hora de Inicio':'Start Time'}</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
+            <div class="field"><label>${L?'Hora de Fin':'End Time'}</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
           </div>
           <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showShiftModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveShift()">SAVE SHIFT</button>
+            <button class="btn-cancel" onclick="S.showShiftModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" onclick="saveShift()">${L?'GUARDAR TURNO':'SAVE SHIFT'}</button>
           </div>
         </div>
       </div>`:''}
 
       ${S.showDropModal?`<div class="modal-bg" onclick="S.showDropModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">DROP SHIFT</div>
-          <div class="field"><label>Reason</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="Emergency, sick, etc."/></div>
+          <div class="modal-title">${L?'DEJAR TURNO':'DROP SHIFT'}</div>
+          <div class="field"><label>${L?'Razón':'Reason'}</label><input type="text" value="${S.dropReason}" oninput="S.dropReason=this.value" placeholder="${L?'Emergencia, enfermo, etc.':'Emergency, sick, etc.'}"/></div>
           <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showDropModal=false;render()">Cancel</button>
-            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">DROP</button>
+            <button class="btn-cancel" onclick="S.showDropModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" style="background:var(--red)" onclick="dropShift('${S.dropShiftId}')">${L?'DEJAR':'DROP'}</button>
           </div>
         </div>
       </div>`:''}
@@ -1343,11 +1343,11 @@ function renderOwnerApp(){
     ${S.tab==='chat'?renderChat(true):''}
 
     ${S.tab==='shift'?`
-      <div class="sec-title">⏰ SHIFT</div>
+      <div class="sec-title">⏰ ${L?'TURNO':'SHIFT'}</div>
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
       <div class="card">
-        <div class="ct">CLOCK IN / OUT</div>
-        ${S.staff.length===0?`<div class="empty-state">No staff added yet.<br/>Tap "+ Add Staff" below.</div>`:''}
+        <div class="ct">${L?'ENTRADA / SALIDA':'CLOCK IN / OUT'}</div>
+        ${S.staff.length===0?`<div class="empty-state">${L?'No hay empleados agregados todavía.':'No staff added yet.'}<br/>${L?'Toca "+ Agregar Empleado" abajo.':'Tap "+ Add Staff" below.'}</div>`:''}
         <div class="staff-grid">
           ${S.staff.map((s,i)=>{
             const isIn=S.clockedIn.includes(s.id);
@@ -1355,15 +1355,15 @@ function renderOwnerApp(){
               <div class="av" style="background:${ac(i)}22;color:${ac(i)}">${ai(s.name)}</div>
               <div style="font-weight:700;font-size:15px;margin-top:8px;color:var(--text)">${s.name}</div>
               <div style="font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:2px">${s.role}</div>
-              <div style="font-size:12px;font-weight:700;margin-top:6px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?'● ON CLOCK':'○ OFF'}</div>
+              <div style="font-size:12px;font-weight:700;margin-top:6px;color:${isIn?'var(--green)':'var(--muted)'}">${isIn?(L?'● TRABAJANDO':'● ON CLOCK'):(L?'○ FUERA':'○ OFF')}</div>
             </div>`;
           }).join('')}
         </div>
         ${S.selectedStaff?(()=>{
           const isIn=S.clockedIn.includes(S.selectedStaff);
           return isIn
-            ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ CLOCK OUT</button>`
-            :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ CLOCK IN</button>`;
+            ?`<button class="action-btn red" onclick="S.clockedIn=S.clockedIn.filter(id=>id!=='${S.selectedStaff}');render()">⏹ ${L?'TERMINAR TURNO':'CLOCK OUT'}</button>`
+            :`<button class="action-btn green" onclick="S.clockedIn=[...S.clockedIn,'${S.selectedStaff}'];render()">▶ ${L?'INICIAR TURNO':'CLOCK IN'}</button>`;
         })():`<button class="action-btn" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)" disabled>${L?'TOCA TU NOMBRE ARRIBA':'TAP YOUR NAME ABOVE'}</button>`}
       </div>
 
@@ -1406,39 +1406,40 @@ function renderOwnerApp(){
       <button class="action-btn blue" onclick="S.showStaffModal=true;render()">${L?'+ AGREGAR EMPLEADO':'+ ADD STAFF MEMBER'}</button>
       ${S.showStaffModal?`<div class="modal-bg" onclick="S.showStaffModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD STAFF MEMBER</div>
-          <div class="field"><label>Full Name</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria Garcia"/></div>
-          <div class="field"><label>Role / Position</label>
+          <div class="modal-title">${L?'+ AGREGAR EMPLEADO':'+ ADD STAFF MEMBER'}</div>
+          <div class="field"><label>${L?'Nombre Completo':'Full Name'}</label><input type="text" value="${S.newStaff.name}" oninput="S.newStaff.name=this.value" placeholder="Maria Garcia"/></div>
+          <div class="field"><label>${L?'Puesto / Posición':'Role / Position'}</label>
             <select oninput="S.newStaff.role=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
               ${ROLES.map(r=>`<option value="${r}" ${S.newStaff.role===r?'selected':''}>${r}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>PIN (4 digits — staff use this to log in)</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234" maxlength="4"/></div>
+          <div class="field"><label>${L?'PIN (4 dígitos — los empleados usan esto para entrar)':'PIN (4 digits — staff use this to log in)'}</label><input type="number" value="${S.newStaff.pin}" oninput="S.newStaff.pin=this.value" placeholder="1234" maxlength="4"/></div>
           <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showStaffModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveStaff()">Save</button>
+            <button class="btn-cancel" onclick="S.showStaffModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" onclick="saveStaff()">${L?'Guardar':'Save'}</button>
           </div>
         </div>
       </div>`:''}
     `:''}
 
     ${S.tab==='inventory'?`
-      <div class="sec-title">📦 INVENTORY</div>
-      <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:14px">+ ADD ITEM</button>
+      <div class="sec-title">📦 ${L?'INVENTARIO':'INVENTORY'}</div>
+      <button class="action-btn red" onclick="S.showInvModal=true;render()" style="margin-bottom:14px">${L?'+ AGREGAR PRODUCTO':'+ ADD ITEM'}</button>
       <div class="card" style="padding:0;overflow:hidden">
-        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">No inventory items yet.<br/>Tap "+ Add Item" above.</div>`:`
+        ${S.inventory.length===0?`<div class="empty-state" style="padding:32px">${L?'No hay productos todavía.':'No inventory items yet.'}<br/>${L?'Toca "+ Agregar Producto" arriba.':'Tap "+ Add Item" above.'}</div>`:`
         <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
           <table class="inv-table">
-            <thead><tr><th>Item</th><th>Unit</th><th>Stock</th><th>Par</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>${L?'Producto':'Item'}</th><th>${L?'Unidad':'Unit'}</th><th>${L?'Stock':'Stock'}</th><th>${L?'Par':'Par'}</th><th>${L?'Estado':'Status'}</th><th></th></tr></thead>
             <tbody>
               ${S.inventory.map(item=>{
                 const st=item.stock===0?'out':item.stock<=(item.par_level*0.5)?'low':'ok';
+                const stLabel=L?(st==='ok'?'BIEN':st==='low'?'BAJO':'AGOTADO'):st.toUpperCase();
                 return `<tr>
                   <td><div style="font-weight:700;font-size:15px;color:var(--text)">${item.name}</div><div style="font-size:12px;color:var(--muted)">${item.category||''}</div></td>
                   <td style="font-size:13px;color:var(--muted)">${item.unit||''}</td>
                   <td><input type="number" value="${item.stock}" onchange="updateStock('${item.id}',parseFloat(this.value)||0)" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:14px;width:62px;outline:none;font-family:'Share Tech Mono',monospace"/></td>
                   <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted)">${item.par_level}</td>
-                  <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${st.toUpperCase()}</span></td>
+                  <td><span class="stock-pill ${st==='ok'?'stock-ok':st==='low'?'stock-low':'stock-out'}">${stLabel}</span></td>
                   <td><button onclick="deleteInv('${item.id}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:22px;padding:4px">×</button></td>
                 </tr>`;
               }).join('')}
@@ -1448,17 +1449,17 @@ function renderOwnerApp(){
       </div>
       ${S.showInvModal?`<div class="modal-bg" onclick="S.showInvModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">+ ADD INVENTORY ITEM</div>
-          <div class="field"><label>Name</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
-          <div class="field"><label>Category</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="Tequila, Beer, Wine..."/></div>
-          <div class="field"><label>Unit</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="750ml, Keg, Case, Bottle..."/></div>
+          <div class="modal-title">${L?'+ AGREGAR PRODUCTO':'+ ADD INVENTORY ITEM'}</div>
+          <div class="field"><label>${L?'Nombre':'Name'}</label><input type="text" value="${S.newInv.name}" oninput="S.newInv.name=this.value" placeholder="Patron Silver"/></div>
+          <div class="field"><label>${L?'Categoría':'Category'}</label><input type="text" value="${S.newInv.category}" oninput="S.newInv.category=this.value" placeholder="${L?'Tequila, Cerveza, Vino...':'Tequila, Beer, Wine...'}"/></div>
+          <div class="field"><label>${L?'Unidad':'Unit'}</label><input type="text" value="${S.newInv.unit}" oninput="S.newInv.unit=this.value" placeholder="${L?'750ml, Barril, Caja, Botella...':'750ml, Keg, Case, Bottle...'}"/></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Current Stock</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value" placeholder="0"/></div>
-            <div class="field"><label>Par Level</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value" placeholder="0"/></div>
+            <div class="field"><label>${L?'Stock Actual':'Current Stock'}</label><input type="number" value="${S.newInv.stock}" oninput="S.newInv.stock=this.value" placeholder="0"/></div>
+            <div class="field"><label>${L?'Nivel Par':'Par Level'}</label><input type="number" value="${S.newInv.par_level}" oninput="S.newInv.par_level=this.value" placeholder="0"/></div>
           </div>
           <div class="modal-actions">
-            <button class="btn-cancel" onclick="S.showInvModal=false;render()">Cancel</button>
-            <button class="btn-save" onclick="saveInv()">Save Item</button>
+            <button class="btn-cancel" onclick="S.showInvModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+            <button class="btn-save" onclick="saveInv()">${L?'Guardar':'Save Item'}</button>
           </div>
         </div>
       </div>`:''}
@@ -1504,17 +1505,17 @@ function renderOwnerApp(){
     `:''}
 
     ${S.tab==='recipes'?`
-      <div class="sec-title">🍹 RECIPE BOOK</div>
+      <div class="sec-title">🍹 ${L?'LIBRO DE RECETAS':'RECIPE BOOK'}</div>
       ${renderRecipeBook(true)}
     `:''}
 
     ${S.tab==='closeout'?`
-      <div class="sec-title">✅ END OF NIGHT</div>
+      <div class="sec-title">✅ ${L?'CIERRE DE LA NOCHE':'END OF NIGHT'}</div>
       <div class="card">
-        <div class="ct">CLOSING CHECKLIST</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">Complete all items before submitting closeout</div>
+        <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:12px">${L?'Completa todos los puntos antes de enviar el cierre':'Complete all items before submitting closeout'}</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} complete — ${pct}%</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} ${L?'completados':'complete'} — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
           ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
@@ -1524,43 +1525,43 @@ function renderOwnerApp(){
         `).join('')}
       </div>
       <div class="card">
-        <div class="ct">CLOSEOUT FORM</div>
-        ${S.closeoutSubmitted?`<div class="success-box">✓ CLOSEOUT SUBMITTED SUCCESSFULLY!</div>`:`
+        <div class="ct">${L?'FORMULARIO DE CIERRE':'CLOSEOUT FORM'}</div>
+        ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO EXITOSAMENTE!':'✓ CLOSEOUT SUBMITTED SUCCESSFULLY!'}</div>`:`
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-            <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
-            <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
-            <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
-            <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-            <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
+            <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+            <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
+            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+            <div class="field"><label>${L?'Tarjetas ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
           </div>
-          <div class="field"><label>Closing Staff</label>
+          <div class="field"><label>${L?'Empleado de Cierre':'Closing Staff'}</label>
             <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
-              <option value="">Select staff member</option>
+              <option value="">${L?'Selecciona un empleado':'Select staff member'}</option>
               ${S.staff.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}
             </select>
           </div>
-          <div class="field"><label>Notes / Incidents</label><textarea placeholder="Any issues or notes for the owner..." oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?'SUBMIT CLOSEOUT':`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`}</button>
+          <div class="field"><label>${L?'Notas / Incidentes':'Notes / Incidents'}</label><textarea placeholder="${L?'Cualquier problema o nota para el dueño...':'Any issues or notes for the owner...'}" oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`COMPLETA LA LISTA PRIMERO (${ALL_ITEMS.length-checkedCount} pendientes)`:`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`)}</button>
         `}
       </div>
     `:''}
 
     ${S.showSaleModal?`<div class="modal-bg" onclick="S.showSaleModal=false;render()">
       <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-title">+ LOG SALES</div>
+        <div class="modal-title">${L?'+ REGISTRAR VENTAS':'+ LOG SALES'}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>Bar Sales ($)</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-          <div class="field"><label>Food ($)</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
-          <div class="field"><label>Cash ($)</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
-          <div class="field"><label>Cards ($)</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
-          <div class="field"><label>Tips ($)</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-          <div class="field"><label>Comps ($)</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
+          <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+          <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
+          <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+          <div class="field"><label>${L?'Tarjetas ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+          <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+          <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
         </div>
-        <div class="field"><label>Notes</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="Shift notes..."/></div>
+        <div class="field"><label>${L?'Notas':'Notes'}</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="${L?'Notas del turno...':'Shift notes...'}"/></div>
         <div class="modal-actions">
-          <button class="btn-cancel" onclick="S.showSaleModal=false;render()">Cancel</button>
-          <button class="btn-save" onclick="saveSale()">Save Sales</button>
+          <button class="btn-cancel" onclick="S.showSaleModal=false;render()">${L?'Cancelar':'Cancel'}</button>
+          <button class="btn-save" onclick="saveSale()">${L?'Guardar Ventas':'Save Sales'}</button>
         </div>
       </div>
     </div>`:''}
@@ -1728,6 +1729,7 @@ function renderMessageBubble(m,myId,isOwner,L,isPinnedSection){
 }
 
 function renderRecipeBook(isOwner){
+  const L=S.lang==='es';
   const HARDCODED = [
     {id:'h1',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prep_time:'2 min',emoji:'🍹',isDefault:true,
       ingredients:[{amount:'2 oz',name:'Blanco Tequila',note:'well tequila'},{amount:'1 oz',name:'Cointreau',note:''},{amount:'3/4 oz',name:'Fresh lime juice',note:'squeeze to order'},{amount:'1/2 oz',name:'Agave syrup',note:''}],
@@ -1754,25 +1756,25 @@ function renderRecipeBook(isOwner){
 
   let html = '';
   if(isOwner){
-    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">+ ADD YOUR RECIPE</button>`;
+    html += `<button class="action-btn red" onclick="S.editingRecipe=null;S.newRecipe={name:'',tag:'Signature',glass:'',prep_time:'2 min',emoji:'🍹',ingredients:[{amount:'',name:'',note:''}],steps:['']};S.showRecipeModal=true;render()" style="margin-bottom:14px">${L?'+ AGREGAR TU RECETA':'+ ADD YOUR RECIPE'}</button>`;
     if(visibleHardcoded.length>0){
       html += `<div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);line-height:1.5">
         <span style="font-size:18px;flex-shrink:0">💡</span>
-        <span style="flex:1">Want to hide our sample recipes and only show yours?</span>
-        <button onclick="hideAllDefaults()" style="background:rgba(212,160,23,.15);border:1px solid var(--lcg);color:var(--lcg);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">HIDE ALL</button>
+        <span style="flex:1">${L?'¿Quieres ocultar nuestras recetas de muestra y mostrar solo las tuyas?':'Want to hide our sample recipes and only show yours?'}</span>
+        <button onclick="hideAllDefaults()" style="background:rgba(212,160,23,.15);border:1px solid var(--lcg);color:var(--lcg);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'OCULTAR':'HIDE ALL'}</button>
       </div>`;
     }
   }
   html += `<div style="display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
     <span style="color:var(--muted);font-size:18px">🔍</span>
-    <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="Search recipes..." value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
+    <input style="background:none;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;flex:1;outline:none;width:100%" placeholder="${L?'Buscar recetas...':'Search recipes...'}" value="${S.recipeSearch}" oninput="S.recipeSearch=this.value;render()"/>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
     ${tags.map(f=>`<button style="background:${S.recipeFilter===f?'rgba(200,16,46,.15)':'var(--s2)'};border:1px solid ${S.recipeFilter===f?'var(--lc)':'var(--border)'};color:${S.recipeFilter===f?'var(--lc)':'var(--muted)'};font-family:'Bebas Neue',cursive;font-size:13px;padding:8px 16px;border-radius:20px;cursor:pointer;" onclick="S.recipeFilter='${f}';render()">${f}</button>`).join('')}
   </div>`;
 
   if(filtered.length===0){
-    html += `<div class="empty-state">No recipes found.<br/>${isOwner?'Tap "+ Add Your Recipe" above to create your first one!':''}</div>`;
+    html += `<div class="empty-state">${L?'No se encontraron recetas.':'No recipes found.'}<br/>${isOwner?(L?'Toca "+ AGREGAR TU RECETA" arriba para crear la primera.':'Tap "+ Add Your Recipe" above to create your first one!'):''}</div>`;
   }
 
   filtered.forEach(r => {
@@ -1781,21 +1783,21 @@ function renderRecipeBook(isOwner){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="font-weight:700;font-size:17px;color:var(--text)">${r.emoji||'🍹'} ${r.name}</div>
         <div style="display:flex;align-items:center;gap:8px">
-          ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">EDIT</button>
-          <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">DEL</button>`:''}
-          ${isOwner&&r.isDefault?`<button onclick="event.stopPropagation();hideDefaultRecipe('${r.id}')" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px">HIDE</button>`:''}
+          ${isOwner&&!r.isDefault?`<button onclick="event.stopPropagation();editRecipe(JSON.parse(this.dataset.r))" data-r="${rJson}" style="background:rgba(77,159,255,.2);border:none;color:var(--blue);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">${L?'EDITAR':'EDIT'}</button>
+          <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive">${L?'BORRAR':'DEL'}</button>`:''}
+          ${isOwner&&r.isDefault?`<button onclick="event.stopPropagation();hideDefaultRecipe('${r.id}')" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:5px 8px;cursor:pointer;font-size:12px;font-family:'Bebas Neue',cursive;letter-spacing:1px">${L?'OCULTAR':'HIDE'}</button>`:''}
         </div>
       </div>
       <div style="font-size:14px;color:var(--muted)">${r.tag||''}${r.glass?' · '+r.glass:''}${r.prep_time?' · '+r.prep_time:''}</div>
     </div>
     <div style="display:none;background:var(--s1);border:2px solid var(--lc);border-radius:12px;padding:16px;margin-bottom:14px;margin-top:-6px">
-      ${r.ingredients&&r.ingredients.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">INGREDIENTS</div>
+      ${r.ingredients&&r.ingredients.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">${L?'INGREDIENTES':'INGREDIENTS'}</div>
       ${r.ingredients.map(i=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
         <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--teal);width:55px;flex-shrink:0">${i.amount||''}</div>
         <div style="font-size:15px;font-weight:600;flex:1;color:var(--text)">${i.name||''}</div>
         ${i.note?`<div style="font-size:13px;color:var(--muted);font-style:italic">${i.note}</div>`:''}
       </div>`).join('')}`:''}
-      ${r.steps&&r.steps.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">STEPS</div>
+      ${r.steps&&r.steps.length?`<div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:14px 0 10px">${L?'PASOS':'STEPS'}</div>
       ${r.steps.map((step,idx)=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
         <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);border:1px solid rgba(200,16,46,.4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${idx+1}</div>
         <div style="font-size:15px;line-height:1.7;color:var(--text)">${step}</div>
@@ -1807,13 +1809,13 @@ function renderRecipeBook(isOwner){
     const hiddenRecipes = HARDCODED.filter(r=>hiddenIds.includes(r.id));
     html += `<div style="margin-top:24px;padding-top:18px;border-top:1px dashed var(--border)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap">
-        <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--muted)">🙈 HIDDEN BUILT-IN RECIPES (${hiddenRecipes.length})</div>
-        <button onclick="restoreAllDefaults()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;-webkit-tap-highlight-color:transparent">RESTORE ALL</button>
+        <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--muted)">🙈 ${L?'RECETAS OCULTAS':'HIDDEN BUILT-IN RECIPES'} (${hiddenRecipes.length})</div>
+        <button onclick="restoreAllDefaults()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:6px 10px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1px;-webkit-tap-highlight-color:transparent">${L?'RESTAURAR TODAS':'RESTORE ALL'}</button>
       </div>
       ${hiddenRecipes.map(r=>`<div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;opacity:.7">
         <div style="font-size:18px">${r.emoji||'🍹'}</div>
         <div style="flex:1;font-size:14px;color:var(--text)">${r.name}<span style="font-size:12px;color:var(--muted);margin-left:6px">${r.tag}</span></div>
-        <button onclick="unhideDefaultRecipe('${r.id}')" style="background:rgba(0,232,122,.15);border:1px solid var(--green);color:var(--green);border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">SHOW</button>
+        <button onclick="unhideDefaultRecipe('${r.id}')" style="background:rgba(0,232,122,.15);border:1px solid var(--green);color:var(--green);border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:'Bebas Neue',cursive;letter-spacing:1px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'MOSTRAR':'SHOW'}</button>
       </div>`).join('')}
     </div>`;
   }
@@ -1821,41 +1823,41 @@ function renderRecipeBook(isOwner){
   if(S.showRecipeModal && isOwner){
     html += `<div class="modal-bg" onclick="S.showRecipeModal=false;render()">
       <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-title">${S.editingRecipe?'EDIT RECIPE':'+ ADD RECIPE'}</div>
+        <div class="modal-title">${S.editingRecipe?(L?'EDITAR RECETA':'EDIT RECIPE'):(L?'+ AGREGAR RECETA':'+ ADD RECIPE')}</div>
         <div style="display:grid;grid-template-columns:60px 1fr;gap:10px">
-          <div class="field"><label>Emoji</label><input type="text" value="${S.newRecipe.emoji}" oninput="S.newRecipe.emoji=this.value" maxlength="2" style="text-align:center;font-size:24px"/></div>
-          <div class="field"><label>Recipe Name *</label><input type="text" value="${S.newRecipe.name}" oninput="S.newRecipe.name=this.value" placeholder="Cantina Margarita"/></div>
+          <div class="field"><label>${L?'Emoji':'Emoji'}</label><input type="text" value="${S.newRecipe.emoji}" oninput="S.newRecipe.emoji=this.value" maxlength="2" style="text-align:center;font-size:24px"/></div>
+          <div class="field"><label>${L?'Nombre de la Receta *':'Recipe Name *'}</label><input type="text" value="${S.newRecipe.name}" oninput="S.newRecipe.name=this.value" placeholder="Cantina Margarita"/></div>
         </div>
-        <div class="field"><label>Category</label>
+        <div class="field"><label>${L?'Categoría':'Category'}</label>
           <select oninput="S.newRecipe.tag=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
             ${['Signature','Classic','Premium','Custom','Shot','Beer','Wine','Non-Alcoholic'].map(t=>`<option value="${t}" ${S.newRecipe.tag===t?'selected':''}>${t}</option>`).join('')}
           </select>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="field"><label>Glass Type</label><input type="text" value="${S.newRecipe.glass}" oninput="S.newRecipe.glass=this.value" placeholder="Rocks, Highball..."/></div>
-          <div class="field"><label>Prep Time</label><input type="text" value="${S.newRecipe.prep_time}" oninput="S.newRecipe.prep_time=this.value" placeholder="2 min"/></div>
+          <div class="field"><label>${L?'Tipo de Vaso':'Glass Type'}</label><input type="text" value="${S.newRecipe.glass}" oninput="S.newRecipe.glass=this.value" placeholder="${L?'Rocas, Highball...':'Rocks, Highball...'}"/></div>
+          <div class="field"><label>${L?'Tiempo de Preparación':'Prep Time'}</label><input type="text" value="${S.newRecipe.prep_time}" oninput="S.newRecipe.prep_time=this.value" placeholder="2 min"/></div>
         </div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:10px 0 8px">INGREDIENTS</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin:10px 0 8px">${L?'INGREDIENTES':'INGREDIENTS'}</div>
         ${S.newRecipe.ingredients.map((ing,i)=>`
           <div style="display:grid;grid-template-columns:75px 1fr 30px;gap:6px;margin-bottom:8px;align-items:center">
             <input type="text" value="${ing.amount}" oninput="S.newRecipe.ingredients[${i}].amount=this.value" placeholder="2 oz" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 8px;font-size:14px;outline:none;font-family:'Share Tech Mono',monospace;width:100%"/>
-            <input type="text" value="${ing.name}" oninput="S.newRecipe.ingredients[${i}].name=this.value" placeholder="Ingredient name" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
+            <input type="text" value="${ing.name}" oninput="S.newRecipe.ingredients[${i}].name=this.value" placeholder="${L?'Nombre del ingrediente':'Ingredient name'}" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
             <button onclick="removeIngredientRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:6px;padding:10px;cursor:pointer;font-size:16px">×</button>
           </div>
         `).join('')}
-        <button onclick="addIngredientRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">+ ADD INGREDIENT</button>
-        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">STEPS</div>
+        <button onclick="addIngredientRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">${L?'+ AGREGAR INGREDIENTE':'+ ADD INGREDIENT'}</button>
+        <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">${L?'PASOS':'STEPS'}</div>
         ${S.newRecipe.steps.map((step,i)=>`
           <div style="display:grid;grid-template-columns:28px 1fr 30px;gap:8px;margin-bottom:8px;align-items:center">
             <div style="width:28px;height:28px;border-radius:50%;background:rgba(200,16,46,.2);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:14px;color:var(--lc);flex-shrink:0">${i+1}</div>
-            <input type="text" value="${step}" oninput="S.newRecipe.steps[${i}]=this.value" placeholder="Step ${i+1}..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
+            <input type="text" value="${step}" oninput="S.newRecipe.steps[${i}]=this.value" placeholder="${L?'Paso':'Step'} ${i+1}..." style="background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;font-family:'Rajdhani',sans-serif;width:100%"/>
             <button onclick="removeStepRow(${i})" style="background:rgba(255,68,85,.2);border:none;color:var(--red);border-radius:6px;padding:10px;cursor:pointer;font-size:16px">×</button>
           </div>
         `).join('')}
-        <button onclick="addStepRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:6px">+ ADD STEP</button>
+        <button onclick="addStepRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:10px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:6px">${L?'+ AGREGAR PASO':'+ ADD STEP'}</button>
         <div class="modal-actions">
-          <button class="btn-cancel" onclick="S.showRecipeModal=false;S.editingRecipe=null;render()">Cancel</button>
-          <button class="btn-save" onclick="saveRecipe()">${S.editingRecipe?'SAVE CHANGES':'ADD RECIPE'}</button>
+          <button class="btn-cancel" onclick="S.showRecipeModal=false;S.editingRecipe=null;render()">${L?'Cancelar':'Cancel'}</button>
+          <button class="btn-save" onclick="saveRecipe()">${S.editingRecipe?(L?'GUARDAR CAMBIOS':'SAVE CHANGES'):(L?'AGREGAR RECETA':'ADD RECIPE')}</button>
         </div>
       </div>
     </div>`;
