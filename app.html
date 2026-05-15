@@ -279,7 +279,7 @@ function getStaffLink(){return`${window.location.origin}${window.location.pathna
 let S={
   user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
   checklist:{},closeoutSubmitted:false,
-  tab:'dashboard',lang:'en',authMode:'login',authLoading:false,authError:'',appLoading:true,
+  tab:'dashboard',lang:'en',authMode:(new URLSearchParams(window.location.search).get('signup')==='1'?'signup':'login'),authLoading:false,authError:'',appLoading:true,
   showPw:false,
   loginEmail:'',loginPassword:'',loginBarName:'',loginLocation:'',
   staffLoginStep:'select',staffLoginStaff:[],staffLoginSelected:null,staffPinInput:'',staffPinError:'',staffPinVerifying:false,staffUser:null,
@@ -306,6 +306,10 @@ let S={
   barLookupError:null,
   showPins:false,editingStaff:null,
   newChecklistItem:'',
+  signupPendingEmail:null,
+  needsBarSetup:false,
+  setupBarName:'',
+  setupBarLocation:'',
 };
 
 // PWA install prompt
@@ -462,8 +466,36 @@ async function init(){
 }
 
 async function loadBar(){
-  const{data}=await db.from('bars').select('*').eq('owner_email',S.user.email).single();
-  if(data){S.bar=data;await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);subscribeToMessages();}
+  const{data,error}=await db.from('bars').select('*').eq('owner_email',S.user.email).maybeSingle();
+  if(error){console.error('[CantinaPro] loadBar error:',error);}
+  if(data){
+    S.bar=data;
+    await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);
+    subscribeToMessages();
+    return;
+  }
+  // No bar yet — check for pending signup data
+  let pending=null;
+  try{
+    const raw=localStorage.getItem('cp_pending_bar');
+    if(raw)pending=JSON.parse(raw);
+  }catch(e){}
+  if(pending&&pending.owner_email===S.user.email){
+    const{data:created,error:insertErr}=await db.from('bars').insert({
+      name:pending.name,location:pending.location||'',owner_email:pending.owner_email
+    }).select().single();
+    if(insertErr){console.error('[CantinaPro] auto-create bar error:',insertErr);return;}
+    if(created){
+      S.bar=created;
+      try{localStorage.removeItem('cp_pending_bar');}catch(e){}
+      await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);
+      subscribeToMessages();
+      S.onboardingStep=1;
+      return;
+    }
+  }
+  // No bar and no pending data — let user create one via onboarding fallback
+  S.needsBarSetup=true;
 }
 async function loadStaff(){if(!S.bar)return;const{data}=await db.from('staff').select('*').eq('bar_id',S.bar.id).order('name');S.staff=data||[];}
 async function loadSales(){if(!S.bar)return;const{data}=await db.from('sales').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(30);S.sales=data||[];}
@@ -525,15 +557,42 @@ async function handleAuth(){
   if(!email||!password){S.authError='Email and password are required';S.authLoading=false;render();return;}
   if(S.authMode==='login'){
     const{data,error}=await db.auth.signInWithPassword({email,password});
-    if(error){S.authError=error.message;S.authLoading=false;render();return;}
+    if(error){
+      // Helpful message for unconfirmed users
+      if(error.message&&/email|confirm/i.test(error.message)){
+        S.authError='Please confirm your email first. Check your inbox (and spam folder) for the confirmation link.';
+      }else{
+        S.authError=error.message;
+      }
+      S.authLoading=false;render();return;
+    }
     if(data?.user){S.user=data.user;await loadBar();}
   }else{
     if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
-    const{data,error}=await db.auth.signUp({email,password});
+    // Stash bar info so we can create it after they confirm their email
+    try{
+      localStorage.setItem('cp_pending_bar',JSON.stringify({
+        name:S.loginBarName.trim(),
+        location:S.loginLocation.trim(),
+        owner_email:email
+      }));
+    }catch(e){}
+    const{data,error}=await db.auth.signUp({
+      email,password,
+      options:{emailRedirectTo:`${window.location.origin}${window.location.pathname}`}
+    });
     if(error){S.authError=error.message;S.authLoading=false;render();return;}
-    if(data.user){
+    // If Supabase requires email confirmation, data.session will be null
+    if(data.user&&!data.session){
+      S.authLoading=false;
+      S.signupPendingEmail=email;
+      render();return;
+    }
+    // Otherwise, user is fully signed in already
+    if(data.user&&data.session){
       S.user=data.user;
       await db.from('bars').insert({name:S.loginBarName.trim(),location:S.loginLocation.trim(),owner_email:email});
+      try{localStorage.removeItem('cp_pending_bar');}catch(e){}
       await loadBar();
       S.onboardingStep=1;
     }
@@ -726,6 +785,8 @@ function render(){
   const root=document.getElementById('root');
   try{
     if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
+    if(S.signupPendingEmail&&!S.user){root.innerHTML=renderEmailConfirmPending();return;}
+    if(S.user&&S.needsBarSetup&&!S.bar){root.innerHTML=renderBarSetupFallback();return;}
     if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
     if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
     if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
@@ -746,6 +807,65 @@ function render(){
       <div style="font-size:11px;color:#666;margin-top:20px;font-family:'Share Tech Mono',monospace;max-width:90%;word-break:break-word">${(e.message||String(e)).replace(/</g,'&lt;')}</div>
     </div>`;
   }
+}
+
+function renderEmailConfirmPending(){
+  return `<div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">📬</div>
+      <div class="auth-title">Check Your Email</div>
+      <div style="font-size:15px;color:var(--text);line-height:1.7;margin-bottom:14px">
+        We sent a confirmation link to:
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--lcg);border-radius:8px;padding:12px;font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--lcg);margin-bottom:16px;word-break:break-all">${S.signupPendingEmail}</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;text-align:left">
+        <strong style="color:var(--text)">Next steps:</strong><br/>
+        1. Open the email from CantinaPro (check spam folder too)<br/>
+        2. Click the "Confirm your email" link<br/>
+        3. You'll be redirected back here — then log in below
+      </div>
+      <button onclick="S.signupPendingEmail=null;S.authMode='login';render()" class="action-btn red" style="margin-top:0">I CONFIRMED — LOG ME IN</button>
+      <button onclick="S.signupPendingEmail=null;render()" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;width:100%;padding:14px;margin-top:6px">← Back</button>
+    </div>
+  </div>`;
+}
+
+async function completeBarSetup(){
+  const name=(S.setupBarName||'').trim();
+  if(!name){alert('Please enter a bar name.');return;}
+  const location=(S.setupBarLocation||'').trim();
+  const{data,error}=await db.from('bars').insert({
+    name,location,owner_email:S.user.email
+  }).select().single();
+  if(error){alert('Could not create bar: '+error.message);return;}
+  S.bar=data;
+  S.needsBarSetup=false;
+  S.setupBarName='';S.setupBarLocation='';
+  await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);
+  subscribeToMessages();
+  S.onboardingStep=1;
+  render();
+}
+
+function renderBarSetupFallback(){
+  return `<div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card">
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-size:42px;margin-bottom:8px">🎉</div>
+        <div class="auth-title" style="margin-bottom:6px">EMAIL CONFIRMED</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">Welcome ${S.user?.email||''}. Let's set up your bar.</div>
+      </div>
+      <div class="field"><label>Bar Name *</label><input type="text" placeholder="Local Cantina" value="${S.setupBarName||''}" oninput="S.setupBarName=this.value" onkeydown="if(event.key==='Enter')completeBarSetup()"/></div>
+      <div class="field"><label>Location</label><input type="text" placeholder="Oak Lawn, IL" value="${S.setupBarLocation||''}" oninput="S.setupBarLocation=this.value" onkeydown="if(event.key==='Enter')completeBarSetup()"/></div>
+      <button onclick="completeBarSetup()" class="auth-btn">CREATE MY BAR</button>
+    </div>
+  </div>`;
 }
 
 function renderBarNotFound(){
