@@ -206,7 +206,33 @@ const CHECKLIST_DATA={
   '💰 Cash':['Count cash drawer','Separate tips','Prepare bank deposit','Reconcile card totals'],
   '🔒 Security':['Check all doors & windows locked','Turn off all equipment','Set alarm'],
 };
-const ALL_ITEMS=Object.values(CHECKLIST_DATA).flat();
+const DEFAULT_ITEMS=Object.values(CHECKLIST_DATA).flat();
+
+function customItemsKey(){return `cp_custom_checklist_${S.bar?.id||'none'}`;}
+function loadCustomItems(){
+  try{const raw=localStorage.getItem(customItemsKey());return raw?JSON.parse(raw):[];}
+  catch(e){return [];}
+}
+function saveCustomItems(items){
+  try{localStorage.setItem(customItemsKey(),JSON.stringify(items));}catch(e){}
+}
+function allChecklistItems(){return [...DEFAULT_ITEMS,...loadCustomItems()];}
+function addCustomChecklistItem(){
+  const txt=(S.newChecklistItem||'').trim();
+  if(!txt)return;
+  const items=loadCustomItems();
+  if(items.includes(txt)||DEFAULT_ITEMS.includes(txt)){
+    S.newChecklistItem='';render();return;
+  }
+  items.push(txt);saveCustomItems(items);
+  S.newChecklistItem='';render();
+}
+function removeCustomChecklistItem(item){
+  const items=loadCustomItems().filter(i=>i!==item);
+  saveCustomItems(items);
+  if(S.checklist[item])delete S.checklist[item];
+  render();
+}
 
 const RECIPES=[
   {id:1,emoji:'🍹',name:'Cantina Margarita',tag:'Signature',glass:'Rocks',prepTime:'2 min',
@@ -257,6 +283,7 @@ let S={
   messages:[],chatInput:'',chatChannel:null,chatScrollPinned:true,
   barLookupError:null,
   showPins:false,editingStaff:null,
+  newChecklistItem:'',
 };
 
 // PWA install prompt
@@ -560,7 +587,7 @@ async function approveBid(bidId,shiftId,staffId,staffName){
 async function declineBid(bidId){await db.from('shift_bids').update({status:'declined'}).eq('id',bidId);await loadSchedules();render();}
 function toggleCheck(item){S.checklist[item]=!S.checklist[item];render();}
 async function submitCloseout(){
-  if(ALL_ITEMS.filter(i=>S.checklist[i]).length<ALL_ITEMS.length)return;
+  if(allChecklistItems().filter(i=>S.checklist[i]).length<allChecklistItems().length)return;
   await db.from('checklist_logs').insert({bar_id:S.bar.id,completed_by:S.staffUser?S.staffUser.name:(S.newSale.submitted_by||'Manager'),items_completed:S.checklist});
   if(Object.values(S.newSale).some(v=>v&&v!==''))await db.from('sales').insert({bar_id:S.bar.id,...S.newSale});
   S.closeoutSubmitted=true;render();
@@ -971,9 +998,9 @@ function renderStaffApp(){
   const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
   const myTodayShift=myShifts.find(s=>s.day_of_week===new Date().getDay());
   const openShifts=S.schedules.filter(s=>s.status==='open');
-  const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
-  const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
-  const allDone=checkedCount===ALL_ITEMS.length;
+  const checkedCount=allChecklistItems().filter(i=>S.checklist[i]).length;
+  const pct=Math.round((checkedCount/allChecklistItems().length)*100);
+  const allDone=checkedCount===allChecklistItems().length;
   const isClockedIn=S.clockedIn.includes(S.staffUser.id);
 
   const STAFF_TABS=[
@@ -1129,7 +1156,7 @@ function renderStaffApp(){
         <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:12px">${L?'Completa todos los puntos antes de salir':'Complete all items before leaving'}</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} ${L?'completados':'complete'} — ${pct}%</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allChecklistItems().length} ${L?'completados':'complete'} — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
           ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
@@ -1137,8 +1164,20 @@ function renderStaffApp(){
             <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
           </div>`).join('')}
         `).join('')}
+        ${loadCustomItems().length>0?`<div class="cgroup-t">⭐ ${L?'PERSONALIZADOS':'CUSTOM'}</div>
+        ${loadCustomItems().map(item=>`<div class="citem" style="position:relative">
+          <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
+            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+          </div>
+          <button onclick="event.stopPropagation();removeCustomChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:rgba(255,68,85,.15);border:none;color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;-webkit-tap-highlight-color:transparent" title="${L?'Quitar':'Remove'}">×</button>
+        </div>`).join('')}`:''}
+        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)">
+          <input type="text" value="${S.newChecklistItem||''}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter')addCustomChecklistItem()" placeholder="${L?'Agregar otro punto a la lista...':'Add another item to the list...'}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;-webkit-appearance:none"/>
+          <button onclick="addCustomChecklistItem()" style="background:var(--lcg);border:none;color:#000;border-radius:8px;padding:0 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'+ AGREGAR':'+ ADD'}</button>
+        </div>
         ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO!':'✓ CLOSEOUT SUBMITTED!'}</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${ALL_ITEMS.length-checkedCount} puntos pendientes`:`${ALL_ITEMS.length-checkedCount} items remaining`)}</button>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${allChecklistItems().length-checkedCount} puntos pendientes`:`${allChecklistItems().length-checkedCount} items remaining`)}</button>
         `}
       </div>
     `:''}
@@ -1152,9 +1191,9 @@ function renderOwnerApp(){
   const todaySales=S.sales[0]?(parseFloat(S.sales[0].bar_sales||0)+parseFloat(S.sales[0].food_sales||0)):0;
   const weekSales=S.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
   const lowItems=S.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
-  const checkedCount=ALL_ITEMS.filter(i=>S.checklist[i]).length;
-  const pct=Math.round((checkedCount/ALL_ITEMS.length)*100);
-  const allDone=checkedCount===ALL_ITEMS.length;
+  const checkedCount=allChecklistItems().filter(i=>S.checklist[i]).length;
+  const pct=Math.round((checkedCount/allChecklistItems().length)*100);
+  const allDone=checkedCount===allChecklistItems().length;
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
   const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
@@ -1515,7 +1554,7 @@ function renderOwnerApp(){
         <div class="ct">${L?'LISTA DE CIERRE':'CLOSING CHECKLIST'}</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:12px">${L?'Completa todos los puntos antes de enviar el cierre':'Complete all items before submitting closeout'}</div>
         <div class="cprog"><div class="cbar" style="width:${pct}%"></div></div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${ALL_ITEMS.length} ${L?'completados':'complete'} — ${pct}%</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${checkedCount}/${allChecklistItems().length} ${L?'completados':'complete'} — ${pct}%</div>
         ${Object.entries(CHECKLIST_DATA).map(([group,items])=>`
           <div class="cgroup-t">${group}</div>
           ${items.map(item=>`<div class="citem" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
@@ -1523,6 +1562,18 @@ function renderOwnerApp(){
             <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
           </div>`).join('')}
         `).join('')}
+        ${loadCustomItems().length>0?`<div class="cgroup-t">⭐ ${L?'PERSONALIZADOS':'CUSTOM'}</div>
+        ${loadCustomItems().map(item=>`<div class="citem" style="position:relative">
+          <div onclick="toggleCheck('${item.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer">
+            <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
+            <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
+          </div>
+          <button onclick="event.stopPropagation();removeCustomChecklistItem('${item.replace(/'/g,"\\'")}')" style="background:rgba(255,68,85,.15);border:none;color:var(--red);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;-webkit-tap-highlight-color:transparent" title="${L?'Quitar':'Remove'}">×</button>
+        </div>`).join('')}`:''}
+        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)">
+          <input type="text" value="${S.newChecklistItem||''}" oninput="S.newChecklistItem=this.value" onkeydown="if(event.key==='Enter')addCustomChecklistItem()" placeholder="${L?'Agregar otro punto a la lista...':'Add another item to the list...'}" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;font-family:'Rajdhani',sans-serif;outline:none;flex:1;-webkit-appearance:none"/>
+          <button onclick="addCustomChecklistItem()" style="background:var(--lcg);border:none;color:#000;border-radius:8px;padding:0 16px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1.5px;flex-shrink:0;-webkit-tap-highlight-color:transparent">${L?'+ AGREGAR':'+ ADD'}</button>
+        </div>
       </div>
       <div class="card">
         <div class="ct">${L?'FORMULARIO DE CIERRE':'CLOSEOUT FORM'}</div>
@@ -1542,7 +1593,7 @@ function renderOwnerApp(){
             </select>
           </div>
           <div class="field"><label>${L?'Notas / Incidentes':'Notes / Incidents'}</label><textarea placeholder="${L?'Cualquier problema o nota para el dueño...':'Any issues or notes for the owner...'}" oninput="S.newSale.notes=this.value">${S.newSale.notes}</textarea></div>
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`COMPLETA LA LISTA PRIMERO (${ALL_ITEMS.length-checkedCount} pendientes)`:`COMPLETE CHECKLIST FIRST (${ALL_ITEMS.length-checkedCount} remaining)`)}</button>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`COMPLETA LA LISTA PRIMERO (${allChecklistItems().length-checkedCount} pendientes)`:`COMPLETE CHECKLIST FIRST (${allChecklistItems().length-checkedCount} remaining)`)}</button>
         `}
       </div>
     `:''}
