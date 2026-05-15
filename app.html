@@ -192,7 +192,12 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;ov
 <script>
 const SUPABASE_URL='https://hfndlrfqijwuxhwydhns.supabase.co';
 const SUPABASE_KEY='sb_publishable_IB2dOie5ji9zbXl-JZPu6w_CCrDW2kT';
-const STRIPE_LINK='https://buy.stripe.com/3cI5kDeBLgjJ90b8ujbV601';
+const STRIPE_MONTHLY='https://buy.stripe.com/bJe5kDalv4B1ekvfWLbV603';
+const STRIPE_ANNUAL='https://buy.stripe.com/cNicN5ctDffF1xJcKzbV602';
+const EXEMPT_EMAILS=['lt@goldenowlinsurance.com'];
+function isExemptEmail(email){
+  return EXEMPT_EMAILS.includes((email||'').toLowerCase().trim());
+}
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
@@ -310,6 +315,8 @@ let S={
   needsBarSetup:false,
   setupBarName:'',
   setupBarLocation:'',
+  justPaid:false,
+  paymentProcessing:false,
 };
 
 // PWA install prompt
@@ -427,6 +434,16 @@ async function init(){
       S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
       const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
     },1000);
+    // Detect Stripe payment redirect — flag for later when we know which bar this is
+    if(new URLSearchParams(window.location.search).get('paid')==='success'){
+      S.justPaid=true;
+      // Clean up URL so refresh doesn't re-trigger
+      try{
+        const url=new URL(window.location.href);
+        url.searchParams.delete('paid');
+        window.history.replaceState({},'',url.toString());
+      }catch(e){}
+    }
     const urlBarId=getBarIdFromURL();
     if(urlBarId){
       S.urlBarId=urlBarId;
@@ -465,11 +482,38 @@ async function init(){
   }
 }
 
+// ── PAYMENT GATE HELPERS ─────────────────────────────
+function isBarPaid(){
+  if(!S.bar)return false;
+  // Exempt emails always pass
+  if(isExemptEmail(S.user?.email))return true;
+  return S.bar.is_paid===true;
+}
+async function markBarPaid(){
+  if(!S.bar)return false;
+  S.paymentProcessing=true;render();
+  const{data,error}=await db.from('bars').update({is_paid:true,paid_at:new Date().toISOString()}).eq('id',S.bar.id).select().single();
+  S.paymentProcessing=false;
+  if(error){console.error('[CantinaPro] markBarPaid error:',error);return false;}
+  if(data)S.bar=data;
+  return true;
+}
+function openStripeCheckout(plan){
+  const link=plan==='annual'?STRIPE_ANNUAL:STRIPE_MONTHLY;
+  // Open in same tab so we get the redirect back
+  window.location.href=link;
+}
+
 async function loadBar(){
   const{data,error}=await db.from('bars').select('*').eq('owner_email',S.user.email).maybeSingle();
   if(error){console.error('[CantinaPro] loadBar error:',error);}
   if(data){
     S.bar=data;
+    // If user just came back from Stripe payment, mark bar as paid
+    if(S.justPaid&&!S.bar.is_paid){
+      await markBarPaid();
+      S.justPaid=false;
+    }
     await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);
     subscribeToMessages();
     return;
@@ -789,6 +833,8 @@ function render(){
     if(S.user&&S.needsBarSetup&&!S.bar){root.innerHTML=renderBarSetupFallback();return;}
     if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
     if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
+    // Payment gate: bar exists, onboarding done, but not paid yet → show plan picker
+    if(S.user&&S.bar&&!isBarPaid()){root.innerHTML=renderPaymentGate();return;}
     if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
     if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
     if(S.urlBarId&&!S.bar){root.innerHTML=renderBarNotFound();return;}
@@ -864,6 +910,58 @@ function renderBarSetupFallback(){
       <div class="field"><label>Bar Name *</label><input type="text" placeholder="Local Cantina" value="${S.setupBarName||''}" oninput="S.setupBarName=this.value" onkeydown="if(event.key==='Enter')completeBarSetup()"/></div>
       <div class="field"><label>Location</label><input type="text" placeholder="Oak Lawn, IL" value="${S.setupBarLocation||''}" oninput="S.setupBarLocation=this.value" onkeydown="if(event.key==='Enter')completeBarSetup()"/></div>
       <button onclick="completeBarSetup()" class="auth-btn">CREATE MY BAR</button>
+    </div>
+  </div>`;
+}
+
+function renderPaymentGate(){
+  const L=S.lang==='es';
+  return `<div class="auth-wrap" style="justify-content:flex-start;padding-top:24px;padding-bottom:40px">
+    <div style="width:100%;max-width:440px">
+      <div style="text-align:center;margin-bottom:18px">
+        <div class="auth-logo" style="font-size:36px">CantinaPro</div>
+        <div class="auth-sub">${L?'PLAN DE SUSCRIPCIÓN':'CHOOSE YOUR PLAN'}</div>
+      </div>
+
+      <div style="background:linear-gradient(135deg,rgba(212,160,23,.15),rgba(200,16,46,.10));border:1px solid var(--lcg);border-radius:12px;padding:18px;text-align:center;margin-bottom:18px">
+        <div style="font-size:32px;margin-bottom:6px">🎉</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--lcg);line-height:1.1">${L?'¡COMIENZA TU PRUEBA GRATIS DE 14 DÍAS!':'START YOUR 14-DAY FREE TRIAL'}</div>
+        <div style="font-size:14px;color:var(--text);margin-top:8px;line-height:1.6">${L?'No se te cobra nada hoy. Cancela cuando quieras durante tu prueba.':"You won't be charged today. Cancel anytime during your trial."}</div>
+      </div>
+
+      <div style="background:var(--s1);border:2px solid var(--lc);border-radius:14px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,var(--lc),#a00020);color:#fff;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1.5px;padding:5px 12px;border-bottom-left-radius:10px">${L?'POPULAR':'POPULAR'}</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;color:var(--text)">${L?'MENSUAL':'MONTHLY'}</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0">
+          <div style="font-family:'Bebas Neue',cursive;font-size:48px;color:var(--lc);line-height:1">$50</div>
+          <div style="font-size:14px;color:var(--muted)">${L?'/mes':'/month'}</div>
+        </div>
+        <div style="font-size:13px;color:var(--lcg);margin-bottom:14px">✓ ${L?'14 días gratis primero':'14 days free first'}</div>
+        <button onclick="openStripeCheckout('monthly')" style="width:100%;padding:15px;background:linear-gradient(135deg,var(--lc),#a00020);border:none;border-radius:10px;color:#fff;font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;-webkit-tap-highlight-color:transparent">${L?'COMENZAR PRUEBA →':'START FREE TRIAL →'}</button>
+      </div>
+
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,var(--green),#00a050);color:#000;font-family:'Bebas Neue',cursive;font-size:11px;letter-spacing:1.5px;padding:5px 12px;border-bottom-left-radius:10px">${L?'AHORRA $120':'SAVE $120'}</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;color:var(--text)">${L?'ANUAL':'ANNUAL'}</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin:8px 0">
+          <div style="font-family:'Bebas Neue',cursive;font-size:48px;color:var(--green);line-height:1">$480</div>
+          <div style="font-size:14px;color:var(--muted)">${L?'/año':'/year'}</div>
+          <div style="font-size:13px;color:var(--muted);text-decoration:line-through;margin-left:6px">$600</div>
+        </div>
+        <div style="font-size:13px;color:var(--lcg);margin-bottom:14px">✓ ${L?'14 días gratis · Equivalente a $40/mes':'14 days free · Works out to $40/month'}</div>
+        <button onclick="openStripeCheckout('annual')" style="width:100%;padding:15px;background:var(--s2);border:1px solid var(--green);border-radius:10px;color:var(--green);font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:2px;cursor:pointer;-webkit-tap-highlight-color:transparent">${L?'COMENZAR ANUAL →':'START ANNUAL TRIAL →'}</button>
+      </div>
+
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:13px;color:var(--text);line-height:1.7">
+          <div style="margin-bottom:6px">✓ <strong>${L?'Sin tarjeta hoy':'No card today'}</strong> — ${L?'solo se requiere para empezar la prueba':'just enter to start trial'}</div>
+          <div style="margin-bottom:6px">✓ <strong>${L?'Cancela cuando quieras':'Cancel anytime'}</strong> — ${L?'en los primeros 14 días sin cobro':'in first 14 days at no charge'}</div>
+          <div>✓ <strong>${L?'Todas las funciones':'All features included'}</strong> — ${L?'staff, horarios, inventario, recetas, chat':'staff, schedule, inventory, recipes, chat'}</div>
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">${L?'Pagos seguros vía':'Secure payments via'} <strong style="color:var(--text)">Stripe</strong> · ${S.user?.email||''}</div>
+      <button onclick="logout()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;width:100%;padding:14px;margin-top:6px;text-decoration:underline">${L?'Salir':'Sign out'}</button>
     </div>
   </div>`;
 }
@@ -1103,7 +1201,7 @@ function renderOnboarding(){
         <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--blue);margin-bottom:8px">📱 INSTALL AS APP</div>
         <div style="font-size:13px;color:var(--text);line-height:1.7">Tell your staff to <strong>"Add to Home Screen"</strong> after opening the link. Works just like a real app — no App Store needed.</div>
       </div>
-      <button class="action-btn red" onclick="S.onboardingStep=0;render()">ENTER MY DASHBOARD →</button>
+      <button class="action-btn red" onclick="S.onboardingStep=0;render()">${isBarPaid()?'ENTER MY DASHBOARD →':'CONTINUE TO PLAN →'}</button>
     `;
   }
 
