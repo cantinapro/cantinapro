@@ -516,6 +516,8 @@ async function loadBar(){
     }
     await Promise.all([loadStaff(),loadSales(),loadInventory(),loadPhotos(),loadSchedules(),loadMessages(),loadRecipes()]);
     subscribeToMessages();
+    // Trigger onboarding if bar hasn't completed it yet
+    if(!S.bar.onboarding_completed)S.onboardingStep=1;
     return;
   }
   // No bar yet — check for pending signup data
@@ -1051,6 +1053,13 @@ const STARTER_PACK={
   ],
 };
 
+async function markOnboardingComplete(){
+  if(!S.bar||S.bar.onboarding_completed)return;
+  const{data,error}=await db.from('bars').update({onboarding_completed:true}).eq('id',S.bar.id).select().single();
+  if(error){console.error('[CantinaPro] markOnboardingComplete error:',error);return;}
+  if(data)S.bar=data;
+}
+
 async function onboardFinish(){
   S.onboardSaving=true;render();
   const validStaff=S.onboardStaff.filter(s=>s.name.trim()&&s.pin&&s.pin.length===4);
@@ -1065,11 +1074,13 @@ async function onboardFinish(){
     await db.from('inventory').insert(items.map(i=>({bar_id:S.bar.id,...i})));
   }
   await loadStaff();await loadInventory();
+  await markOnboardingComplete();
   S.onboardingStep=0;S.onboardSaving=false;render();
 }
 
-function onboardSkipAll(){
+async function onboardSkipAll(){
   if(confirm('Skip setup? You can always add staff and stock later from inside the app.')){
+    await markOnboardingComplete();
     S.onboardingStep=0;render();
   }
 }
@@ -1201,7 +1212,7 @@ function renderOnboarding(){
         <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--blue);margin-bottom:8px">📱 INSTALL AS APP</div>
         <div style="font-size:13px;color:var(--text);line-height:1.7">Tell your staff to <strong>"Add to Home Screen"</strong> after opening the link. Works just like a real app — no App Store needed.</div>
       </div>
-      <button class="action-btn red" onclick="S.onboardingStep=0;render()">${isBarPaid()?'ENTER MY DASHBOARD →':'CONTINUE TO PLAN →'}</button>
+      <button class="action-btn red" onclick="markOnboardingComplete().then(()=>{S.onboardingStep=0;render()})">${isBarPaid()?'ENTER MY DASHBOARD →':'CONTINUE TO PLAN →'}</button>
     `;
   }
 
