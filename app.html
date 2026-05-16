@@ -494,6 +494,12 @@ function isBarPaid(){
   if(isExemptEmail(S.user?.email))return true;
   return S.bar.is_paid===true;
 }
+// Check by bar object directly (used for staff path where no S.user exists)
+function isBarPaidForBar(bar){
+  if(!bar)return false;
+  if(isExemptEmail(bar.owner_email))return true;
+  return bar.is_paid===true;
+}
 async function markBarPaid(){
   if(!S.bar)return false;
   S.paymentProcessing=true;render();
@@ -838,11 +844,15 @@ function render(){
     if(S.appLoading){root.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center"><div class="spinner"></div></div>';return;}
     if(S.signupPendingEmail&&!S.user){root.innerHTML=renderEmailConfirmPending();return;}
     if(S.user&&S.needsBarSetup&&!S.bar){root.innerHTML=renderBarSetupFallback();return;}
+    // STAFF GATE: if a staff member is on a bar that isn't paid, block them
+    if(S.staffUser&&S.bar&&!isBarPaidForBar(S.bar)){root.innerHTML=renderStaffBlocked();return;}
     if(S.staffUser&&S.bar){root.innerHTML=renderStaffApp();scrollActiveTabIntoView();return;}
     if(S.user&&S.bar&&S.onboardingStep>0){root.innerHTML=renderOnboarding();return;}
     // Payment gate: bar exists, onboarding done, but not paid yet → show plan picker
     if(S.user&&S.bar&&!isBarPaid()){root.innerHTML=renderPaymentGate();return;}
     if(S.user&&S.bar){root.innerHTML=renderOwnerApp();scrollActiveTabIntoView();return;}
+    // STAFF PRE-LOGIN GATE: staff portal access via URL — bar must be paid
+    if(S.urlBarId&&S.bar&&!S.user&&!isBarPaidForBar(S.bar)){root.innerHTML=renderStaffBlocked();return;}
     if(S.urlBarId&&S.bar&&!S.user){root.innerHTML=renderStaffViaLink();return;}
     if(S.urlBarId&&!S.bar){root.innerHTML=renderBarNotFound();return;}
     root.innerHTML=renderAuth();
@@ -988,6 +998,25 @@ function renderBarNotFound(){
   </div>`;
 }
 
+function renderStaffBlocked(){
+  const barName=S.bar?.name||'this bar';
+  return `<div class="auth-wrap">
+    <div class="auth-logo">CantinaPro</div>
+    <div class="auth-sub">BAR MANAGEMENT SYSTEM</div>
+    <div class="auth-div"></div>
+    <div class="auth-card" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">⏳</div>
+      <div class="auth-title">Activation Pending</div>
+      <div style="font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:18px">
+        <strong style="color:var(--text)">${barName}</strong> hasn't activated their CantinaPro subscription yet.
+        <br/><br/>
+        Please ask the owner to log in and complete their subscription setup. Once they do, you'll have full access.
+      </div>
+      <a href="${window.location.origin}${window.location.pathname}" style="display:block;padding:14px;background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:8px;font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;text-decoration:none">← BACK</a>
+    </div>
+  </div>`;
+}
+
 function scrollActiveTabIntoView(){
   setTimeout(()=>{
     const nav=document.querySelector('.top-nav');
@@ -1102,18 +1131,27 @@ const STARTER_PACK={
 };
 
 async function markOnboardingComplete(){
-  if(!S.bar||S.bar.onboarding_completed)return;
-  // Save diagnostic answers along with completion flag
-  const answers={
-    bar_type:S.onboardBarType||null,
-    bar_size:S.onboardBarSize||null,
-    shift_count:S.onboardShiftCount||null,
-    pain_points:Object.keys(S.onboardPainPoints).filter(k=>S.onboardPainPoints[k]),
-    freeform_notes:(S.onboardFreeformNotes||'').trim()||null,
-  };
-  const{data,error}=await db.from('bars').update({onboarding_completed:true,onboarding_answers:answers}).eq('id',S.bar.id).select().single();
-  if(error){console.error('[CantinaPro] markOnboardingComplete error:',error);return;}
-  if(data)S.bar=data;
+  if(!S.bar)return;
+  if(S.bar.onboarding_completed)return;
+  try{
+    const answers={
+      bar_type:S.onboardBarType||null,
+      bar_size:S.onboardBarSize||null,
+      shift_count:S.onboardShiftCount||null,
+      pain_points:Object.keys(S.onboardPainPoints).filter(k=>S.onboardPainPoints[k]),
+      freeform_notes:(S.onboardFreeformNotes||'').trim()||null,
+    };
+    const{data,error}=await db.from('bars').update({onboarding_completed:true,onboarding_answers:answers}).eq('id',S.bar.id).select().single();
+    if(error){
+      console.error('[CantinaPro] markOnboardingComplete with answers failed, trying minimal update:',error);
+      // Fallback: try without the JSON column in case it doesn't exist on this bar
+      const{data:d2,error:e2}=await db.from('bars').update({onboarding_completed:true}).eq('id',S.bar.id).select().single();
+      if(e2)console.error('[CantinaPro] minimal markOnboardingComplete also failed:',e2);
+      else if(d2)S.bar=d2;
+    }else if(data){S.bar=data;}
+  }catch(err){
+    console.error('[CantinaPro] markOnboardingComplete caught:',err);
+  }
 }
 
 function togglePainPoint(key){
@@ -1395,7 +1433,7 @@ function renderOnboarding(){
         <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:2px;color:var(--blue);margin-bottom:8px">📱 INSTALL AS APP</div>
         <div style="font-size:13px;color:var(--text);line-height:1.7">Tell your staff to <strong>"Add to Home Screen"</strong> after opening the link. Works just like a real app — no App Store needed.</div>
       </div>
-      <button class="action-btn red" onclick="markOnboardingComplete().then(()=>{S.onboardingStep=0;render()})">${isBarPaid()?'ENTER MY DASHBOARD →':'CONTINUE TO PLAN →'}</button>
+      <button class="action-btn red" onclick="markOnboardingComplete().finally(()=>{S.onboardingStep=0;render()})">${isBarPaid()?'ENTER MY DASHBOARD →':'CONTINUE TO PLAN →'}</button>
     `;
   }
 
