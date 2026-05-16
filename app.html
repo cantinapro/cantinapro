@@ -1678,8 +1678,19 @@ function renderStaffApp(){
           <div class="cbox ${S.checklist[item]?'done':''}">${S.checklist[item]?'<svg width="14" height="14" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#000" stroke-width="2.5" fill="none"/></svg>':''}</div>
           <span class="ctxt ${S.checklist[item]?'done':''}">${item}</span>
         </div>`).join('')}`:''}
+      </div>
+      <div class="card">
+        <div class="ct">${L?'CIERRE DE CAJA':'REGISTER CLOSEOUT'}</div>
         ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO!':'✓ CLOSEOUT SUBMITTED!'}</div>`:`
-          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?'submitCloseout()':''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${allChecklistItems().length-checkedCount} puntos pendientes`:`${allChecklistItems().length-checkedCount} items remaining`)}</button>
+          <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">${L?'Cuenta el efectivo, propinas y revisa los totales antes de enviar.':'Count the cash, tips, and review the totals before submitting.'}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
+            <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
+            <div class="field"><label>${L?'Tarjetas ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
+            <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
+          </div>
+          <div class="field"><label>${L?'Notas / Incidentes':'Notes / Incidents'}</label><textarea placeholder="${L?'Cualquier problema o nota para el dueño...':'Any issues or notes for the owner...'}" oninput="S.newSale.notes=this.value">${S.newSale.notes||''}</textarea></div>
+          <button class="subbtn ${allDone?'ready':'locked'}" onclick="${allDone?`S.newSale.submitted_by='${S.staffUser.name.replace(/'/g,"\\'")}';submitCloseout()`:''}" ${allDone?'':'disabled'}>${allDone?(L?'ENVIAR CIERRE':'SUBMIT CLOSEOUT'):(L?`${allChecklistItems().length-checkedCount} puntos pendientes`:`${allChecklistItems().length-checkedCount} items remaining`)}</button>
         `}
       </div>
     `:''}
@@ -1690,8 +1701,8 @@ function renderStaffApp(){
 
 function renderOwnerApp(){
   const L=S.lang==='es';
-  const todaySales=S.sales[0]?(parseFloat(S.sales[0].bar_sales||0)+parseFloat(S.sales[0].food_sales||0)):0;
-  const weekSales=S.sales.slice(0,7).reduce((a,s)=>a+(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)),0);
+  const todaySales=S.sales[0]?parseFloat(S.sales[0].bar_sales||0):0;
+  const weekSales=S.sales.slice(0,7).reduce((a,s)=>a+parseFloat(s.bar_sales||0),0);
   const lowItems=S.inventory.filter(i=>i.stock<=(i.par_level*0.5)).length;
   const checkedCount=allChecklistItems().filter(i=>S.checklist[i]).length;
   const pct=Math.round((checkedCount/allChecklistItems().length)*100);
@@ -1774,7 +1785,7 @@ function renderOwnerApp(){
         ${S.sales.length===0?`<div class="empty-state">${L?'No hay ventas registradas todavía.<br/>Toca "Registrar Ventas" arriba.':'No sales logged yet.<br/>Tap "Log Sales" above.'}</div>`:
           S.sales.slice(0,5).map(s=>`<div class="row">
             <div style="flex:1">
-              <div style="font-weight:700;font-size:17px;color:var(--text)">$${(parseFloat(s.bar_sales||0)+parseFloat(s.food_sales||0)).toLocaleString()}</div>
+              <div style="font-weight:700;font-size:17px;color:var(--text)">$${parseFloat(s.bar_sales||0).toLocaleString()}</div>
               <div style="font-size:13px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()} · ${s.submitted_by||'Manager'}</div>
             </div>
             <div style="font-size:13px;color:var(--muted);text-align:right">
@@ -2089,11 +2100,9 @@ function renderOwnerApp(){
         ${S.closeoutSubmitted?`<div class="success-box">${L?'✓ ¡CIERRE ENVIADO EXITOSAMENTE!':'✓ CLOSEOUT SUBMITTED SUCCESSFULLY!'}</div>`:`
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-            <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
             <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
             <div class="field"><label>${L?'Tarjetas ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
             <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-            <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
           </div>
           <div class="field"><label>${L?'Empleado de Cierre':'Closing Staff'}</label>
             <select onchange="S.newSale.submitted_by=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
@@ -2112,11 +2121,9 @@ function renderOwnerApp(){
         <div class="modal-title">${L?'+ REGISTRAR VENTAS':'+ LOG SALES'}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="field"><label>${L?'Ventas Bar ($)':'Bar Sales ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.bar_sales}" oninput="S.newSale.bar_sales=this.value"/></div>
-          <div class="field"><label>${L?'Comida ($)':'Food ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.food_sales}" oninput="S.newSale.food_sales=this.value"/></div>
           <div class="field"><label>${L?'Efectivo ($)':'Cash ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.cash}" oninput="S.newSale.cash=this.value"/></div>
           <div class="field"><label>${L?'Tarjetas ($)':'Cards ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.card_sales}" oninput="S.newSale.card_sales=this.value"/></div>
           <div class="field"><label>${L?'Propinas ($)':'Tips ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.tips}" oninput="S.newSale.tips=this.value"/></div>
-          <div class="field"><label>${L?'Cortesías ($)':'Comps ($)'}</label><input type="number" placeholder="0.00" value="${S.newSale.comps}" oninput="S.newSale.comps=this.value"/></div>
         </div>
         <div class="field"><label>${L?'Notas':'Notes'}</label><input type="text" value="${S.newSale.notes}" oninput="S.newSale.notes=this.value" placeholder="${L?'Notas del turno...':'Shift notes...'}"/></div>
         <div class="modal-actions">
