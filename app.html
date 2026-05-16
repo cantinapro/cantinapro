@@ -306,6 +306,11 @@ let S={
   onboardingStep:0,
   onboardStaff:[{name:'',role:'Bartender',pin:''},{name:'',role:'Bartender',pin:''}],
   onboardStarterPack:{liquor:true,beer:true,mixers:true,wine:false},
+  onboardBarType:'',
+  onboardBarSize:'',
+  onboardShiftCount:'',
+  onboardPainPoints:{},
+  onboardFreeformNotes:'',
   onboardSaving:false,
   messages:[],chatInput:'',chatChannel:null,chatScrollPinned:true,
   barLookupError:null,
@@ -1028,6 +1033,49 @@ function renderAuth(){
 }
 
 // ── ONBOARDING WIZARD ──────────────────────────────────
+// ── ONBOARDING DIAGNOSTIC DATA ─────────────────────────
+const BAR_TYPES=[
+  {key:'cantina',icon:'🌮',label:'Cantina / Mexican'},
+  {key:'cocktail',icon:'🍸',label:'Cocktail Bar'},
+  {key:'sports',icon:'🏈',label:'Sports Bar'},
+  {key:'restaurant',icon:'🍽️',label:'Restaurant Bar'},
+  {key:'nightclub',icon:'🪩',label:'Nightclub / Lounge'},
+  {key:'brewery',icon:'🍺',label:'Brewery / Tap Room'},
+  {key:'dive',icon:'🍷',label:'Neighborhood / Dive'},
+  {key:'other',icon:'🍹',label:'Other'},
+];
+const BAR_SIZES=[
+  {key:'small',label:'1–5 staff',sub:'Small / family-run'},
+  {key:'medium',label:'6–10 staff',sub:'Mid-size operation'},
+  {key:'large',label:'11–20 staff',sub:'Busy multi-shift bar'},
+  {key:'xl',label:'20+ staff',sub:'High volume / multi-location'},
+];
+const SHIFT_COUNTS=[
+  {key:'few',label:'10 or fewer',sub:'Smaller operation'},
+  {key:'mid',label:'11–25',sub:'Typical 5-day bar'},
+  {key:'many',label:'26–50',sub:'7-day with overlaps'},
+  {key:'lots',label:'50+',sub:'Multi-location'},
+];
+// Each pain point maps to a feature in the app — used for the "here's how we help" step
+const PAIN_POINTS=[
+  {key:'scheduling',icon:'🗓️',title:'Scheduling drama',desc:'No-shows, last-minute drops, miscommunication',
+    solution:'Shift bid system',solutionDesc:'When someone drops a shift, it goes open and any qualified staff can claim it from their phone. Owner approves with one tap. No more group-text chaos.'},
+  {key:'stockouts',icon:'📦',title:'Running out of stock',desc:'Out of Modelo on a Saturday night',
+    solution:'Real-time inventory + par alerts',solutionDesc:'Track every bottle, keg, and case. The dashboard flags items below 50% par level so you order before you run out — not after.'},
+  {key:'closeouts',icon:'💰',title:'End-of-night closeouts taking forever',desc:'Counting cash at 3am, missing receipts',
+    solution:'Digital closeout checklist + log',solutionDesc:'Closing staff walks through a checklist, enters sales/cash/tips/comps, hits submit. You get the full report on your phone before they leave.'},
+  {key:'accountability',icon:'📱',title:'Staff not knowing what to do',desc:'No clear duties, lack of accountability',
+    solution:'Closing checklist + clock-in/out + chat',solutionDesc:"Every shift has a clear checklist. Time clock shows who's in. Team chat keeps everyone on the same page across shifts."},
+  {key:'recipes',icon:'🍹',title:'Inconsistent drinks',desc:'New staff don\'t know your recipes',
+    solution:'Recipe book with photos',solutionDesc:'Build your bar\'s menu with exact specs — ingredients, amounts, glassware, prep time. Staff pull up any drink on their phone instead of guessing.'},
+  {key:'tippooling',icon:'👥',title:'Tip pooling disputes',desc:'Hours tracking, fair splits, paper trails',
+    solution:'Coming soon — Tip pooling module',solutionDesc:"On our roadmap. Time clock data will feed automatic tip splits. For now, the time clock gives you accurate hours so manual splits are fair."},
+  {key:'numbers',icon:'📊',title:'No idea what my actual numbers are',desc:'Sales, labor, costs all in my head',
+    solution:'Sales dashboard + weekly revenue',solutionDesc:'Every closeout feeds your dashboard. See today\'s sales, weekly revenue, low stock items, and clocked-in staff at a glance.'},
+  {key:'communication',icon:'💬',title:'Hard to communicate with the team',desc:'Group texts get buried, info lost',
+    solution:'In-app team chat',solutionDesc:'Live chat for your bar — pinned announcements stay at the top, message history persists, and everyone sees the same thread. No more "did you see my text?"'},
+];
+
 const STARTER_PACK={
   liquor:[
     {name:'Tequila Blanco',category:'Tequila',unit:'750ml',stock:6,par_level:8},
@@ -1055,10 +1103,24 @@ const STARTER_PACK={
 
 async function markOnboardingComplete(){
   if(!S.bar||S.bar.onboarding_completed)return;
-  const{data,error}=await db.from('bars').update({onboarding_completed:true}).eq('id',S.bar.id).select().single();
+  // Save diagnostic answers along with completion flag
+  const answers={
+    bar_type:S.onboardBarType||null,
+    bar_size:S.onboardBarSize||null,
+    shift_count:S.onboardShiftCount||null,
+    pain_points:Object.keys(S.onboardPainPoints).filter(k=>S.onboardPainPoints[k]),
+    freeform_notes:(S.onboardFreeformNotes||'').trim()||null,
+  };
+  const{data,error}=await db.from('bars').update({onboarding_completed:true,onboarding_answers:answers}).eq('id',S.bar.id).select().single();
   if(error){console.error('[CantinaPro] markOnboardingComplete error:',error);return;}
   if(data)S.bar=data;
 }
+
+function togglePainPoint(key){
+  S.onboardPainPoints[key]=!S.onboardPainPoints[key];
+  render();
+}
+function setOnboardField(field,val){S[field]=val;render();}
 
 async function onboardFinish(){
   S.onboardSaving=true;render();
@@ -1074,8 +1136,8 @@ async function onboardFinish(){
     await db.from('inventory').insert(items.map(i=>({bar_id:S.bar.id,...i})));
   }
   await loadStaff();await loadInventory();
-  await markOnboardingComplete();
-  S.onboardingStep=0;S.onboardSaving=false;render();
+  S.onboardSaving=false;
+  // Note: does NOT call markOnboardingComplete — that happens on the final step button
 }
 
 async function onboardSkipAll(){
@@ -1105,7 +1167,7 @@ function shareStaffLink(channel){
 
 function renderOnboarding(){
   const step=S.onboardingStep;
-  const totalSteps=4;
+  const totalSteps=8;
   const progress=Math.round((step/totalSteps)*100);
   let body='';
 
@@ -1116,16 +1178,129 @@ function renderOnboarding(){
         <div style="font-family:'Bebas Neue',cursive;font-size:32px;letter-spacing:3px;color:var(--lc);line-height:1.1">WELCOME TO CANTINAPRO</div>
         <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--lcg);margin-top:8px">${S.bar.name}</div>
       </div>
-      <div style="font-size:16px;line-height:1.7;color:var(--text);margin-bottom:18px">Let's get your bar set up in under 2 minutes. We'll:</div>
+      <div style="font-size:16px;line-height:1.7;color:var(--text);margin-bottom:18px">Let's get to know your bar — a few quick questions so we can show you exactly how CantinaPro fits your operation, then set up your staff & stock.</div>
       <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">👥</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Add your staff</div><div style="font-size:13px;color:var(--muted)">Their name + a 4-digit PIN — that's it</div></div></div>
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">📦</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Stock the bar</div><div style="font-size:13px;color:var(--muted)">Pick a starter pack — edit later anytime</div></div></div>
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0"><div style="font-size:22px">🔗</div><div><div style="font-weight:700;font-size:15px;color:var(--text)">Share your staff link</div><div style="font-size:13px;color:var(--muted)">Text it, share it — they're in instantly</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:6px 0"><div style="font-size:20px">🎯</div><div><div style="font-weight:700;font-size:14px;color:var(--text)">A few questions about your bar</div><div style="font-size:12px;color:var(--muted)">Helps us tailor your setup</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:6px 0"><div style="font-size:20px">💡</div><div><div style="font-weight:700;font-size:14px;color:var(--text)">See how we solve your pain points</div><div style="font-size:12px;color:var(--muted)">Real solutions for real headaches</div></div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:6px 0"><div style="font-size:20px">⚡</div><div><div style="font-weight:700;font-size:14px;color:var(--text)">Quick setup — staff, stock, share</div><div style="font-size:12px;color:var(--muted)">Under 3 minutes total</div></div></div>
       </div>
       <button class="action-btn red" onclick="S.onboardingStep=2;render()">LET'S GO →</button>
       <button onclick="onboardSkipAll()" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;width:100%;padding:14px;margin-top:6px">Skip — I'll set it up later</button>
     `;
   } else if(step===2){
+    // BAR INFO: type, size, shifts
+    body=`
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">TELL US ABOUT YOUR BAR</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">So we know who we're working with.</div>
+      </div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">WHAT KIND OF BAR?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+        ${BAR_TYPES.map(t=>{
+          const on=S.onboardBarType===t.key;
+          return `<div onclick="setOnboardField('onboardBarType','${t.key}')" style="background:${on?'rgba(200,16,46,.1)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:8px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s">
+            <div style="font-size:24px;margin-bottom:4px">${t.icon}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.2">${t.label}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">HOW MANY STAFF?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+        ${BAR_SIZES.map(t=>{
+          const on=S.onboardBarSize===t.key;
+          return `<div onclick="setOnboardField('onboardBarSize','${t.key}')" style="background:${on?'rgba(200,16,46,.1)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:8px;padding:12px;cursor:pointer">
+            <div style="font-size:14px;font-weight:700;color:var(--text)">${t.label}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.sub}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:10px">SHIFTS PER WEEK?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+        ${SHIFT_COUNTS.map(t=>{
+          const on=S.onboardShiftCount===t.key;
+          return `<div onclick="setOnboardField('onboardShiftCount','${t.key}')" style="background:${on?'rgba(200,16,46,.1)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:8px;padding:12px;cursor:pointer">
+            <div style="font-size:14px;font-weight:700;color:var(--text)">${t.label}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${t.sub}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=1;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=3;render()">NEXT →</button>
+      </div>
+    `;
+  } else if(step===3){
+    // PAIN POINTS multi-select
+    const selectedCount=Object.keys(S.onboardPainPoints).filter(k=>S.onboardPainPoints[k]).length;
+    body=`
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">WHAT ARE YOUR HEADACHES?</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">Check everything that's a pain. We'll show you how CantinaPro solves each one on the next screen.</div>
+      </div>
+      ${PAIN_POINTS.map(p=>{
+        const on=S.onboardPainPoints[p.key];
+        return `<div onclick="togglePainPoint('${p.key}')" style="background:${on?'rgba(200,16,46,.08)':'var(--s2)'};border:2px solid ${on?'var(--lc)':'var(--border)'};border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:26px;flex-shrink:0">${p.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:14px;color:var(--text);line-height:1.3">${p.title}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4">${p.desc}</div>
+          </div>
+          <div style="width:22px;height:22px;border-radius:5px;border:2px solid ${on?'var(--lc)':'var(--border)'};background:${on?'var(--lc)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${on?'<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#fff" stroke-width="2.5" fill="none"/></svg>':''}</div>
+        </div>`;
+      }).join('')}
+      <div style="margin-top:16px;margin-bottom:18px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:2px;color:var(--lcg);margin-bottom:8px">ANYTHING ELSE? <span style="color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;font-family:inherit;font-size:12px">(optional)</span></div>
+        <textarea oninput="S.onboardFreeformNotes=this.value" placeholder="Tell us what else you wish your software could do..." style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-size:14px;width:100%;min-height:70px;resize:vertical;outline:none;font-family:inherit">${S.onboardFreeformNotes||''}</textarea>
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px">${selectedCount===0?'Pick at least one — or skip ahead':`${selectedCount} pain point${selectedCount>1?'s':''} selected`}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=2;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=4;render()">${selectedCount>0?'SEE SOLUTIONS →':'NEXT →'}</button>
+      </div>
+    `;
+  } else if(step===4){
+    // DYNAMIC SOLUTIONS — show how CantinaPro solves each pain point picked
+    const selected=PAIN_POINTS.filter(p=>S.onboardPainPoints[p.key]);
+    body=`
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">HERE'S HOW WE HELP</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6">${selected.length>0?'Built for the exact problems you face — let\'s look at each one.':'No pain points picked — that\'s fine, here\'s a tour of the core features.'}</div>
+      </div>
+      ${selected.length>0?selected.map(p=>`
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="font-size:26px">${p.icon}</div>
+            <div style="font-size:14px;font-weight:700;color:var(--muted);line-height:1.3">${p.title}</div>
+          </div>
+          <div style="background:rgba(0,196,140,.06);border-left:3px solid var(--green);border-radius:6px;padding:10px 12px">
+            <div style="font-family:'Bebas Neue',cursive;font-size:14px;letter-spacing:1px;color:var(--green);margin-bottom:4px">✓ ${p.solution}</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.6">${p.solutionDesc}</div>
+          </div>
+        </div>
+      `).join(''):`
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="font-size:26px">🗓️</div><div style="font-size:14px;font-weight:700;color:var(--text)">Smart scheduling</div></div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">Build weekly schedules, staff drop & bid open shifts from their phone, you approve with one tap.</div>
+        </div>
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="font-size:26px">📦</div><div style="font-size:14px;font-weight:700;color:var(--text)">Inventory at a glance</div></div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">Real-time stock, par-level alerts, fast updates from any device.</div>
+        </div>
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="font-size:26px">💰</div><div style="font-size:14px;font-weight:700;color:var(--text)">End-of-night closeouts</div></div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">Digital checklist + sales/cash/tips/comps entry. Report on your phone before the door's locked.</div>
+        </div>
+      `}
+      <div style="background:rgba(212,160,23,.06);border:1px solid var(--lcg);border-radius:10px;padding:12px 14px;margin:14px 0;font-size:13px;color:var(--text);line-height:1.6">
+        💪 <strong>We're not done.</strong> CantinaPro keeps growing. Tip pooling, payroll export, and deeper POS integration are coming. Your feedback shapes what we build next.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="S.onboardingStep=3;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=5;render()">LET'S SET UP →</button>
+      </div>
+    `;
+  } else if(step===5){
+    // STAFF (was step 2)
     body=`
       <div style="margin-bottom:18px">
         <div style="font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:2px;color:var(--text);margin-bottom:6px">ADD YOUR STAFF</div>
@@ -1148,12 +1323,13 @@ function renderOnboarding(){
       `).join('')}
       <button onclick="onboardAddStaffRow()" style="background:var(--s2);border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:12px;cursor:pointer;font-size:14px;font-family:'Bebas Neue',cursive;letter-spacing:1px;width:100%;margin-bottom:14px">+ ADD ANOTHER STAFF MEMBER</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button onclick="S.onboardingStep=1;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
-        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=3;render()">NEXT →</button>
+        <button onclick="S.onboardingStep=4;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="S.onboardingStep=6;render()">NEXT →</button>
       </div>
       <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">💡 Leave blank to skip — you can add staff anytime</div>
     `;
-  } else if(step===3){
+  } else if(step===6){
+    // STARTER STOCK (was step 3)
     const counts=Object.keys(S.onboardStarterPack).reduce((a,k)=>a+(S.onboardStarterPack[k]?STARTER_PACK[k].length:0),0);
     body=`
       <div style="margin-bottom:18px">
@@ -1178,11 +1354,12 @@ function renderOnboarding(){
       }).join('')}
       <div style="text-align:center;font-size:13px;color:var(--muted);margin:14px 0">${counts} items will be added — fully editable later</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button onclick="S.onboardingStep=2;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
-        <button class="action-btn red" style="margin-top:0" onclick="onboardFinish().then(()=>{S.onboardingStep=4;render()})" ${S.onboardSaving?'disabled':''}>${S.onboardSaving?'SAVING...':'NEXT →'}</button>
+        <button onclick="S.onboardingStep=5;render()" style="background:var(--s2);border:1px solid var(--border);color:var(--muted);font-family:'Bebas Neue',cursive;font-size:16px;letter-spacing:2px;padding:14px;border-radius:10px;cursor:pointer">← BACK</button>
+        <button class="action-btn red" style="margin-top:0" onclick="onboardFinish().then(()=>{S.onboardingStep=7;render()})" ${S.onboardSaving?'disabled':''}>${S.onboardSaving?'SAVING...':'NEXT →'}</button>
       </div>
     `;
-  } else if(step===4){
+  } else if(step===7){
+    // SHARE LINK (was step 4)
     const link=getStaffLink();
     body=`
       <div style="text-align:center;margin-bottom:20px">
