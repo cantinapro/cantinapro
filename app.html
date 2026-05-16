@@ -1124,18 +1124,24 @@ function setOnboardField(field,val){S[field]=val;render();}
 
 async function onboardFinish(){
   S.onboardSaving=true;render();
-  const validStaff=S.onboardStaff.filter(s=>s.name.trim()&&s.pin&&s.pin.length===4);
-  for(const st of validStaff){
-    await db.from('staff').insert({bar_id:S.bar.id,name:st.name.trim(),role:st.role,pin:st.pin});
+  try{
+    const validStaff=S.onboardStaff.filter(s=>s.name.trim()&&s.pin&&s.pin.length===4);
+    for(const st of validStaff){
+      const{error}=await db.from('staff').insert({bar_id:S.bar.id,name:st.name.trim(),role:st.role,pin:st.pin});
+      if(error)console.error('[CantinaPro] staff insert error:',error,st);
+    }
+    const items=[];
+    Object.keys(S.onboardStarterPack).forEach(k=>{
+      if(S.onboardStarterPack[k])items.push(...STARTER_PACK[k]);
+    });
+    if(items.length>0){
+      const{error}=await db.from('inventory').insert(items.map(i=>({bar_id:S.bar.id,...i})));
+      if(error)console.error('[CantinaPro] inventory insert error:',error);
+    }
+    await loadStaff();await loadInventory();
+  }catch(err){
+    console.error('[CantinaPro] onboardFinish caught:',err);
   }
-  const items=[];
-  Object.keys(S.onboardStarterPack).forEach(k=>{
-    if(S.onboardStarterPack[k])items.push(...STARTER_PACK[k]);
-  });
-  if(items.length>0){
-    await db.from('inventory').insert(items.map(i=>({bar_id:S.bar.id,...i})));
-  }
-  await loadStaff();await loadInventory();
   S.onboardSaving=false;
   // Note: does NOT call markOnboardingComplete — that happens on the final step button
 }
