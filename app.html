@@ -452,11 +452,11 @@ async function init(){
     const urlBarId=getBarIdFromURL();
     if(urlBarId){
       S.urlBarId=urlBarId;
-      const{data:bar,error:barError}=await db.from('bars').select('*').eq('id',urlBarId).maybeSingle();
+      const{data:bar,error:barError}=await db.from('bars').select('id,name,location,is_paid').eq('id',urlBarId).maybeSingle();
       if(barError){console.error('[CantinaPro] bar lookup error:',barError);S.barLookupError=barError.message;}
       if(bar){
         S.bar=bar;
-        const{data:staff,error:staffError}=await db.from('staff').select('*').eq('bar_id',urlBarId).order('name');
+        const{data:staff,error:staffError}=await db.from('staff').select('id,bar_id,name,role').eq('bar_id',urlBarId).order('name');
         if(staffError)console.error('[CantinaPro] staff lookup error:',staffError);
         S.staffLoginStaff=staff||[];
       }else if(!barError){
@@ -583,7 +583,17 @@ function pinPress(v){
 }
 async function verifyPin(){
   const m=S.staffLoginSelected;
-  if(!m.pin||m.pin.toString()===S.staffPinInput.toString()){
+  let ok=false;
+  try{
+    const{data,error}=await db.rpc('verify_staff_pin',{p_staff_id:m.id,p_pin:S.staffPinInput});
+    if(error)throw error;
+    ok=data===true;
+  }catch(e){
+    console.error('[CantinaPro] verifyPin rpc error:',e);
+    S.staffPinError=S.lang==='es'?'Error de conexión. Intenta de nuevo.':'Connection error. Try again.';
+    S.staffPinInput='';S.staffPinVerifying=false;render();return;
+  }
+  if(ok){
     try{
       S.staffUser=m;
       await loadSchedules();await loadStaff();await loadMessages();await loadRecipes();
