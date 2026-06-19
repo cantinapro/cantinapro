@@ -202,6 +202,8 @@ const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYS_ES=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const SCHED_HORIZON=21; // days ahead the date strip extends (today + 3 weeks)
 const COLORS=['#c8102e','#d4a017','#00e87a','#4d9fff','#b366ff','#00d4aa','#ff8c42','#ff6eb4'];
 const ROLES=['Bartender','Barback','Server','Host','Security','Manager','Busser','DJ','Cook','Other'];
 
@@ -280,6 +282,26 @@ function getBarIdFromURL(){return new URLSearchParams(window.location.search).ge
 function ac(i){return COLORS[i%COLORS.length];}
 function ai(n){return(n||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();}
 function getStaffLink(){return`${window.location.origin}${window.location.pathname}?bar=${S.bar?.id}`;}
+function todayISO(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isoAddDays(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function schedDates(){const t=todayISO();const out=[];for(let i=0;i<=SCHED_HORIZON;i++)out.push(isoAddDays(t,i));return out;}
+function dowLabel(iso){const d=new Date(iso+'T00:00:00').getDay();return(S.lang==='es'?DAYS_ES:DAYS)[d];}
+function fmtSelDate(iso){const d=new Date((iso||todayISO())+'T00:00:00');return d.toLocaleDateString(S.lang==='es'?'es-ES':'en-US',{weekday:'short',month:'short',day:'numeric'});}
+function renderDateStrip(){
+  const sel=S.schedDate||todayISO();
+  return`<div class="day-tabs">
+    ${schedDates().map(iso=>{
+      const hasOpen=S.schedules.some(s=>s.shift_date===iso&&s.status==='open');
+      const on=sel===iso;
+      const d=new Date(iso+'T00:00:00');
+      return`<button class="day-tab ${on?'on':''} ${hasOpen&&!on?'has-open':''}" onclick="S.schedDate='${iso}';render()">
+        <div style="font-size:10px;letter-spacing:1px">${dowLabel(iso)}</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:19px;line-height:1;letter-spacing:1px">${d.getDate()}</div>
+        ${hasOpen?`<div style="font-size:8px;color:var(--red)">${S.lang==='es'?'ABIERTO':'OPEN'}</div>`:''}
+      </button>`;
+    }).join('')}
+  </div>`;
+}
 
 let S={
   user:null,bar:null,staff:[],sales:[],inventory:[],photos:[],schedules:[],bids:[],
@@ -292,12 +314,12 @@ let S={
   newStaff:{name:'',role:'Bartender',pin:''},
   newInv:{name:'',category:'',unit:'',stock:'',par_level:''},
   newSale:{bar_sales:'',food_sales:'',cash:'',card_sales:'',tips:'',comps:'',notes:'',submitted_by:''},
-  newShift:{staff_id:'',day_of_week:1,start_time:'',end_time:'',role:'Bartender'},
+  newShift:{staff_id:'',shift_date:'',start_time:'',end_time:'',role:'Bartender',repeat:false,repeat_weeks:4},
   dropShiftId:null,dropReason:'',
   clockedIn:[],selectedStaff:null,
   liveTime:'',selectedPhoto:null,photoNote:'',
   recipeSearch:'',recipeFilter:'All',
-  schedDay:new Date().getDay(),
+  schedDate:'',
   urlBarId:null,
   showInstallBanner:false,
   showIOSInstallBanner:false,
@@ -439,6 +461,7 @@ async function init(){
       S.liveTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
       const el=document.getElementById('clock-el');if(el)el.textContent=S.liveTime;
     },1000);
+    if(!S.schedDate)S.schedDate=todayISO();
     // Detect Stripe payment redirect — flag for later when we know which bar this is
     if(new URLSearchParams(window.location.search).get('paid')==='success'){
       S.justPaid=true;
@@ -568,7 +591,7 @@ async function loadInventory(){if(!S.bar)return;const{data}=await db.from('inven
 async function loadPhotos(){if(!S.bar)return;const{data}=await db.from('photos').select('*').eq('bar_id',S.bar.id).order('created_at',{ascending:false}).limit(50);S.photos=data||[];}
 async function loadSchedules(){
   if(!S.bar)return;
-  const{data:sc}=await db.from('schedules').select('*').eq('bar_id',S.bar.id).order('day_of_week').order('start_time');
+  const{data:sc}=await db.from('schedules').select('*').eq('bar_id',S.bar.id).order('shift_date').order('start_time');
   const{data:bi}=await db.from('shift_bids').select('*').eq('bar_id',S.bar.id);
   S.schedules=sc||[];S.bids=bi||[];
 }
@@ -721,20 +744,28 @@ async function updateStock(id,v){await db.from('inventory').update({stock:v,upda
 
 async function saveShift(){
   if(!S.newShift.start_time||!S.newShift.end_time||!S.bar){
-    alert('Please fill in start time and end time!');return;
+    alert(S.lang==='es'?'¡Completa la hora de inicio y fin!':'Please fill in start time and end time!');return;
   }
+  const baseDate=S.newShift.shift_date||S.schedDate||todayISO();
   const sm=S.staff.find(s=>s.id===S.newShift.staff_id);
-  await db.from('schedules').insert({
-    bar_id:S.bar.id,
-    staff_id:S.newShift.staff_id||null,
-    staff_name:sm?sm.name:'OPEN',
-    day_of_week:parseInt(S.newShift.day_of_week),
-    start_time:S.newShift.start_time,
-    end_time:S.newShift.end_time,
-    role:S.newShift.role||'Staff',
-    status:S.newShift.staff_id?'scheduled':'open'
-  });
-  S.newShift={staff_id:'',day_of_week:S.schedDay,start_time:'',end_time:'',role:'Bartender'};
+  const weeks=S.newShift.repeat?Math.max(1,Math.min(12,parseInt(S.newShift.repeat_weeks)||1)):1;
+  const rows=[];
+  for(let w=0;w<weeks;w++){
+    const d=isoAddDays(baseDate,w*7);
+    rows.push({
+      bar_id:S.bar.id,
+      staff_id:S.newShift.staff_id||null,
+      staff_name:sm?sm.name:'OPEN',
+      shift_date:d,
+      day_of_week:new Date(d+'T00:00:00').getDay(),
+      start_time:S.newShift.start_time,
+      end_time:S.newShift.end_time,
+      role:S.newShift.role||'Staff',
+      status:S.newShift.staff_id?'scheduled':'open'
+    });
+  }
+  await db.from('schedules').insert(rows);
+  S.newShift={staff_id:'',shift_date:S.schedDate,start_time:'',end_time:'',role:'Bartender',repeat:false,repeat_weeks:4};
   S.showShiftModal=false;
   await loadSchedules();
   render();
@@ -1520,7 +1551,7 @@ function renderStaffViaLink(){
 function renderStaffApp(){
   const L=S.lang==='es';
   const myShifts=S.schedules.filter(s=>s.staff_id===S.staffUser.id);
-  const myTodayShift=myShifts.find(s=>s.day_of_week===new Date().getDay());
+  const myTodayShift=myShifts.find(s=>s.shift_date===todayISO());
   const openShifts=S.schedules.filter(s=>s.status==='open');
   const checkedCount=allChecklistItems().filter(i=>S.checklist[i]).length;
   const pct=Math.round((checkedCount/allChecklistItems().length)*100);
@@ -1569,16 +1600,9 @@ function renderStaffApp(){
         <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
       </div>`:''}
       ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} ${L?(openShifts.length!==1?'Turnos Abiertos':'Turno Abierto'):'Open Shift'+(openShifts.length!==1?'s':'')}</div><div style="font-size:14px;color:var(--muted)">${L?'Toca cualquier turno abierto para pujar':'Tap any open shift to bid'}</div></div></div>`:''}
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>{
-          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
-          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?'<div style="font-size:8px;color:var(--red)">OPEN</div>':''}
-          </button>`;
-        }).join('')}
-      </div>
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).length===0?`<div class="empty-state">${L?'No hay turnos programados para':'No shifts scheduled for'} ${DAYS[S.schedDay]}.</div>`:''}
-      ${S.schedules.filter(s=>s.day_of_week===S.schedDay).map(shift=>{
+      ${renderDateStrip()}
+      ${S.schedules.filter(s=>s.shift_date===(S.schedDate||todayISO())).length===0?`<div class="empty-state">${L?'No hay turnos programados para':'No shifts scheduled for'} ${fmtSelDate(S.schedDate)}.</div>`:''}
+      ${S.schedules.filter(s=>s.shift_date===(S.schedDate||todayISO())).map(shift=>{
         const isMyShift=shift.staff_id===S.staffUser.id;
         const hasBid=S.bids.find(b=>b.shift_id===shift.id&&b.staff_id===S.staffUser.id);
         const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
@@ -1727,7 +1751,7 @@ function renderOwnerApp(){
   const allDone=checkedCount===allChecklistItems().length;
   const openShifts=S.schedules.filter(s=>s.status==='open').length;
   const pendingBids=S.bids.filter(b=>b.status==='pending').length;
-  const dayShifts=S.schedules.filter(s=>s.day_of_week===S.schedDay);
+  const dayShifts=S.schedules.filter(s=>s.shift_date===(S.schedDate||todayISO()));
 
   const TABS=[
     {key:'dashboard',icon:'📊',label:L?'Inicio':'Home'},
@@ -1816,16 +1840,9 @@ function renderOwnerApp(){
 
     ${S.tab==='schedule'?`
       <div class="sec-title">📅 ${L?'HORARIO':'SCHEDULE'}</div>
-      <div class="day-tabs">
-        ${DAYS.map((d,i)=>{
-          const hasOpen=S.schedules.some(s=>s.day_of_week===i&&s.status==='open');
-          return `<button class="day-tab ${S.schedDay===i?'on':''} ${hasOpen&&S.schedDay!==i?'has-open':''}" onclick="S.schedDay=${i};render()">
-            <div>${d}</div>${hasOpen?`<div style="font-size:8px;color:var(--red)">${L?'ABIERTO':'OPEN'}</div>`:''}
-          </button>`;
-        }).join('')}
-      </div>
-      <button class="action-btn red" onclick="S.newShift.day_of_week=${S.schedDay};S.showShiftModal=true;render()" style="margin-bottom:14px">${L?'+ AGREGAR TURNO PARA':'+ ADD SHIFT FOR'} ${DAYS[S.schedDay].toUpperCase()}</button>
-      ${dayShifts.length===0?`<div class="empty-state">${L?'No hay turnos para':'No shifts for'} ${DAYS[S.schedDay]}.<br/>${L?'Toca el botón de arriba para agregar uno.':'Tap the button above to add one.'}</div>`:''}
+      ${renderDateStrip()}
+      <button class="action-btn red" onclick="S.newShift.shift_date='${S.schedDate||''}';S.showShiftModal=true;render()" style="margin-bottom:14px">${L?'+ AGREGAR TURNO —':'+ ADD SHIFT —'} ${fmtSelDate(S.schedDate)}</button>
+      ${dayShifts.length===0?`<div class="empty-state">${L?'No hay turnos para':'No shifts for'} ${fmtSelDate(S.schedDate)}.<br/>${L?'Toca el botón de arriba para agregar uno.':'Tap the button above to add one.'}</div>`:''}
       ${dayShifts.map(shift=>{
         const shiftBids=S.bids.filter(b=>b.shift_id===shift.id&&b.status==='pending');
         const staffIdx=S.staff.findIndex(s=>s.id===shift.staff_id);
@@ -1875,7 +1892,7 @@ function renderOwnerApp(){
 
       ${S.showShiftModal?`<div class="modal-bg" onclick="S.showShiftModal=false;render()">
         <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-title">${L?'+ AGREGAR TURNO —':'+ ADD SHIFT —'} ${DAYS[S.schedDay].toUpperCase()}</div>
+          <div class="modal-title">${L?'+ AGREGAR TURNO —':'+ ADD SHIFT —'} ${fmtSelDate(S.newShift.shift_date||S.schedDate)}</div>
           <div class="field"><label>${L?'Empleado (opcional — deja en blanco para turno abierto)':'Staff Member (optional — leave blank for open shift)'}</label>
             <select oninput="S.newShift.staff_id=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 14px;font-size:16px;width:100%;outline:none;-webkit-appearance:none;">
               <option value="">${L?'-- Turno Abierto (sin asignar) --':'-- Open Shift (unassigned) --'}</option>
@@ -1887,10 +1904,16 @@ function renderOwnerApp(){
               ${ROLES.map(r=>`<option value="${r}" ${S.newShift.role===r?'selected':''}>${r}</option>`).join('')}
             </select>
           </div>
+          <div class="field"><label>${L?'Fecha':'Date'}</label><input type="date" value="${S.newShift.shift_date||S.schedDate||''}" oninput="S.newShift.shift_date=this.value" style="font-size:16px;"/></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="field"><label>${L?'Hora de Inicio':'Start Time'}</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
             <div class="field"><label>${L?'Hora de Fin':'End Time'}</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
           </div>
+          <label style="display:flex;align-items:center;gap:10px;margin-top:6px;cursor:pointer;font-size:16px;color:var(--text)">
+            <input type="checkbox" ${S.newShift.repeat?'checked':''} onchange="S.newShift.repeat=this.checked;render()" style="width:20px;height:20px"/>
+            ${L?'Repetir cada semana':'Repeat weekly'}
+          </label>
+          ${S.newShift.repeat?`<div class="field" style="margin-top:10px"><label>${L?'¿Por cuántas semanas?':'For how many weeks?'}</label><input type="number" min="1" max="12" value="${S.newShift.repeat_weeks}" oninput="S.newShift.repeat_weeks=this.value" style="font-size:16px;"/></div>`:''}
           <div class="modal-actions">
             <button class="btn-cancel" onclick="S.showShiftModal=false;render()">${L?'Cancelar':'Cancel'}</button>
             <button class="btn-save" onclick="saveShift()">${L?'GUARDAR TURNO':'SAVE SHIFT'}</button>
