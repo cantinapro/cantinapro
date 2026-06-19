@@ -295,6 +295,42 @@ function fmt12(t){
   const ap=h>=12?'PM':'AM';h=h%12||12;
   return h+':'+mm+' '+ap;
 }
+function setShiftTimePart(field,part,val){
+  const cur=S.newShift[field]||'';
+  const mt=cur.match(/^(\d{1,2}):(\d{2})/);
+  let h12,min='00',ap='PM';
+  if(mt){const h=parseInt(mt[1],10);min=mt[2];ap=h>=12?'PM':'AM';h12=h%12||12;}
+  if(part==='h')h12=(val===''?'':parseInt(val,10));
+  if(part==='m')min=val;
+  if(part==='ap')ap=val;
+  if(h12===''||h12==null){S.newShift[field]='';render();return;}
+  const h24=(h12%12)+(ap==='PM'?12:0);
+  S.newShift[field]=String(h24).padStart(2,'0')+':'+min;
+  render();
+}
+function timePicker(field){
+  const L=S.lang==='es';
+  const cur=S.newShift[field]||'';
+  const mt=cur.match(/^(\d{1,2}):(\d{2})/);
+  let h12='',min='00',ap='PM';
+  if(mt){const h=parseInt(mt[1],10);min=mt[2];ap=h>=12?'PM':'AM';h12=h%12||12;}
+  const ss="background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:13px 4px;font-size:17px;outline:none;-webkit-appearance:none;text-align:center;width:100%;";
+  const hrs=Array.from({length:12},(_,i)=>i+1);
+  const mins=['00','15','30','45'];
+  return`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+    <select onchange="setShiftTimePart('${field}','h',this.value)" style="${ss}">
+      <option value="" ${h12===''?'selected':''}>${L?'Hr':'Hr'}</option>
+      ${hrs.map(h=>`<option value="${h}" ${String(h12)===String(h)?'selected':''}>${h}</option>`).join('')}
+    </select>
+    <select onchange="setShiftTimePart('${field}','m',this.value)" style="${ss}">
+      ${mins.map(m=>`<option value="${m}" ${min===m?'selected':''}>:${m}</option>`).join('')}
+    </select>
+    <select onchange="setShiftTimePart('${field}','ap',this.value)" style="${ss}">
+      <option value="AM" ${ap==='AM'?'selected':''}>AM</option>
+      <option value="PM" ${ap==='PM'?'selected':''}>PM</option>
+    </select>
+  </div>`;
+}
 function renderDateStrip(){
   const sel=S.schedDate||todayISO();
   return`<div class="day-tabs">
@@ -1914,8 +1950,8 @@ function renderOwnerApp(){
           </div>
           <div class="field"><label>${L?'Fecha':'Date'}</label><input type="date" value="${S.newShift.shift_date||S.schedDate||''}" oninput="S.newShift.shift_date=this.value" style="font-size:16px;"/></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>${L?'Hora de Inicio':'Start Time'}</label><input type="time" value="${S.newShift.start_time}" oninput="S.newShift.start_time=this.value" style="font-size:18px;"/></div>
-            <div class="field"><label>${L?'Hora de Fin':'End Time'}</label><input type="time" value="${S.newShift.end_time}" oninput="S.newShift.end_time=this.value" style="font-size:18px;"/></div>
+            <div class="field"><label>${L?'Hora de Inicio':'Start Time'}</label>${timePicker('start_time')}</div>
+            <div class="field"><label>${L?'Hora de Fin':'End Time'}</label>${timePicker('end_time')}</div>
           </div>
           <label style="display:flex;align-items:center;gap:10px;margin-top:6px;cursor:pointer;font-size:16px;color:var(--text)">
             <input type="checkbox" ${S.newShift.repeat?'checked':''} onchange="S.newShift.repeat=this.checked;render()" style="width:20px;height:20px"/>
