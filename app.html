@@ -287,6 +287,14 @@ function isoAddDays(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate
 function schedDates(){const t=todayISO();const out=[];for(let i=0;i<=SCHED_HORIZON;i++)out.push(isoAddDays(t,i));return out;}
 function dowLabel(iso){const d=new Date(iso+'T00:00:00').getDay();return(S.lang==='es'?DAYS_ES:DAYS)[d];}
 function fmtSelDate(iso){const d=new Date((iso||todayISO())+'T00:00:00');return d.toLocaleDateString(S.lang==='es'?'es-ES':'en-US',{weekday:'short',month:'short',day:'numeric'});}
+function fmt12(t){
+  if(!t)return t||'';
+  const m=String(t).match(/^(\d{1,2}):(\d{2})/);
+  if(!m)return t;
+  let h=parseInt(m[1],10);const mm=m[2];
+  const ap=h>=12?'PM':'AM';h=h%12||12;
+  return h+':'+mm+' '+ap;
+}
 function renderDateStrip(){
   const sel=S.schedDate||todayISO();
   return`<div class="day-tabs">
@@ -1596,7 +1604,7 @@ function renderStaffApp(){
       <div class="sec-title">📅 ${L?'HORARIO COMPLETO':'FULL SCHEDULE'}</div>
       ${myTodayShift?`<div class="my-shift-highlight">
         <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">⭐ ${L?'TU TURNO HOY':'YOUR SHIFT TODAY'}</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${fmt12(myTodayShift.start_time)} – ${fmt12(myTodayShift.end_time)}</div>
         <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
       </div>`:''}
       ${openShifts.length>0?`<div class="open-banner"><div style="font-size:24px">🔴</div><div><div style="font-weight:700;font-size:17px;color:var(--text)">${openShifts.length} ${L?(openShifts.length!==1?'Turnos Abiertos':'Turno Abierto'):'Open Shift'+(openShifts.length!==1?'s':'')}</div><div style="font-size:14px;color:var(--muted)">${L?'Toca cualquier turno abierto para pujar':'Tap any open shift to bid'}</div></div></div>`:''}
@@ -1610,7 +1618,7 @@ function renderStaffApp(){
         return `<div class="shift-card ${isMyShift?'mine':shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
           <div style="display:flex;align-items:flex-start;justify-content:space-between">
             <div>
-              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
+              <div class="shift-time">${fmt12(shift.start_time)} – ${fmt12(shift.end_time)}</div>
               <div class="shift-role">${shift.role||'Staff'}</div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
                 ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
@@ -1644,7 +1652,7 @@ function renderStaffApp(){
       <div class="clock-wrap"><div class="lct" id="clock-el">${S.liveTime||'--:--:--'}</div><div class="lcd">${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} · ${S.bar.name}</div></div>
       ${myTodayShift?`<div class="my-shift-highlight">
         <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lcg);margin-bottom:6px">TODAY'S SHIFT</div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${myTodayShift.start_time} – ${myTodayShift.end_time}</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:3px;color:var(--text)">${fmt12(myTodayShift.start_time)} – ${fmt12(myTodayShift.end_time)}</div>
         <div style="font-size:15px;color:var(--muted);margin-top:4px">${myTodayShift.role||'Staff'}</div>
       </div>`:`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;color:var(--muted);font-size:15px">No shift scheduled for today.<br/>Check Schedule tab for open shifts.</div>`}
       <div class="card">
@@ -1850,7 +1858,7 @@ function renderOwnerApp(){
         return `<div class="shift-card ${shift.status==='open'?'open':shift.status==='covered'?'covered':''}">
           <div style="display:flex;align-items:flex-start;justify-content:space-between">
             <div>
-              <div class="shift-time">${shift.start_time} – ${shift.end_time}</div>
+              <div class="shift-time">${fmt12(shift.start_time)} – ${fmt12(shift.end_time)}</div>
               <div class="shift-role">${shift.role||'Staff'}</div>
               <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
                 ${shift.status!=='open'?`<div class="av" style="background:${color}22;color:${color};width:28px;height:28px;font-size:10px">${shift.staff_name?ai(shift.staff_name):'?'}</div>`:''}
