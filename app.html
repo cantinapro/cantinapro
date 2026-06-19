@@ -449,7 +449,15 @@ async function init(){
         window.history.replaceState({},'',url.toString());
       }catch(e){}
     }
-    const urlBarId=getBarIdFromURL();
+    let urlBarId=getBarIdFromURL();
+    if(urlBarId){
+      try{localStorage.setItem('cp_staff_bar',urlBarId);}catch(e){}
+    }else{
+      // Installed-app launches drop the ?bar= param. If this device has no owner
+      // session but logged in as staff before, send them back to the staff portal.
+      const{data:{session:_s}}=await db.auth.getSession();
+      if(!_s){try{urlBarId=localStorage.getItem('cp_staff_bar')||null;}catch(e){}}
+    }
     if(urlBarId){
       S.urlBarId=urlBarId;
       const{data:bar,error:barError}=await db.from('bars').select('id,name,location,is_paid').eq('id',urlBarId).maybeSingle();
@@ -633,7 +641,7 @@ async function handleAuth(){
       }
       S.authLoading=false;render();return;
     }
-    if(data?.user){S.user=data.user;await loadBar();}
+    if(data?.user){try{localStorage.removeItem('cp_staff_bar');}catch(e){}S.user=data.user;await loadBar();}
   }else{
     if(!S.loginBarName.trim()){S.authError='Bar name is required';S.authLoading=false;render();return;}
     // Stash bar info so we can create it after they confirm their email
